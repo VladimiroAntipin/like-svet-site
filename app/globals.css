@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
+html,
+body,
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  height: 100%;
 }
 
 @theme inline {
@@ -14,8 +15,8 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --foreground: #0a0a0a;
+    --background: white;
   }
 }
 
@@ -23,4 +24,18 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 20s linear infinite;
 }
