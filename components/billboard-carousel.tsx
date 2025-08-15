@@ -33,7 +33,7 @@ const BillboardCarousel: React.FC<BillboardCarouselProps> = ({ billboards }) => 
   }, [instanceRef]);
 
   return (
-    <div className="relative w-[60vw] max-[500px]:w-screen h-[75vh] overflow-hidden">
+    <div className="relative w-screen h-[80vh] max-[500px]:h-[75vh] overflow-hidden">
       {/* Slider */}
       <div ref={sliderRef} className="keen-slider w-full h-full">
         {billboards.map((item) => (
