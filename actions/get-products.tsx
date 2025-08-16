@@ -7,6 +7,7 @@ interface Query {
     categoryId?: string;
     sizeId?: string;
     isFeatured?: boolean;
+    limit?: number;
 }
 
 const getProducts = async (query: Query): Promise<Product[]> => {
@@ -16,6 +17,7 @@ const getProducts = async (query: Query): Promise<Product[]> => {
             sizeId: query.sizeId,
             categoryId: query.categoryId,
             isFeatured: query.isFeatured,
+            limit: query.limit,
         }
     })
     const res = await fetch(url);

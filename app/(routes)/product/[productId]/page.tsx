@@ -4,42 +4,55 @@ import Gallery from "@/components/gallery";
 import Info from "@/components/info";
 import ProductList from "@/components/product-list";
 import Container from "@/components/ui/container";
+import LoadMoreButton from "@/components/ui/load-more-button";
 
 interface ProductPageProps {
-    params: {
-        productId: string
-    }
-};
-
-const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
-    const resolvedParams = await params;
-    const product = await getProduct(resolvedParams.productId);
-
-    const suggestedProducts = (await getProducts({
-        categoryId: product?.category?.id
-    })).filter((p) => p.id !== product.id);
-
-    return (
-        <div className="bg-white">
-            <Container>
-                <div className="flex flex-col gap-y-8 mt-0 w-[85vw] max-[500px]:w-[95vw] ">
-
-                    <div className="py-10 max-[500px]:py-5">
-                        <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
-                            <Gallery images={product.images} />
-                            <div className="mt-10  sm:mt-16 sm:px-0 lg:mt-0">
-                                <Info data={product}/>
-                            </div>
-                        </div>
-                        <hr className="my-10 " />
-
-                        <ProductList title="Смотрите также" items={suggestedProducts} />
-                    </div>
-
-                </div>
-            </Container>
-        </div>
-    );
+  params: {
+    productId: string;
+    limit?: string;
+  };
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ProductPage: React.FC<ProductPageProps> = async ({ params, searchParams }: any) => {
+  const resolvedParams = await params;
+  const product = await getProduct(resolvedParams.productId);
+
+  const limit = parseInt(searchParams?.limit || "8", 10);
+
+  // pattern "fetch +1" per sapere se ci sono altri prodotti
+  const suggested = await getProducts({
+    isFeatured: true,
+    limit: limit + 1,
+  });
+
+  const suggestedProducts = suggested.filter((p) => p.id !== product.id);
+  const items = suggestedProducts.slice(0, limit);
+  const hasMore = suggestedProducts.length > limit;
+
+  return (
+    <div className="bg-white">
+      <Container>
+        <div className="py-10 max-[500px]:py-5">
+          <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
+            <Gallery images={product.images} />
+            <div className="mt-10 sm:mt-16 sm:px-0 lg:mt-0">
+              <Info data={product} />
+            </div>
+          </div>
+
+          <hr className="my-10 " />
+
+          <ProductList title="Смотрите также" items={items} />
+          {hasMore && (
+            <div className="flex justify-center mt-8 w-full">
+              <LoadMoreButton limit={limit} basePath={`/product/${product.id}`}/>
+            </div>
+          )}
+        </div>
+      </Container>
+    </div>
+  );
+};
 
 export default ProductPage;
