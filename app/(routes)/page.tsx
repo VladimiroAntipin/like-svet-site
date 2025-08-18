@@ -50,9 +50,10 @@ const HomePage: React.FC<HomePageProps> = async ({ searchParams }) => {
       </div>
 
       <ScrollingBanner />
-      <Container>
-        <div className="space-y-10 pb-10">
+      <Container >
+        <div className="space-y-10 pb-10 scroll-mt-15" id="products">
           <div className="flex flex-col gap-y-8 px-4 sm:px-6 lg:px-8 mt-20 w-[85vw] max-[500px]:w-full">
+            <h2 className="font-bold text-3xl">Каталог</h2>
             <ClearFiltersButton />
             <Filters valueKey="categoryId" name="category" data={categories} />
             <ProductList title="" items={items} />
