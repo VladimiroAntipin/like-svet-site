@@ -20,7 +20,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ data }) => {
     return (
         <div className="bg-white group cursor-pointer border-none p-0 space-y-4" onClick={handleClick}>
             <div className="aspect-square bg-gray-100 relative">
-                <Image src={data?.images?.[0]?.url} alt="image" fill className="aspect-square object-cover" />
+                <Image src={data?.images?.[0]?.url} alt="image" fill className="aspect-square object-cover" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" />
                 <div className="absolute w-full px-6 top-5">
                     <div className="flex gap-x-6 justify-end">
                         <IconButton onClick={() => { }} icon={<ShoppingBag size={20} className="text-grey-600" />} />

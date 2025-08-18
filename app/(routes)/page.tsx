@@ -1,8 +1,10 @@
 import getBillboards from "@/actions/get-billboards";
 import getCategories from "@/actions/get-categories";
+import getColors from "@/actions/get-colors";
 import getProducts from "@/actions/get-products";
 import BillboardCarousel from "@/components/billboard-carousel";
 import Filters from "@/components/filters";
+import FiltersByCategory from "@/components/filters-by-category";
 import ProductList from "@/components/product-list";
 import ScrollingBanner from "@/components/scrolling-banners";
 import ClearFiltersButton from "@/components/ui/clear-filter-button";
@@ -15,29 +17,56 @@ interface HomePageProps {
   searchParams: {
     categoryId?: string;
     limit?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    colorId?: string;
+    sort?: "asc" | "desc";
   };
 }
 
 const HomePage: React.FC<HomePageProps> = async ({ searchParams }) => {
   const billboards = await getBillboards();
   const categories = await getCategories();
+  const colors = await getColors();
+
   const resolvedSearchParams = await searchParams;
 
   const limit = parseInt(resolvedSearchParams.limit || "8", 10);
-
-  // pattern fetch +1 per sapere se ci sono altri prodotti
   const requestLimit = limit + 1;
 
-  let products;
-  if (resolvedSearchParams.categoryId) {
-    // categoria selezionata
-    products = await getProducts({
-      categoryId: resolvedSearchParams.categoryId,
-      limit: requestLimit,
-    });
-  } else {
-    // homepage -> tutti i prodotti
-    products = await getProducts({ limit: requestLimit });
+  const hasFilters =
+    (resolvedSearchParams.minPrice ?? "") !== "" ||
+    (resolvedSearchParams.maxPrice ?? "") !== "" ||
+    (resolvedSearchParams.colorId ?? "") !== "" ||
+    (resolvedSearchParams.sort ?? "") !== "";
+
+  let products = await getProducts({
+    categoryId: resolvedSearchParams.categoryId,
+    ...(hasFilters ? {} : { limit: requestLimit }),
+  });
+
+  if (resolvedSearchParams.minPrice) {
+    const min = Number(resolvedSearchParams.minPrice) * 100; // рубли -> копейки
+    products = products.filter((p) => Number(p.price) >= min);
+  }
+
+  if (resolvedSearchParams.maxPrice) {
+    const max = Number(resolvedSearchParams.maxPrice) * 100; // рубли -> копейки
+    products = products.filter((p) => Number(p.price) <= max);
+  }
+
+  if (resolvedSearchParams.colorId) {
+    products = products.filter((p) =>
+      p.productColors?.some((c) => c.colorId === resolvedSearchParams.colorId)
+    );
+  }
+
+  if (resolvedSearchParams.sort) {
+    products = products.sort((a, b) =>
+      resolvedSearchParams.sort === "asc"
+        ? Number(a.price) - Number(b.price)
+        : Number(b.price) - Number(a.price)
+    );
   }
 
   const items = products.slice(0, limit);
@@ -50,17 +79,26 @@ const HomePage: React.FC<HomePageProps> = async ({ searchParams }) => {
       </div>
 
       <ScrollingBanner />
-      <Container >
+      <Container>
         <div className="space-y-10 pb-10 scroll-mt-15" id="products">
           <div className="flex flex-col gap-y-8 px-4 sm:px-6 lg:px-8 mt-20 w-[85vw] max-[500px]:w-full">
             <h2 className="font-bold text-3xl">Каталог</h2>
             <ClearFiltersButton />
-            <Filters valueKey="categoryId" name="category" data={categories} />
+            <FiltersByCategory
+              valueKey="categoryId"
+              name="category"
+              data={categories}
+            />
+            <Filters colors={colors} />
             <ProductList title="" items={items} />
             {hasMore && (
               <LoadMoreButton
                 limit={limit}
                 categoryId={resolvedSearchParams.categoryId}
+                minPrice={resolvedSearchParams.minPrice}
+                maxPrice={resolvedSearchParams.maxPrice}
+                colorId={resolvedSearchParams.colorId}
+                sort={resolvedSearchParams.sort}
               />
             )}
           </div>

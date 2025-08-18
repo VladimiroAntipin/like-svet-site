@@ -5,10 +5,22 @@ import { useRouter, useSearchParams } from "next/navigation";
 interface LoadMoreButtonProps {
   limit: number;
   categoryId?: string;
-  basePath?: string; // 👈 nuovo: serve a specificare su che pagina restare
+  basePath?: string;
+  minPrice?: string;
+  maxPrice?: string;
+  colorId?: string;
+  sort?: "asc" | "desc";
 }
 
-const LoadMoreButton: React.FC<LoadMoreButtonProps> = ({ limit, categoryId, basePath }) => {
+const LoadMoreButton: React.FC<LoadMoreButtonProps> = ({
+  limit,
+  categoryId,
+  basePath,
+  minPrice,
+  maxPrice,
+  colorId,
+  sort,
+}) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -18,11 +30,20 @@ const LoadMoreButton: React.FC<LoadMoreButtonProps> = ({ limit, categoryId, base
 
     params.set("limit", newLimit.toString());
 
-    if (categoryId) {
-      params.set("categoryId", categoryId);
-    } else {
-      params.delete("categoryId");
-    }
+    if (categoryId) params.set("categoryId", categoryId);
+    else params.delete("categoryId");
+
+    if (minPrice) params.set("minPrice", minPrice);
+    else params.delete("minPrice");
+
+    if (maxPrice) params.set("maxPrice", maxPrice);
+    else params.delete("maxPrice");
+
+    if (colorId) params.set("colorId", colorId);
+    else params.delete("colorId");
+
+    if (sort) params.set("sort", sort);
+    else params.delete("sort");
 
     router.push(`${basePath || "/"}?${params.toString()}`, { scroll: false });
   };
@@ -38,6 +59,7 @@ const LoadMoreButton: React.FC<LoadMoreButtonProps> = ({ limit, categoryId, base
 };
 
 export default LoadMoreButton;
+
 
 
 
