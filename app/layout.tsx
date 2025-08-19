@@ -17,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ru">
+    <html lang="ru" data-scroll-behavior="smooth">
       <body className={font.className} >
         <Navbar />
         <main className="pt-[104px]">

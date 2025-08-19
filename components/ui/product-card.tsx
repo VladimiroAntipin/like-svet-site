@@ -3,7 +3,7 @@
 import { Product } from "@/types";
 import Image from "next/image";
 import IconButton from "@/components/ui/icon-button";
-import { Expand, Heart, ShoppingBag } from "lucide-react";
+import { Heart, ShoppingBag } from "lucide-react";
 import Currency from "@/components/ui/currency";
 import { useRouter } from "next/navigation";
 
