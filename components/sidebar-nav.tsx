@@ -5,11 +5,11 @@ import { Category } from "@/types";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-interface MainNavProps {
+interface SidebarNavProps {
     data: Category[]
 }
 
-const MainNav: React.FC<MainNavProps> = ({ data }) => {
+const SidebarNav: React.FC<SidebarNavProps> = ({ data }) => {
     const pathname = usePathname();
 
     const routes = data.map((route) => ({
@@ -29,4 +29,4 @@ const MainNav: React.FC<MainNavProps> = ({ data }) => {
     );
 }
 
-export default MainNav;
+export default SidebarNav;

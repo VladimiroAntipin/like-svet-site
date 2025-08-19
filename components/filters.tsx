@@ -65,14 +65,14 @@ const Filters: React.FC<FiltersProps> = ({ colors }) => {
           placeholder="Мин. цена"
           value={minPrice}
           onChange={(e) => setMinPrice(e.target.value)}
-          className="w-32 border px-2 py-1 rounded font-thin cursor-pointer max-[500px]:w-full"
+          className="w-32 border px-2 py-1 rounded font-thin cursor-pointer max-[500px]:w-full text-[14px] appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [moz-appearance:textfield]"
         />
         <input
           type="number"
           placeholder="Макс. цена"
           value={maxPrice}
           onChange={(e) => setMaxPrice(e.target.value)}
-          className="w-32 border px-2 py-1 rounded font-thin cursor-pointer max-[500px]:w-full"
+          className="w-32 border px-2 py-1 rounded font-thin cursor-pointer max-[500px]:w-full text-[14px] appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [moz-appearance:textfield]"
         />
       </div>
 
@@ -81,7 +81,7 @@ const Filters: React.FC<FiltersProps> = ({ colors }) => {
         <select
           value={colorId}
           onChange={(e) => setColorId(e.target.value)}
-          className="border px-2 py-1 rounded font-thin cursor-pointer max-[500px]:w-full"
+          className="border px-2 py-1 rounded font-thin cursor-pointer max-[500px]:w-full text-[14px]"
         >
           <option value="">Все цвета</option>
           {colors.map((c) => (
@@ -97,7 +97,7 @@ const Filters: React.FC<FiltersProps> = ({ colors }) => {
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value)}
-          className="border px-2 py-1 rounded font-thin cursor-pointer max-[500px]:w-full"
+          className="border px-2 py-1 rounded font-thin cursor-pointer max-[500px]:w-full text-[14px]"
         >
           <option value="">Без сортировки</option>
           <option value="asc">Цена: по возрастанию</option>
@@ -112,13 +112,13 @@ const Filters: React.FC<FiltersProps> = ({ colors }) => {
       ">
         <button
           onClick={applyFilters}
-          className="bg-black text-white px-4 py-2 rounded hover:opacity-80 cursor-pointer max-[500px]:w-full max-[500px]:text-xs"
+          className="bg-black text-white px-4 py-1 rounded hover:opacity-80 cursor-pointer max-[500px]:py-3 max-[500px]:w-full max-[500px]:text-xs text-[14px]"
         >
           Применить фильтры
         </button>
         <button
           onClick={resetFilters}
-          className="bg-gray-200 text-black px-4 py-2 rounded hover:bg-gray-300 cursor-pointer max-[500px]:w-full max-[500px]:text-xs"
+          className="bg-gray-200 text-black px-4 py-1 rounded hover:bg-gray-300 cursor-pointer max-[500px]:py-3 max-[500px]:w-full max-[500px]:text-xs text-[14px]"
         >
           Сбросить фильтры
         </button>

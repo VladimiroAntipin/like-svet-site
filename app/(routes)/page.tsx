@@ -2,7 +2,11 @@ import getBillboards from "@/actions/get-billboards";
 import getCategories from "@/actions/get-categories";
 import getColors from "@/actions/get-colors";
 import getProducts from "@/actions/get-products";
+import getReviews from "@/actions/get-reviews";
+import AboutUs from "@/components/about-us";
 import BillboardCarousel from "@/components/billboard-carousel";
+import Contacts from "@/components/contacts";
+import EmblaOpacityCarousel from "@/components/embla-opacity-carousel";
 import Filters from "@/components/filters";
 import FiltersByCategory from "@/components/filters-by-category";
 import ProductList from "@/components/product-list";
@@ -28,6 +32,7 @@ const HomePage: React.FC<HomePageProps> = async ({ searchParams }) => {
   const billboards = await getBillboards();
   const categories = await getCategories();
   const colors = await getColors();
+  const reviews = await getReviews();
 
   const resolvedSearchParams = await searchParams;
 
@@ -101,6 +106,9 @@ const HomePage: React.FC<HomePageProps> = async ({ searchParams }) => {
                 sort={resolvedSearchParams.sort}
               />
             )}
+            <EmblaOpacityCarousel slides={reviews}/>
+            <AboutUs />
+            <Contacts />
           </div>
         </div>
       </Container>
