@@ -9,9 +9,11 @@ import { motion, AnimatePresence } from "framer-motion";
 
 interface SidebarNavProps {
   onLinkClick?: () => void;
+  isLoggedIn?: boolean;
+  onLogout?: () => void;
 }
 
-const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick }) => {
+const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick, isLoggedIn = false, onLogout }) => {
   const pathname = usePathname();
   const [open, setOpen] = useState<string | null>(null);
 
@@ -25,10 +27,10 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick }) => {
       label: "Покупателям",
       children: [
         { href: "/customers/gift-certificates", label: "Подарочные сертификаты" },
-        { href: "/customers/packaging", label: "Упаковка" },
-        { href: "/customers/delivery", label: "Доставка" },
-        { href: "/customers/custom-orders", label: "Индивидуальные заказы" },
-        { href: "/customers/loyalty", label: "Система лояльности" },
+        { href: "/customers/#packaging", label: "Упаковка" },
+        { href: "/customers/#delivery", label: "Доставка" },
+        { href: "/customers/#custom-orders", label: "Индивидуальные заказы" },
+        { href: "/customers/#loyalty", label: "Система лояльности" },
       ],
     },
     { href: "/#contacts", label: "Контакты" },
@@ -37,6 +39,30 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick }) => {
 
   return (
     <nav className="mx-6 flex flex-col gap-3">
+      {/* Primo link: login/logout */}
+      <div>
+        {isLoggedIn ? (
+          <button
+            onClick={onLogout}
+            className="w-full bg-black text-white text-sm font-medium py-2 transition-colors hover:bg-neutral-800 cursor-pointer mb-10"
+          >
+            Выйти
+          </button>
+        ) : (
+          <Link
+            href="/auth"
+            onClick={onLinkClick}
+            className={cn(
+              "w-full block bg-black text-white text-sm font-medium py-2 text-center transition-colors hover:bg-neutral-800 cursor-pointer mb-10",
+              pathname === "/auth" ? "bg-neutral-900" : ""
+            )}
+          >
+            Войти
+          </Link>
+        )}
+      </div>
+
+      {/* Gli altri link */}
       {routes.map((route) => {
         const active = pathname === route.href;
 
