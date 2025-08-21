@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { updateCustomer } from "@/actions/update-profile"; // <-- importa la funzione
 
 const AccountPage = () => {
   const { user, loading } = useAuth();
@@ -19,6 +20,16 @@ const AccountPage = () => {
   const [password, setPassword] = useState("");
   const [userImage, setUserImage] = useState<string | null>(null);
   const [promoCode, setPromoCode] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const formatBirthDate = (dateStr: string) => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
 
   // 🚨 redirect se non loggato
   useEffect(() => {
@@ -48,10 +59,25 @@ const AccountPage = () => {
 
   if (!user) return null; // evita flash della pagina
 
-  const handleSave = () => {
-    console.log("Сохранить", { firstName, lastName, birthDate, password });
-    // Qui puoi fare una fetch al backend per aggiornare i dati dell'utente
-  };
+const handleSave = async () => {
+  setSaving(true);
+  try {
+    await updateCustomer({
+      firstName,
+      lastName,
+      password: password || undefined, // invia solo se è stato cambiato
+      // birthDate è opzionale, puoi rimuoverlo se non vuoi permettere aggiornamento
+    });
+
+    alert("Профиль успешно обновлен");
+    setPassword("");
+  } catch (error) {
+    console.error(error);
+    alert("Ошибка при обновлении профиля");
+  } finally {
+    setSaving(false);
+  }
+};
 
   const handleReset = () => {
     if (user) {
@@ -126,10 +152,10 @@ const AccountPage = () => {
             <div>
               <label className="block text-sm font-bold text-gray-700">Дата рождения</label>
               <input
-                type="date"
-                value={birthDate}
-                onChange={(e) => setBirthDate(e.target.value)}
-                className="mt-1 w-full border rounded-none px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none font-light"
+                type="text"
+                value={formatBirthDate(birthDate)}
+                readOnly
+                className="mt-1 w-full border rounded-none px-3 py-2 bg-gray-100 text-gray-600 cursor-not-allowed font-light"
               />
             </div>
           </aside>
@@ -196,9 +222,12 @@ const AccountPage = () => {
             </button>
             <button
               onClick={handleSave}
-              className="px-5 py-2 bg-black text-white rounded-none hover:bg-gray-800 transition font-light w-full md:w-auto cursor-pointer"
+              disabled={saving}
+              className={`px-5 py-2 bg-black text-white rounded-none hover:bg-gray-800 transition font-light w-full md:w-auto cursor-pointer ${
+                saving ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             >
-              Сохранить
+              {saving ? "Сохраняем..." : "Сохранить"}
             </button>
           </div>
         </div>
@@ -207,4 +236,4 @@ const AccountPage = () => {
   );
 };
 
-export default AccountPage;
+export default AccountPage
