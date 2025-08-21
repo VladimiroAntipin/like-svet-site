@@ -3,6 +3,7 @@ import { Manrope } from "next/font/google";
 import "./globals.css";
 import Footer from "@/components/footer";
 import Navbar from "@/components/navbar";
+import { AuthProvider } from "@/context/auth-context";
 
 const font = Manrope({ subsets: ["latin", "cyrillic"], });
 
@@ -19,11 +20,13 @@ export default function RootLayout({
   return (
     <html lang="ru" data-scroll-behavior="smooth">
       <body className={font.className} >
-        <Navbar />
-        <main className="pt-[104px]">
-          {children}
-        </main>
-        <Footer />
+        <AuthProvider>
+          <Navbar />
+          <main className="pt-[104px]">
+            {children}
+          </main>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );

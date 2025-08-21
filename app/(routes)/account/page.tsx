@@ -1,11 +1,17 @@
-'use client';
+"use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 
 const AccountPage = () => {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  // stati form
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [birthDate, setBirthDate] = useState("");
@@ -13,6 +19,23 @@ const AccountPage = () => {
   const [password, setPassword] = useState("");
   const [userImage, setUserImage] = useState<string | null>(null);
   const [promoCode, setPromoCode] = useState("");
+
+  // 🚨 se non loggato -> redirect a /auth
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace("/auth");
+    }
+  }, [loading, user, router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Загрузка...
+      </div>
+    );
+  }
+
+  if (!user) return null; // evita di flashare la pagina prima del redirect
 
   const handleSave = () => {
     console.log("Сохранить", { firstName, lastName, birthDate, password });
@@ -43,7 +66,7 @@ const AccountPage = () => {
 
       {/* Main */}
       <main className="flex flex-col items-center flex-1 pt-10 px-6 py-5 bg-white">
-        {/* Foto utente al centro */}
+        {/* Foto utente */}
         <div className="flex justify-center mb-10">
           {userImage ? (
             <Image
@@ -97,7 +120,6 @@ const AccountPage = () => {
 
           {/* Colonna destra */}
           <section className="flex flex-col gap-6">
-
             <div>
               <label className="block text-sm font-bold text-gray-700">Новый пароль</label>
               <input
@@ -140,7 +162,7 @@ const AccountPage = () => {
           </section>
         </div>
 
-        {/* Footer (link a sinistra, bottoni a destra su desktop, stack su mobile) */}
+        {/* Footer */}
         <div className="flex flex-col max-[500px]:flex-col max-[500px]:gap-3 max-[500px]:mb-10 md:flex-row justify-between items-center w-full max-w-5xl mt-10">
           <Link
             href="/account/my-orders"
@@ -170,5 +192,3 @@ const AccountPage = () => {
 };
 
 export default AccountPage;
-
-

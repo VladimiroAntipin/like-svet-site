@@ -2,44 +2,161 @@
 
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const AuthPage = () => {
+  const { user, loading, login, register, logout } = useAuth();
+  const router = useRouter();
+
   const [isLogin, setIsLogin] = useState(true);
 
-  // stato visibilità password
+  // errori separati per campo
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [generalError, setGeneralError] = useState("");
+
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    birthDate: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const resetErrors = () => {
+    setEmailError("");
+    setPasswordError("");
+    setFieldErrors({});
+    setGeneralError("");
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+    resetErrors();
+  };
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!form.email) {
+      newErrors.email = "Поле обязательно для заполнения";
+    } else if (!emailRegex.test(form.email)) {
+      newErrors.email = "Неверный формат email";
+    }
+
+    if (!form.password) {
+      newErrors.password = "Поле обязательно для заполнения";
+    }
+
+    if (!isLogin) {
+      if (!form.firstName) newErrors.firstName = "Поле обязательно для заполнения";
+      if (!form.lastName) newErrors.lastName = "Поле обязательно для заполнения";
+      if (!form.birthDate) newErrors.birthDate = "Поле обязательно для заполнения";
+
+      if (!form.confirmPassword) {
+        newErrors.confirmPassword = "Поле обязательно для заполнения";
+      } else if (form.password !== form.confirmPassword) {
+        newErrors.confirmPassword = "Пароли не совпадают";
+      }
+    }
+
+    setFieldErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLogin) {
-      console.log("Login effettuato");
-    } else {
-      console.log("Registrazione effettuata");
+    resetErrors();
+
+    if (!validateForm()) return;
+
+    try {
+      if (isLogin) {
+        await login({ email: form.email, password: form.password });
+      } else {
+        await register({
+          firstName: form.firstName,
+          lastName: form.lastName,
+          birthDate: form.birthDate,
+          email: form.email,
+          password: form.password,
+        });
+      }
+
+      router.push("/");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      const message = err.message || "Ошибка авторизации";
+
+      if (message.toLowerCase().includes("invalid credentials")) {
+        setEmailError("Нет такого пользователя");
+      } else if (message.toLowerCase().includes("wrong password")) {
+        setPasswordError("Неправильный пароль");
+      } else if (message.toLowerCase().includes("user already exists")) {
+        setEmailError("Пользователь с таким email уже существует");
+      } else {
+        setGeneralError(message);
+      }
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Загрузка...
+      </div>
+    );
+  }
+
+  if (user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="p-6 bg-white shadow rounded text-center">
+          <h2 className="text-2xl mb-4">Вы вошли ✅</h2>
+          <button
+            onClick={logout}
+            className="px-4 py-2 bg-black text-white rounded"
+          >
+            Выйти
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full bg-gray-50 flex flex-col px-6 py-12">
       {/* Tabs */}
       <div className="flex justify-center gap-12 mb-12">
         <button
-          onClick={() => setIsLogin(true)}
-          className={`pb-2 text-xl font-medium cursor-pointer ${
-            isLogin
+          onClick={() => {
+            setIsLogin(true);
+            resetErrors();
+          }}
+          className={`pb-2 text-xl font-medium cursor-pointer ${isLogin
               ? "border-b-2 border-black text-black"
               : "text-gray-500 hover:text-black"
-          }`}
+            }`}
         >
           Вход
         </button>
         <button
-          onClick={() => setIsLogin(false)}
-          className={`pb-2 text-xl font-medium cursor-pointer ${
-            !isLogin
+          onClick={() => {
+            setIsLogin(false);
+            resetErrors();
+          }}
+          className={`pb-2 text-xl font-medium cursor-pointer ${!isLogin
               ? "border-b-2 border-black text-black"
               : "text-gray-500 hover:text-black"
-          }`}
+            }`}
         >
           Регистрация
         </button>
@@ -56,17 +173,27 @@ const AuthPage = () => {
               <label className="block text-sm font-medium mb-1">Имя</label>
               <input
                 type="text"
-                required
+                name="firstName"
+                value={form.firstName}
+                onChange={handleChange}
                 className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none"
               />
+              {fieldErrors.firstName && (
+                <p className="text-red-600 text-sm">{fieldErrors.firstName}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Фамилия</label>
               <input
                 type="text"
-                required
+                name="lastName"
+                value={form.lastName}
+                onChange={handleChange}
                 className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none"
               />
+              {fieldErrors.lastName && (
+                <p className="text-red-600 text-sm">{fieldErrors.lastName}</p>
+              )}
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium mb-1">
@@ -74,9 +201,14 @@ const AuthPage = () => {
               </label>
               <input
                 type="date"
-                required
+                name="birthDate"
+                value={form.birthDate}
+                onChange={handleChange}
                 className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none"
               />
+              {fieldErrors.birthDate && (
+                <p className="text-red-600 text-sm">{fieldErrors.birthDate}</p>
+              )}
             </div>
           </div>
         )}
@@ -84,19 +216,27 @@ const AuthPage = () => {
         <div>
           <label className="block text-sm font-medium mb-1">Email</label>
           <input
-            type="email"
-            required
+            type="text"
+            name="email"
+            value={form.email}
+            onChange={handleChange}
             className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none"
           />
+          {(emailError || fieldErrors.email) && (
+            <p className="text-red-600 text-sm">
+              {emailError || fieldErrors.email}
+            </p>
+          )}
         </div>
 
-        {/* Password */}
         <div>
           <label className="block text-sm font-medium mb-1">Пароль</label>
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
-              required
+              name="password"
+              value={form.password}
+              onChange={handleChange}
               className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none pr-10"
             />
             <button
@@ -107,9 +247,13 @@ const AuthPage = () => {
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
+          {(passwordError || fieldErrors.password) && (
+            <p className="text-red-600 text-sm">
+              {passwordError || fieldErrors.password}
+            </p>
+          )}
         </div>
 
-        {/* Conferma password solo in registrazione */}
         {!isLogin && (
           <div>
             <label className="block text-sm font-medium mb-1">
@@ -118,18 +262,33 @@ const AuthPage = () => {
             <div className="relative">
               <input
                 type={showConfirmPassword ? "text" : "password"}
-                required
+                name="confirmPassword"
+                value={form.confirmPassword}
+                onChange={handleChange}
                 className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none pr-10"
               />
               <button
                 type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                onClick={() =>
+                  setShowConfirmPassword(!showConfirmPassword)
+                }
                 className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-black cursor-pointer"
               >
-                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                {showConfirmPassword ? (
+                  <EyeOff size={18} />
+                ) : (
+                  <Eye size={18} />
+                )}
               </button>
             </div>
+            {fieldErrors.confirmPassword && (
+              <p className="text-red-600 text-sm">{fieldErrors.confirmPassword}</p>
+            )}
           </div>
+        )}
+
+        {generalError && (
+          <p className="text-red-600 text-sm font-medium">{generalError}</p>
         )}
 
         <button
