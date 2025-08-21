@@ -1,6 +1,7 @@
 "use server";
 
 import { saveToken } from "@/lib/token";
+import { getToken } from "@/lib/token";
 
 interface RegisterPayload {
   firstName: string;
@@ -52,4 +53,20 @@ export async function loginUser(data: LoginPayload) {
   if (result.token) saveToken(result.token);
 
   return result;
+}
+
+export async function fetchMe() {
+  const token = getToken();
+  if (!token) return null;
+
+  const res = await fetch(`${CMS_URL}/auth/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!res.ok) {
+    console.error("Failed to fetch user", await res.text());
+    return null;
+  }
+
+  return res.json();
 }

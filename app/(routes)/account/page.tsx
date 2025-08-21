@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { User } from "lucide-react";
+import { User as UserIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -15,17 +15,28 @@ const AccountPage = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [birthDate, setBirthDate] = useState("");
-  const [balance, setBalance] = useState(500);
+  const [balance, setBalance] = useState(0);
   const [password, setPassword] = useState("");
   const [userImage, setUserImage] = useState<string | null>(null);
   const [promoCode, setPromoCode] = useState("");
 
-  // 🚨 se non loggato -> redirect a /auth
+  // 🚨 redirect se non loggato
   useEffect(() => {
     if (!loading && !user) {
       router.replace("/auth");
     }
   }, [loading, user, router]);
+
+  // Popola i dati del form quando l'utente è caricato
+  useEffect(() => {
+    if (user) {
+      setFirstName(user.firstName || "");
+      setLastName(user.lastName || "");
+      setBirthDate(user.birthDate || "");
+      setBalance(user.balance ?? 0);
+      setUserImage(user.profileImage || null);
+    }
+  }, [user]);
 
   if (loading) {
     return (
@@ -35,25 +46,28 @@ const AccountPage = () => {
     );
   }
 
-  if (!user) return null; // evita di flashare la pagina prima del redirect
+  if (!user) return null; // evita flash della pagina
 
   const handleSave = () => {
     console.log("Сохранить", { firstName, lastName, birthDate, password });
+    // Qui puoi fare una fetch al backend per aggiornare i dati dell'utente
   };
 
   const handleReset = () => {
-    setFirstName("");
-    setLastName("");
-    setBirthDate("");
-    setPassword("");
-    setPromoCode("");
-    console.log("Сбросить");
+    if (user) {
+      setFirstName(user.firstName || "");
+      setLastName(user.lastName || "");
+      setBirthDate(user.birthDate || "");
+      setBalance(user.balance ?? 0);
+      setPassword("");
+      setPromoCode("");
+    }
   };
 
   const handleActivatePromo = () => {
     if (!promoCode) return;
     console.log("Активировать промокод:", promoCode);
-    setBalance(balance + 100);
+    setBalance((prev) => prev + 100);
     setPromoCode("");
   };
 
@@ -73,10 +87,12 @@ const AccountPage = () => {
               src={userImage}
               alt="User"
               className="w-32 h-32 rounded-full object-cover shadow"
+              width={128}
+              height={128}
             />
           ) : (
             <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center shadow">
-              <User className="w-12 h-12 text-gray-500" />
+              <UserIcon className="w-12 h-12 text-gray-500" />
             </div>
           )}
         </div>
