@@ -1,19 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/context/auth-context";
+import Loader from "@/components/loader";
+import { toast } from "sonner";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const AuthPage = () => {
-  const { user, loading, login, register, logout } = useAuth();
+  const { loading, login, register } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const [isLogin, setIsLogin] = useState(true);
+  // Inizializza isLogin in base al query param 'mode'
+  const [isLogin, setIsLogin] = useState(() => {
+    const mode = searchParams.get("mode");
+    return mode === "register" ? false : true;
+  });
 
-  // errori separati per campo
+  // Aggiorna isLogin se il query param cambia
+  useEffect(() => {
+    const mode = searchParams.get("mode");
+    if (mode === "register") setIsLogin(false);
+    else setIsLogin(true);
+  }, [searchParams]);
+
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -81,6 +94,7 @@ const AuthPage = () => {
     try {
       if (isLogin) {
         await login({ email: form.email, password: form.password });
+        router.push("/"); // vai alla home dopo login
       } else {
         await register({
           firstName: form.firstName,
@@ -89,9 +103,18 @@ const AuthPage = () => {
           email: form.email,
           password: form.password,
         });
+        toast.success("Регистрация успешна 🎉"); // toast registrazione
+        router.push("/auth?mode=login"); // forza il tab login
       }
 
-      router.push("/");
+      setForm({
+        firstName: "",
+        lastName: "",
+        birthDate: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       const message = err.message || "Ошибка авторизации";
@@ -108,29 +131,7 @@ const AuthPage = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        Загрузка...
-      </div>
-    );
-  }
-
-  if (user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="p-6 bg-white shadow rounded text-center">
-          <h2 className="text-2xl mb-4">Вы вошли ✅</h2>
-          <button
-            onClick={logout}
-            className="px-4 py-2 bg-black text-white rounded"
-          >
-            Выйти
-          </button>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <Loader />;
 
   return (
     <div className="min-h-screen w-full bg-gray-50 flex flex-col px-6 py-12">
@@ -140,10 +141,11 @@ const AuthPage = () => {
           onClick={() => {
             setIsLogin(true);
             resetErrors();
+            router.replace("/auth?mode=login"); // aggiorna query param
           }}
           className={`pb-2 text-xl font-medium cursor-pointer ${isLogin
-              ? "border-b-2 border-black text-black"
-              : "text-gray-500 hover:text-black"
+            ? "border-b-2 border-black text-black"
+            : "text-gray-500 hover:text-black"
             }`}
         >
           Вход
@@ -152,10 +154,11 @@ const AuthPage = () => {
           onClick={() => {
             setIsLogin(false);
             resetErrors();
+            router.replace("/auth?mode=register");
           }}
           className={`pb-2 text-xl font-medium cursor-pointer ${!isLogin
-              ? "border-b-2 border-black text-black"
-              : "text-gray-500 hover:text-black"
+            ? "border-b-2 border-black text-black"
+            : "text-gray-500 hover:text-black"
             }`}
         >
           Регистрация
@@ -163,10 +166,7 @@ const AuthPage = () => {
       </div>
 
       {/* Form */}
-      <form
-        onSubmit={handleSubmit}
-        className="max-w-2xl w-full mx-auto space-y-6"
-      >
+      <form onSubmit={handleSubmit} className="max-w-2xl w-full mx-auto space-y-6">
         {!isLogin && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -196,9 +196,7 @@ const AuthPage = () => {
               )}
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium mb-1">
-                Дата рождения
-              </label>
+              <label className="block text-sm font-medium mb-1">Дата рождения</label>
               <input
                 type="date"
                 name="birthDate"
@@ -223,9 +221,7 @@ const AuthPage = () => {
             className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none"
           />
           {(emailError || fieldErrors.email) && (
-            <p className="text-red-600 text-sm">
-              {emailError || fieldErrors.email}
-            </p>
+            <p className="text-red-600 text-sm">{emailError || fieldErrors.email}</p>
           )}
         </div>
 
@@ -248,17 +244,13 @@ const AuthPage = () => {
             </button>
           </div>
           {(passwordError || fieldErrors.password) && (
-            <p className="text-red-600 text-sm">
-              {passwordError || fieldErrors.password}
-            </p>
+            <p className="text-red-600 text-sm">{passwordError || fieldErrors.password}</p>
           )}
         </div>
 
         {!isLogin && (
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Повторите пароль
-            </label>
+            <label className="block text-sm font-medium mb-1">Повторите пароль</label>
             <div className="relative">
               <input
                 type={showConfirmPassword ? "text" : "password"}
@@ -269,16 +261,10 @@ const AuthPage = () => {
               />
               <button
                 type="button"
-                onClick={() =>
-                  setShowConfirmPassword(!showConfirmPassword)
-                }
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-black cursor-pointer"
               >
-                {showConfirmPassword ? (
-                  <EyeOff size={18} />
-                ) : (
-                  <Eye size={18} />
-                )}
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
             {fieldErrors.confirmPassword && (

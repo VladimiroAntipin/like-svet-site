@@ -4,6 +4,7 @@ import "./globals.css";
 import Footer from "@/components/footer";
 import Navbar from "@/components/navbar";
 import { AuthProvider } from "@/context/auth-context";
+import { Toaster } from "sonner";
 
 const font = Manrope({ subsets: ["latin", "cyrillic"], });
 
@@ -26,6 +27,7 @@ export default function RootLayout({
             {children}
           </main>
           <Footer />
+          <Toaster position="top-left" richColors /> {/* 👈 aggiunto */}
         </AuthProvider>
       </body>
     </html>

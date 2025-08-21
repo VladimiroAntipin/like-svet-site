@@ -1,4 +1,4 @@
-"use server";
+"use client";
 
 import { getToken } from "@/lib/token";
 
@@ -10,7 +10,7 @@ interface UpdateCustomerPayload {
   password?: string;
   birthDate?: string;
   profileImage?: string;
-  balance?: number; // opzionale, dipende da cosa vuoi aggiornare
+  balance?: number;
 }
 
 export async function updateCustomer(data: UpdateCustomerPayload) {

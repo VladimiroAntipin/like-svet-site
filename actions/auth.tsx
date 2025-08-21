@@ -1,8 +1,5 @@
 "use server";
 
-import { saveToken } from "@/lib/token";
-import { getToken } from "@/lib/token";
-
 interface RegisterPayload {
   firstName: string;
   lastName: string;
@@ -16,14 +13,14 @@ interface LoginPayload {
   password: string;
 }
 
-const CMS_URL = process.env.NEXT_PUBLIC_API_URL;
+const CMS_URL = process.env.NEXT_PUBLIC_API_URL!;
 
-// --- API ---
 export async function registerUser(data: RegisterPayload) {
   const res = await fetch(`${CMS_URL}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
+    cache: "no-store",
   });
 
   if (!res.ok) {
@@ -31,10 +28,7 @@ export async function registerUser(data: RegisterPayload) {
     throw new Error(err);
   }
 
-  const result = await res.json();
-  if (result.token) saveToken(result.token);
-
-  return result;
+  return res.json();
 }
 
 export async function loginUser(data: LoginPayload) {
@@ -42,30 +36,12 @@ export async function loginUser(data: LoginPayload) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
+    cache: "no-store",
   });
 
   if (!res.ok) {
     const err = await res.text();
     throw new Error(err);
-  }
-
-  const result = await res.json();
-  if (result.token) saveToken(result.token);
-
-  return result;
-}
-
-export async function fetchMe() {
-  const token = getToken();
-  if (!token) return null;
-
-  const res = await fetch(`${CMS_URL}/auth/me`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  if (!res.ok) {
-    console.error("Failed to fetch user", await res.text());
-    return null;
   }
 
   return res.json();

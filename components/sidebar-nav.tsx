@@ -6,16 +6,16 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/context/auth-context";
 
 interface SidebarNavProps {
   onLinkClick?: () => void;
-  isLoggedIn?: boolean;
-  onLogout?: () => void;
 }
 
-const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick, isLoggedIn = false, onLogout }) => {
+const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick }) => {
   const pathname = usePathname();
   const [open, setOpen] = useState<string | null>(null);
+  const { user, logout } = useAuth();
 
   const routes = [
     { href: "/account", label: "Мой профиль" },
@@ -37,14 +37,19 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick, isLoggedIn = false
     { href: "https://instagram.com/likesvetshop/", label: "Instagram" },
   ];
 
+  const handleLogout = () => {
+    logout();
+    onLinkClick?.();
+  };
+
   return (
     <nav className="mx-6 flex flex-col gap-3">
-      {/* Primo link: login/logout */}
-      <div>
-        {isLoggedIn ? (
+      {/* Login / Logout */}
+      <div className="mb-10">
+        {user ? (
           <button
-            onClick={onLogout}
-            className="w-full bg-black text-white text-sm font-medium py-2 transition-colors hover:bg-neutral-800 cursor-pointer mb-10"
+            onClick={handleLogout}
+            className="w-full bg-black text-white text-sm font-medium py-2 transition-colors hover:bg-neutral-800 cursor-pointer"
           >
             Выйти
           </button>
@@ -53,7 +58,7 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick, isLoggedIn = false
             href="/auth"
             onClick={onLinkClick}
             className={cn(
-              "w-full block bg-black text-white text-sm font-medium py-2 text-center transition-colors hover:bg-neutral-800 cursor-pointer mb-10",
+              "w-full block bg-black text-white text-sm font-medium py-2 text-center transition-colors hover:bg-neutral-800 cursor-pointer",
               pathname === "/auth" ? "bg-neutral-900" : ""
             )}
           >
@@ -62,7 +67,7 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick, isLoggedIn = false
         )}
       </div>
 
-      {/* Gli altri link */}
+      {/* Links principali */}
       {routes.map((route) => {
         const active = pathname === route.href;
 
@@ -87,7 +92,6 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick, isLoggedIn = false
                 />
               </button>
 
-              {/* Children animati */}
               <AnimatePresence initial={false}>
                 {isOpen && (
                   <motion.div
@@ -98,31 +102,29 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick, isLoggedIn = false
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                     className="overflow-hidden ml-2 mt-2"
                   >
-                    <div className="flex flex-col gap-2">
-                      {route.children.map((child, i) => {
-                        const childActive = pathname === child.href;
-                        return (
-                          <motion.div
-                            key={child.href}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -10 }}
-                            transition={{ duration: 0.25, delay: i * 0.05 }}
+                    {route.children.map((child, i) => {
+                      const childActive = pathname === child.href;
+                      return (
+                        <motion.div
+                          key={child.href}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -10 }}
+                          transition={{ duration: 0.25, delay: i * 0.05 }}
+                        >
+                          <Link
+                            href={child.href}
+                            onClick={onLinkClick}
+                            className={cn(
+                              "text-sm text-neutral-500 hover:text-black transition-colors",
+                              childActive ? "text-black font-medium" : ""
+                            )}
                           >
-                            <Link
-                              href={child.href}
-                              onClick={onLinkClick}
-                              className={cn(
-                                "text-sm text-neutral-500 hover:text-black transition-colors",
-                                childActive ? "text-black font-medium" : ""
-                              )}
-                            >
-                              {child.label}
-                            </Link>
-                          </motion.div>
-                        );
-                      })}
-                    </div>
+                            {child.label}
+                          </Link>
+                        </motion.div>
+                      );
+                    })}
                   </motion.div>
                 )}
               </AnimatePresence>

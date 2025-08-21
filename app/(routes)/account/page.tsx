@@ -1,26 +1,29 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { User as UserIcon } from "lucide-react";
-import Image from "next/image";
+import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
-import { updateCustomer } from "@/actions/update-profile"; // <-- importa la funzione
+
+import { updateCustomer } from "@/actions/update-profile";
+import ImageUpload from "@/components/image-upload";
+import { useAuth } from "@/context/auth-context";
+import { toast } from "sonner";
+import Loader from "@/components/loader";
 
 const AccountPage = () => {
   const { user, loading } = useAuth();
   const router = useRouter();
 
-  // stati form
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [balance, setBalance] = useState(0);
   const [password, setPassword] = useState("");
-  const [userImage, setUserImage] = useState<string | null>(null);
+  const [userImage, setUserImage] = useState<string[]>([]);
   const [promoCode, setPromoCode] = useState("");
   const [saving, setSaving] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const formatBirthDate = (dateStr: string) => {
     if (!dateStr) return "";
@@ -31,53 +34,50 @@ const AccountPage = () => {
     return `${day}/${month}/${year}`;
   };
 
-  // 🚨 redirect se non loggato
   useEffect(() => {
     if (!loading && !user) {
       router.replace("/auth");
     }
   }, [loading, user, router]);
 
-  // Popola i dati del form quando l'utente è caricato
   useEffect(() => {
     if (user) {
       setFirstName(user.firstName || "");
       setLastName(user.lastName || "");
       setBirthDate(user.birthDate || "");
       setBalance(user.balance ?? 0);
-      setUserImage(user.profileImage || null);
+      setUserImage(user.profileImage ? [user.profileImage] : []);
     }
   }, [user]);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        Загрузка...
-      </div>
+      <Loader />
     );
   }
 
-  if (!user) return null; // evita flash della pagina
+  if (!user) return null;
 
-const handleSave = async () => {
-  setSaving(true);
-  try {
-    await updateCustomer({
-      firstName,
-      lastName,
-      password: password || undefined, // invia solo se è stato cambiato
-      // birthDate è opzionale, puoi rimuoverlo se non vuoi permettere aggiornamento
-    });
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await updateCustomer({
+        firstName,
+        lastName,
+        password: password || undefined,
+        profileImage: userImage[0] || undefined, // salva solo la prima immagine
+      });
 
-    alert("Профиль успешно обновлен");
-    setPassword("");
-  } catch (error) {
-    console.error(error);
-    alert("Ошибка при обновлении профиля");
-  } finally {
-    setSaving(false);
-  }
-};
+      toast.success("✅ Профиль успешно обновлен");
+      setPassword("");
+      setShowPassword(false);
+    } catch (error) {
+      console.error(error);
+      toast.error("❌ Ошибка при обновлении профиля");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleReset = () => {
     if (user) {
@@ -85,8 +85,11 @@ const handleSave = async () => {
       setLastName(user.lastName || "");
       setBirthDate(user.birthDate || "");
       setBalance(user.balance ?? 0);
+      setUserImage(user.profileImage ? [user.profileImage] : []);
       setPassword("");
       setPromoCode("");
+      setShowPassword(false);
+      toast.info("🔄 Данные сброшены");
     }
   };
 
@@ -94,6 +97,7 @@ const handleSave = async () => {
     if (!promoCode) return;
     console.log("Активировать промокод:", promoCode);
     setBalance((prev) => prev + 100);
+    toast.success("🎁 Промокод активирован +100₽");
     setPromoCode("");
   };
 
@@ -106,21 +110,12 @@ const handleSave = async () => {
 
       {/* Main */}
       <main className="flex flex-col items-center flex-1 pt-10 px-6 py-5 bg-white">
-        {/* Foto utente */}
-        <div className="flex justify-center mb-10">
-          {userImage ? (
-            <Image
-              src={userImage}
-              alt="User"
-              className="w-32 h-32 rounded-full object-cover shadow"
-              width={128}
-              height={128}
-            />
-          ) : (
-            <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center shadow">
-              <UserIcon className="w-12 h-12 text-gray-500" />
-            </div>
-          )}
+        {/* Foto utente con ImageUpload */}
+        <div className="flex justify-center mb-10 w-full max-w-5xl">
+          <ImageUpload
+            value={userImage}
+            onChange={(url) => setUserImage([url])}
+          />
         </div>
 
         {/* Layout due colonne */}
@@ -164,13 +159,22 @@ const handleSave = async () => {
           <section className="flex flex-col gap-6">
             <div>
               <label className="block text-sm font-bold text-gray-700">Новый пароль</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Введите новый пароль"
-                className="mt-1 w-full border rounded-none px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none font-light"
-              />
+              <div className="relative mt-1 w-full">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Введите новый пароль"
+                  className="w-full border rounded-none px-3 py-2 pr-10 focus:ring-2 focus:ring-black focus:outline-none font-light"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
             </div>
 
             <div>
@@ -223,9 +227,8 @@ const handleSave = async () => {
             <button
               onClick={handleSave}
               disabled={saving}
-              className={`px-5 py-2 bg-black text-white rounded-none hover:bg-gray-800 transition font-light w-full md:w-auto cursor-pointer ${
-                saving ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              className={`px-5 py-2 bg-black text-white rounded-none hover:bg-gray-800 transition font-light w-full md:w-auto cursor-pointer ${saving ? "opacity-50 cursor-not-allowed" : ""
+                }`}
             >
               {saving ? "Сохраняем..." : "Сохранить"}
             </button>
@@ -236,4 +239,4 @@ const handleSave = async () => {
   );
 };
 
-export default AccountPage
+export default AccountPage;
