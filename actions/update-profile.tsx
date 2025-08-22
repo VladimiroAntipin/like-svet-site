@@ -2,11 +2,13 @@
 
 import { getToken } from "@/lib/token";
 
-const CMS_URL = process.env.NEXT_PUBLIC_API_URL; 
+const CMS_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface UpdateCustomerPayload {
   firstName?: string;
   lastName?: string;
+  email?: string;
+  phone?: string;
   password?: string;
   birthDate?: string;
   profileImage?: string;

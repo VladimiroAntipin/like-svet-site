@@ -3,11 +3,12 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { loginUser, registerUser } from "@/actions/auth";
 import { getToken, removeToken, saveToken } from "@/lib/token";
-import { toast } from "sonner"; // 👈 import
+import { toast } from "sonner";
 
 interface User {
   id: string;
   email: string;
+  phone?: string;        // 👈 aggiunto
   firstName: string;
   lastName: string;
   birthDate: string;
@@ -19,8 +20,15 @@ interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (credentials: { email: string; password: string }) => Promise<void>;
-  register: (data: { firstName: string; lastName: string; birthDate: string; email: string; password: string }) => Promise<void>;
+  login: (credentials: { identifier: string; password: string }) => Promise<void>;
+  register: (data: {
+    firstName: string;
+    lastName: string;
+    birthDate: string;
+    email: string;
+    phone: string;        // 👈 aggiunto
+    password: string;
+  }) => Promise<void>;
   logout: () => void;
 }
 
@@ -60,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (res?.token && res.user) {
       saveToken(res.token);
       setUser({ token: res.token, ...res.user });
-      toast.success("Вы успешно вошли ✅"); // 👈 toast login success
+      toast.success("Вы успешно вошли ✅");
     }
   };
 
@@ -69,14 +77,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (res?.token && res.user) {
       saveToken(res.token);
       setUser({ token: res.token, ...res.user });
-      toast.success("Регистрация успешна 🎉"); // 👈 toast register success
+      toast.success("Регистрация успешна 🎉");
     }
   };
 
   const logout = () => {
     removeToken();
     setUser(null);
-    toast.info("Вы вышли из аккаунта 👋"); // 👈 toast logout
+    toast.info("Вы вышли из аккаунта 👋");
   };
 
   return (
@@ -91,3 +99,4 @@ export function useAuth() {
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
 }
+

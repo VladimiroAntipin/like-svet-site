@@ -18,6 +18,8 @@ const AccountPage = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [birthDate, setBirthDate] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [balance, setBalance] = useState(0);
   const [password, setPassword] = useState("");
   const [userImage, setUserImage] = useState<string[]>([]);
@@ -47,15 +49,13 @@ const AccountPage = () => {
       setBirthDate(user.birthDate || "");
       setBalance(user.balance ?? 0);
       setUserImage(user.profileImage ? [user.profileImage] : []);
+      setEmail(user.email || "");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setPhone((user as any).phone || "");
     }
   }, [user]);
 
-  if (loading) {
-    return (
-      <Loader />
-    );
-  }
-
+  if (loading) return <Loader />;
   if (!user) return null;
 
   const handleSave = async () => {
@@ -64,8 +64,10 @@ const AccountPage = () => {
       await updateCustomer({
         firstName,
         lastName,
+        email,
+        phone,
         password: password || undefined,
-        profileImage: userImage[0] || undefined, // salva solo la prima immagine
+        profileImage: userImage[0] || undefined,
       });
 
       toast.success("✅ Профиль успешно обновлен");
@@ -84,6 +86,9 @@ const AccountPage = () => {
       setFirstName(user.firstName || "");
       setLastName(user.lastName || "");
       setBirthDate(user.birthDate || "");
+      setEmail(user.email || "");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setPhone((user as any).phone || "");
       setBalance(user.balance ?? 0);
       setUserImage(user.profileImage ? [user.profileImage] : []);
       setPassword("");
@@ -95,7 +100,6 @@ const AccountPage = () => {
 
   const handleActivatePromo = () => {
     if (!promoCode) return;
-    console.log("Активировать промокод:", promoCode);
     setBalance((prev) => prev + 100);
     toast.success("🎁 Промокод активирован +100₽");
     setPromoCode("");
@@ -145,6 +149,17 @@ const AccountPage = () => {
             </div>
 
             <div>
+              <label className="block text-sm font-bold text-gray-700">Email</label>
+              <input
+                type="text"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Введите email"
+                className="mt-1 w-full border rounded-none px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none font-light"
+              />
+            </div>
+
+            <div>
               <label className="block text-sm font-bold text-gray-700">Дата рождения</label>
               <input
                 type="text"
@@ -157,6 +172,17 @@ const AccountPage = () => {
 
           {/* Colonna destra */}
           <section className="flex flex-col gap-6">
+            <div>
+              <label className="block text-sm font-bold text-gray-700">Телефон</label>
+              <input
+                type="text"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="Введите телефон"
+                className="mt-1 w-full border rounded-none px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none font-light"
+              />
+            </div>
+
             <div>
               <label className="block text-sm font-bold text-gray-700">Новый пароль</label>
               <div className="relative mt-1 w-full">

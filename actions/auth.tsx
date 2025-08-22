@@ -5,11 +5,12 @@ interface RegisterPayload {
   lastName: string;
   birthDate: string;
   email: string;
+  phone: string;       // 👈 aggiunto
   password: string;
 }
 
 interface LoginPayload {
-  email: string;
+  identifier: string;  // 👈 può essere email o phone
   password: string;
 }
 

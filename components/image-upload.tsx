@@ -7,7 +7,7 @@ import { CldUploadWidget } from "next-cloudinary";
 
 interface ImageUploadProps {
     disabled?: boolean;
-    onChange: (value: string) => void; 
+    onChange: (value: string) => void;
     value: string[];
 }
 
@@ -19,7 +19,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ disabled, onChange, value }) 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleUpload = (result: any) => {
         const url = result?.info?.secure_url as string | undefined;
-        if (url) onChange(url); 
+        if (url) onChange(url);
     };
 
     if (!isMounted) return null;
@@ -27,7 +27,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ disabled, onChange, value }) 
     return (
         <div className="flex flex-wrap gap-4">
             {value.map((url) => (
-                <div key={url} className="relative w-[200px] h-[200px] rounded-full overflow-hidden group max-[500px]:w-[100px] max-[500px]:h-[100px]">
+                <div key={url} className="relative w-[150px] h-[150px] rounded-full overflow-hidden group max-[500px]:w-[100px] max-[500px]:h-[100px]">
                     <Image fill className="object-cover object-center" alt="image" src={url} />
 
                     {/* Icona + overlay solo al hover */}

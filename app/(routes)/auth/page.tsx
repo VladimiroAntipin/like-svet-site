@@ -8,27 +8,23 @@ import Loader from "@/components/loader";
 import { toast } from "sonner";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const phoneRegex = /^\+?[0-9]{7,15}$/;
 
 const AuthPage = () => {
   const { loading, login, register } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Inizializza isLogin in base al query param 'mode'
   const [isLogin, setIsLogin] = useState(() => {
     const mode = searchParams.get("mode");
-    return mode === "register" ? false : true;
+    return mode !== "register";
   });
 
-  // Aggiorna isLogin se il query param cambia
   useEffect(() => {
     const mode = searchParams.get("mode");
-    if (mode === "register") setIsLogin(false);
-    else setIsLogin(true);
+    setIsLogin(mode !== "register");
   }, [searchParams]);
 
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState("");
 
@@ -37,6 +33,8 @@ const AuthPage = () => {
     lastName: "",
     birthDate: "",
     email: "",
+    phone: "",
+    identifier: "", // login: email o telefono
     password: "",
     confirmPassword: "",
   });
@@ -45,8 +43,6 @@ const AuthPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const resetErrors = () => {
-    setEmailError("");
-    setPasswordError("");
     setFieldErrors({});
     setGeneralError("");
   };
@@ -59,25 +55,30 @@ const AuthPage = () => {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!form.email) {
-      newErrors.email = "Поле обязательно для заполнения";
-    } else if (!emailRegex.test(form.email)) {
-      newErrors.email = "Неверный формат email";
-    }
-
-    if (!form.password) {
-      newErrors.password = "Поле обязательно для заполнения";
-    }
+    if (!form.password) newErrors.password = "Поле обязательно для заполнения";
 
     if (!isLogin) {
+      // Registrazione
       if (!form.firstName) newErrors.firstName = "Поле обязательно для заполнения";
       if (!form.lastName) newErrors.lastName = "Поле обязательно для заполнения";
       if (!form.birthDate) newErrors.birthDate = "Поле обязательно для заполнения";
+      if (!form.phone) newErrors.phone = "Поле обязательно для заполнения";
+      else if (!phoneRegex.test(form.phone)) newErrors.phone = "Неверный формат номера";
 
       if (!form.confirmPassword) {
         newErrors.confirmPassword = "Поле обязательно для заполнения";
       } else if (form.password !== form.confirmPassword) {
         newErrors.confirmPassword = "Пароли не совпадают";
+      }
+
+      if (!form.email) newErrors.email = "Поле обязательно для заполнения";
+      else if (!emailRegex.test(form.email)) newErrors.email = "Неверный формат email";
+    } else {
+      // Login
+      if (!form.identifier) {
+        newErrors.identifier = "Введите email или номер телефона";
+      } else if (!emailRegex.test(form.identifier) && !phoneRegex.test(form.identifier)) {
+        newErrors.identifier = "Неверный формат email или телефона";
       }
     }
 
@@ -93,18 +94,22 @@ const AuthPage = () => {
 
     try {
       if (isLogin) {
-        await login({ email: form.email, password: form.password });
-        router.push("/"); // vai alla home dopo login
+        await login({
+          identifier: form.identifier,
+          password: form.password,
+        });
+        router.push("/");
       } else {
         await register({
           firstName: form.firstName,
           lastName: form.lastName,
           birthDate: form.birthDate,
           email: form.email,
+          phone: form.phone,
           password: form.password,
         });
-        toast.success("Регистрация успешна 🎉"); // toast registrazione
-        router.push("/auth?mode=login"); // forza il tab login
+        toast.success("Регистрация успешна 🎉");
+        router.push("/auth?mode=login");
       }
 
       setForm({
@@ -112,6 +117,8 @@ const AuthPage = () => {
         lastName: "",
         birthDate: "",
         email: "",
+        phone: "",
+        identifier: "",
         password: "",
         confirmPassword: "",
       });
@@ -120,11 +127,11 @@ const AuthPage = () => {
       const message = err.message || "Ошибка авторизации";
 
       if (message.toLowerCase().includes("invalid credentials")) {
-        setEmailError("Нет такого пользователя");
+        setFieldErrors({ identifier: "Нет такого пользователя" });
       } else if (message.toLowerCase().includes("wrong password")) {
-        setPasswordError("Неправильный пароль");
+        setFieldErrors({ password: "Неправильный пароль" });
       } else if (message.toLowerCase().includes("user already exists")) {
-        setEmailError("Пользователь с таким email уже существует");
+        setFieldErrors({ email: "Пользователь с таким email уже существует" });
       } else {
         setGeneralError(message);
       }
@@ -138,28 +145,14 @@ const AuthPage = () => {
       {/* Tabs */}
       <div className="flex justify-center gap-12 mb-12">
         <button
-          onClick={() => {
-            setIsLogin(true);
-            resetErrors();
-            router.replace("/auth?mode=login"); // aggiorna query param
-          }}
-          className={`pb-2 text-xl font-medium cursor-pointer ${isLogin
-            ? "border-b-2 border-black text-black"
-            : "text-gray-500 hover:text-black"
-            }`}
+          onClick={() => { setIsLogin(true); resetErrors(); router.replace("/auth?mode=login"); }}
+          className={`pb-2 text-xl font-medium cursor-pointer ${isLogin ? "border-b-2 border-black text-black" : "text-gray-500 hover:text-black"}`}
         >
           Вход
         </button>
         <button
-          onClick={() => {
-            setIsLogin(false);
-            resetErrors();
-            router.replace("/auth?mode=register");
-          }}
-          className={`pb-2 text-xl font-medium cursor-pointer ${!isLogin
-            ? "border-b-2 border-black text-black"
-            : "text-gray-500 hover:text-black"
-            }`}
+          onClick={() => { setIsLogin(false); resetErrors(); router.replace("/auth?mode=register"); }}
+          className={`pb-2 text-xl font-medium cursor-pointer ${!isLogin ? "border-b-2 border-black text-black" : "text-gray-500 hover:text-black"}`}
         >
           Регистрация
         </button>
@@ -171,116 +164,67 @@ const AuthPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium mb-1">Имя</label>
-              <input
-                type="text"
-                name="firstName"
-                value={form.firstName}
-                onChange={handleChange}
-                className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none"
-              />
-              {fieldErrors.firstName && (
-                <p className="text-red-600 text-sm">{fieldErrors.firstName}</p>
-              )}
+              <input type="text" name="firstName" value={form.firstName} onChange={handleChange} className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none" />
+              {fieldErrors.firstName && <p className="text-red-600 text-sm">{fieldErrors.firstName}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Фамилия</label>
-              <input
-                type="text"
-                name="lastName"
-                value={form.lastName}
-                onChange={handleChange}
-                className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none"
-              />
-              {fieldErrors.lastName && (
-                <p className="text-red-600 text-sm">{fieldErrors.lastName}</p>
-              )}
+              <input type="text" name="lastName" value={form.lastName} onChange={handleChange} className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none" />
+              {fieldErrors.lastName && <p className="text-red-600 text-sm">{fieldErrors.lastName}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Дата рождения</label>
+              <input type="date" name="birthDate" value={form.birthDate} onChange={handleChange} className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none" />
+              {fieldErrors.birthDate && <p className="text-red-600 text-sm">{fieldErrors.birthDate}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Телефон</label>
+              <input type="text" name="phone" value={form.phone} onChange={handleChange} className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none" />
+              {fieldErrors.phone && <p className="text-red-600 text-sm">{fieldErrors.phone}</p>}
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium mb-1">Дата рождения</label>
-              <input
-                type="date"
-                name="birthDate"
-                value={form.birthDate}
-                onChange={handleChange}
-                className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none"
-              />
-              {fieldErrors.birthDate && (
-                <p className="text-red-600 text-sm">{fieldErrors.birthDate}</p>
-              )}
+              <label className="block text-sm font-medium mb-1">Email</label>
+              <input type="text" name="email" value={form.email} onChange={handleChange} className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none" />
+              {fieldErrors.email && <p className="text-red-600 text-sm">{fieldErrors.email}</p>}
             </div>
           </div>
         )}
 
-        <div>
-          <label className="block text-sm font-medium mb-1">Email</label>
-          <input
-            type="text"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none"
-          />
-          {(emailError || fieldErrors.email) && (
-            <p className="text-red-600 text-sm">{emailError || fieldErrors.email}</p>
-          )}
-        </div>
+        {isLogin && (
+          <div>
+            <label className="block text-sm font-medium mb-1">Email или Телефон</label>
+            <input type="text" name="identifier" value={form.identifier} onChange={handleChange} className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none" />
+            {fieldErrors.identifier && <p className="text-red-600 text-sm">{fieldErrors.identifier}</p>}
+          </div>
+        )}
 
         <div>
           <label className="block text-sm font-medium mb-1">Пароль</label>
           <div className="relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none pr-10"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-black cursor-pointer"
-            >
+            <input type={showPassword ? "text" : "password"} name="password" value={form.password} onChange={handleChange} className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none pr-10" />
+            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-black cursor-pointer">
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
-          {(passwordError || fieldErrors.password) && (
-            <p className="text-red-600 text-sm">{passwordError || fieldErrors.password}</p>
-          )}
+          {fieldErrors.password && <p className="text-red-600 text-sm">{fieldErrors.password}</p>}
         </div>
 
         {!isLogin && (
           <div>
             <label className="block text-sm font-medium mb-1">Повторите пароль</label>
             <div className="relative">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                name="confirmPassword"
-                value={form.confirmPassword}
-                onChange={handleChange}
-                className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-black cursor-pointer"
-              >
+              <input type={showConfirmPassword ? "text" : "password"} name="confirmPassword" value={form.confirmPassword} onChange={handleChange} className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none pr-10" />
+              <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-black cursor-pointer">
                 {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
-            {fieldErrors.confirmPassword && (
-              <p className="text-red-600 text-sm">{fieldErrors.confirmPassword}</p>
-            )}
+            {fieldErrors.confirmPassword && <p className="text-red-600 text-sm">{fieldErrors.confirmPassword}</p>}
           </div>
         )}
 
-        {generalError && (
-          <p className="text-red-600 text-sm font-medium">{generalError}</p>
-        )}
+        {generalError && <p className="text-red-600 text-sm font-medium">{generalError}</p>}
 
-        <button
-          type="submit"
-          className="w-full bg-black text-white py-3 hover:bg-gray-800 transition text-lg cursor-pointer"
-        >
+        <button type="submit" className="w-full bg-black text-white py-3 hover:bg-gray-800 transition text-lg cursor-pointer">
           {isLogin ? "Войти" : "Зарегистрироваться"}
         </button>
       </form>
@@ -289,3 +233,4 @@ const AuthPage = () => {
 };
 
 export default AuthPage;
+
