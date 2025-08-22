@@ -58,3 +58,8 @@ export interface Product {
   productSizes: ProductSize[];
   productColors: ProductColor[];
 }
+
+export interface Favorite {
+  id: string;          
+  product: Product;     
+}

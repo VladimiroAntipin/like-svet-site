@@ -60,7 +60,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ disabled, onChange, value }) 
                     {({ open }) => (
                         <div
                             onClick={() => open()}
-                            className="relative w-[200px] h-[200px] rounded-full border border-gray-300 bg-gray-200 flex items-center justify-center cursor-pointer group max-[500px]:w-[100px] max-[500px]:h-[100px]"
+                            className="relative w-[150px] h-[150px] rounded-full border border-gray-300 bg-gray-200 flex items-center justify-center cursor-pointer group max-[500px]:w-[100px] max-[500px]:h-[100px]"
                         >
                             <ImagePlusIcon className="w-8 h-8 text-gray-500" />
                         </div>

@@ -5,6 +5,7 @@ import { Heart, Menu, ShoppingBag } from "lucide-react";
 import { useEffect, useState } from "react";
 import Sidebar from "./sidebar";
 import SidebarNav from "./sidebar-nav";
+import Link from "next/link";
 
 const NavbarActions = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -22,7 +23,9 @@ const NavbarActions = () => {
       <div className="flex items-center justify-between gap-x-4 w-full">
         <div className="flex items-center max-[500px]:flex-row-reverse gap-2">
           <Button className="flex items-center rounded-full px-4 py-2 max-[500px]:px-2 max-[500px]:py-1">
+            <Link href="/favorites">
             <Heart size={24} />
+            </Link>
           </Button>
           <Button className="flex items-center rounded-full px-4 py-2 max-[500px]:px-2 max-[500px]:py-1 relative">
             <ShoppingBag size={24} />
