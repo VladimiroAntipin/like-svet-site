@@ -7,49 +7,45 @@ import { Heart, ShoppingBag } from "lucide-react";
 import Currency from "@/components/ui/currency";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
-import { useState, useEffect } from "react";
-import { addFavorite, removeFavorite } from "@/actions/favorites";
 import { toast } from "sonner";
+import { useFavorites } from "@/context/favorite-context";
 
 interface ProductCardProps {
   data: Product;
-  initialIsFavorite?: boolean;
-  onToggleFavorite?: () => void; // callback opzionale per la pagina
+  onToggleFavorite?: () => void;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ data, initialIsFavorite = false, onToggleFavorite }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ data, onToggleFavorite }) => {
   const router = useRouter();
   const { user } = useAuth();
-  const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
+  const { isFavorite, toggleFavorite } = useFavorites();
 
-  useEffect(() => {
-    setIsFavorite(initialIsFavorite);
-  }, [initialIsFavorite]);
-
-  const toggleFavorite = async (e: React.MouseEvent) => {
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!user) return alert("Devi essere loggato per aggiungere ai preferiti");
+    if (!user) {
+      router.push("/auth");
+      return;
+    }
 
     try {
-      if (isFavorite) {
-        await removeFavorite(data.id);  
-        setIsFavorite(false);
-        toast.success("Товар удалён из избранного ❤️");
-      } else {
-        await addFavorite(data.id);     
-        setIsFavorite(true);
-        toast.success("Товар добавлен в избранное 💖");
-      }
-
-      if (onToggleFavorite) onToggleFavorite();
+      await toggleFavorite(data);
+      toast.success(
+        isFavorite(data.id)
+          ? "Товар удалён из избранного ❤️"
+          : "Товар добавлен в избранное 💖"
+      );
+      onToggleFavorite?.();
     } catch (err) {
-      console.error("Errore toggle favorite:", err);
+      console.error(err);
       toast.error("Произошла ошибка, попробуйте снова ❌");
     }
   };
 
   return (
-    <div className="bg-white group cursor-pointer border-none p-0 space-y-4" onClick={() => router.push(`/product/${data.id}`)}>
+    <div
+      className="bg-white group cursor-pointer border-none p-0 space-y-4"
+      onClick={() => router.push(`/product/${data.id}`)}
+    >
       <div className="aspect-square bg-gray-100 relative">
         <Image
           src={data.images[0]?.url || "/placeholder.png"}
@@ -63,8 +59,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ data, initialIsFavorite = fal
             onClick={(e) => e.stopPropagation()}
           />
           <IconButton
-            icon={<Heart size={20} className={isFavorite ? "text-red-500 fill-red-500 cursor-pointer" : "text-grey-600 cursor-pointer"} />}
-            onClick={toggleFavorite}
+            icon={
+              <Heart
+                size={20}
+                className={isFavorite(data.id) ? "text-red-500 fill-red-500 cursor-pointer" : "text-grey-600 cursor-pointer"}
+              />
+            }
+            onClick={handleToggleFavorite}
           />
         </div>
       </div>
@@ -80,6 +81,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ data, initialIsFavorite = fal
 };
 
 export default ProductCard;
+
+
 
 
 

@@ -1,11 +1,10 @@
 'use client';
 
-import { Product, Favorite } from "@/types";
+import { Product } from "@/types";
 import NoResults from "@/components/ui/no-results";
 import ProductCard from "@/components/ui/product-card";
-import { useEffect, useState } from "react";
-import { useAuth } from "@/context/auth-context";
-import { fetchFavorites } from "@/actions/favorites";
+import { useFavorites } from "@/context/favorite-context";
+
 
 interface ProductListProps {
   title: string;
@@ -13,25 +12,9 @@ interface ProductListProps {
 }
 
 const ProductList: React.FC<ProductListProps> = ({ title, items }) => {
-  const { user } = useAuth();
-  const [favorites, setFavorites] = useState<Favorite[]>([]);
-
-  useEffect(() => {
-    if (!user) return;
-
-    const loadFavorites = async () => {
-      try {
-        const data = await fetchFavorites();
-        setFavorites(data);
-      } catch (err) {
-        console.error("Errore fetchFavorites:", err);
-      }
-    };
-
-    loadFavorites();
-  }, [user]);
-
-  const favoriteIds = new Set(favorites.map(fav => fav.product.id));
+  const { favorites } = useFavorites();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const favoriteIds = new Set(favorites.map(f => f.id));
 
   return (
     <div className="space-y-8">
@@ -42,7 +25,6 @@ const ProductList: React.FC<ProductListProps> = ({ title, items }) => {
           <ProductCard
             key={item.id}
             data={item}
-            initialIsFavorite={favoriteIds.has(item.id)}
           />
         ))}
       </div>
@@ -51,3 +33,4 @@ const ProductList: React.FC<ProductListProps> = ({ title, items }) => {
 };
 
 export default ProductList;
+

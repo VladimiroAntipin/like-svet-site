@@ -5,6 +5,7 @@ import Footer from "@/components/footer";
 import Navbar from "@/components/navbar";
 import { AuthProvider } from "@/context/auth-context";
 import { Toaster } from "sonner";
+import { FavoritesProvider } from "@/context/favorite-context";
 
 const font = Manrope({ subsets: ["latin", "cyrillic"], });
 
@@ -22,12 +23,14 @@ export default function RootLayout({
     <html lang="ru" data-scroll-behavior="smooth">
       <body className={font.className} >
         <AuthProvider>
-          <Navbar />
-          <main className="pt-[104px]">
-            {children}
-          </main>
-          <Footer />
-          <Toaster position="top-left" richColors /> {/* 👈 aggiunto */}
+          <FavoritesProvider>
+            <Navbar />
+            <main className="pt-[104px]">
+              {children}
+            </main>
+            <Footer />
+            <Toaster position="top-left" richColors /> {/* 👈 aggiunto */}
+          </FavoritesProvider>
         </AuthProvider>
       </body>
     </html>
