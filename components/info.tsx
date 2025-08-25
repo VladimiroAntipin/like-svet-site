@@ -132,9 +132,8 @@ const Info: React.FC<InfoProps> = ({ data }) => {
       {/* Bottone Carrello + Preferiti */}
       <div className="mt-10 flex items-center gap-x-3">
         <Button
-          className={`bg-black text-white flex items-center gap-x-4 rounded-none ${
-            !selectedSize || !selectedColor ? "opacity-50 hover:opacity-50 cursor-not-allowed" : ""
-          }`}
+          className={`bg-black text-white flex items-center gap-x-4 rounded-none ${!selectedSize || !selectedColor ? "opacity-50 hover:opacity-50 cursor-not-allowed" : ""
+            }`}
           disabled={!selectedSize || !selectedColor}
           onClick={() => {
             if (!selectedSize || !selectedColor) return;
@@ -150,7 +149,7 @@ const Info: React.FC<InfoProps> = ({ data }) => {
         </Button>
 
         <Button
-          className={`${isFavorite(data.id) ? "text-red-500" : "text-gray-600"} flex items-center gap-x-2 rounded-none`}
+          className={`${isFavorite(data.id) ? "text-red-500 border-red-500" : "text-gray-600 border-gray-300"} flex items-center gap-x-2 rounded-none border`}
           onClick={handleToggleFavorite}
         >
           <Heart className={`${isFavorite(data.id) ? "fill-red-500" : ""}`} />

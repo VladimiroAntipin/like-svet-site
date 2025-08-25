@@ -30,8 +30,25 @@ const getProducts = async (query: Query): Promise<Product[]> => {
   });
 
   const res = await fetch(url);
+  if (!res.ok) throw new Error("Failed to fetch products");
 
-  return res.json();
+  const data = await res.json();
+
+  // Trasforma i prezzi delle gift card
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return data.map((product: any) => {
+    if (product.isGiftCard && product.giftPrices) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      product.giftPrices = product.giftPrices.map((gp: any) => ({
+        value: gp.value,
+      }));
+      // Rimuove price normale per coerenza
+      product.price = null;
+    }
+    return product;
+  });
 };
 
 export default getProducts;
+
+

@@ -1,19 +1,31 @@
-"use client";
+'use client';
 
 import { useState, useRef, useEffect } from "react";
-import { ChevronDown, ShoppingBag } from "lucide-react";
+import { ChevronDown, ShoppingBag, Heart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { Product } from "@/types";
+import { useFavorites } from "@/context/favorite-context";
+import { useAuth } from "@/context/auth-context";
+import { toast } from "sonner";
 
-const GiftCertificatesPage = () => {
+interface GiftCertificatesProps {
+  product: Product;
+}
+
+const GiftCertificatesPage: React.FC<GiftCertificatesProps> = ({ product }) => {
   const [amount, setAmount] = useState<number | null>(null);
   const [type, setType] = useState<"электронный" | "бланк">("электронный");
   const [openDropdown, setOpenDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const amounts = [
-    1000, 2000, 3000, 5000, 7000, 10000, 15000, 20000, 25000, 30000,
-  ];
+  const { user } = useAuth();
+  const { isFavorite, toggleFavorite } = useFavorites();
+
+  const amounts = (product.giftPrices || []).map(gp => ({
+    ...gp,
+    value: gp.value / 100,
+  }));
 
   const handleAddToCart = () => {
     if (!amount) return alert("Выберите сумму сертификата");
@@ -21,13 +33,24 @@ const GiftCertificatesPage = () => {
     alert(`Сертификат на ${amount}₽ (${type}) добавлен в корзину`);
   };
 
-  // Chiudi dropdown cliccando fuori
+  const handleToggleFavorite = async () => {
+    if (!user) return toast.error("Необходимо войти в аккаунт");
+    try {
+      await toggleFavorite(product);
+      toast.success(
+        isFavorite(product.id)
+          ? "Сертификат удалён из избранного ❤️"
+          : "Сертификат добавлен в избранное 💖"
+      );
+    } catch (err) {
+      console.error(err);
+      toast.error("Произошла ошибка, попробуйте снова ❌");
+    }
+  };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setOpenDropdown(false);
       }
     };
@@ -37,37 +60,33 @@ const GiftCertificatesPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row items-center md:items-start px-6 py-12 gap-12 max-w-7xl mx-auto">
-      {/* FOTO A SINISTRA */}
+      {/* FOTO */}
       <div className="w-full md:w-1/2 flex justify-center">
         <Image
-          src="/certificate.jpg"
-          alt="Подарочный сертификат"
+          src={product.images?.[0]?.url || "/certificate.jpg"}
+          alt={product.name || "Подарочный сертификат"}
           width={500}
           height={500}
           className="object-contain h-auto shadow-md"
         />
       </div>
 
-      {/* CONTENUTO A DESTRA */}
+      {/* CONTENUTO */}
       <div className="w-full md:w-1/2 flex flex-col items-start text-left">
-        {/* Titolo */}
         <h1 className="text-3xl font-bold text-gray-900 mb-10">
-          ПОДАРОЧНЫЙ СЕРТИФИКАТ
+          {product.name || "ПОДАРОЧНЫЙ СЕРТИФИКАТ"}
         </h1>
 
         {/* Importi */}
         <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 gap-4 max-w-lg mb-10 w-full">
-          {amounts.map((value) => (
+          {amounts.map((price, index) => (
             <button
-              key={value}
-              onClick={() => setAmount(value)}
-              className={`px-4 py-3 border text-gray-700 text-lg font-light transition cursor-pointer ${
-                amount === value
-                  ? "bg-black text-white border-black"
-                  : "bg-white hover:bg-gray-100"
-              }`}
+              key={price.id || index}
+              onClick={() => setAmount(price.value)}
+              className={`px-4 py-3 border text-gray-700 text-lg font-light transition cursor-pointer ${amount === price.value ? "bg-black text-white border-black" : "bg-white hover:bg-gray-100"
+                }`}
             >
-              {value.toLocaleString("ru-RU")} ₽
+              {price.value.toLocaleString("ru-RU")} ₽
             </button>
           ))}
         </div>
@@ -84,9 +103,7 @@ const GiftCertificatesPage = () => {
           >
             {type}
             <ChevronDown
-              className={`w-5 h-5 text-gray-500 transition-transform ${
-                openDropdown ? "rotate-180" : ""
-              }`}
+              className={`w-5 h-5 text-gray-500 transition-transform ${openDropdown ? "rotate-180" : ""}`}
             />
           </button>
 
@@ -99,37 +116,42 @@ const GiftCertificatesPage = () => {
                 transition={{ duration: 0.2 }}
                 className="absolute w-full mt-1 bg-white border shadow-md z-10 rounded cursor-pointer"
               >
-                <button
-                  onClick={() => {
-                    setType("электронный");
-                    setOpenDropdown(false);
-                  }}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-100 font-light cursor-pointer"
-                >
-                  электронный
-                </button>
-                <button
-                  onClick={() => {
-                    setType("бланк");
-                    setOpenDropdown(false);
-                  }}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-100 font-light cursor-pointer"
-                >
-                  бланк
-                </button>
+                {["электронный", "бланк"].map(option => (
+                  <button
+                    key={option}
+                    onClick={() => {
+                      setType(option as "электронный" | "бланк");
+                      setOpenDropdown(false);
+                    }}
+                    className="w-full text-left px-3 py-2 hover:bg-gray-100 font-light cursor-pointer"
+                  >
+                    {option}
+                  </button>
+                ))}
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        {/* Bottone aggiungere al carrello */}
-        <button
-          onClick={handleAddToCart}
-          className="flex gap-x-4 items-center px-6 py-3 bg-black text-white text-lg font-light hover:bg-gray-800 transition mb-12 cursor-pointer"
-        >
-          В корзину
-          <ShoppingBag />
-        </button>
+        {/* Bottoni */}
+        <div className="flex gap-x-4 mb-12">
+          <button
+            onClick={handleAddToCart}
+            className="flex gap-x-4 items-center px-6 py-3 bg-black text-white text-lg font-light hover:bg-gray-800 transition cursor-pointer"
+          >
+            В корзину
+            <ShoppingBag />
+          </button>
+
+          <button
+            onClick={handleToggleFavorite}
+            className={`flex gap-x-2 items-center px-4 py-3 border cursor-pointer ${isFavorite(product.id) ? "text-red-500 border-red-500" : "text-gray-600 border-gray-300"
+              }`}
+          >
+            <Heart className={isFavorite(product.id) ? "fill-red-500" : ""} />
+            {isFavorite(product.id) ? "В избранном" : "В избранное"}
+          </button>
+        </div>
 
         {/* Testo informativo */}
         <div className="max-w-xl text-gray-700 leading-relaxed font-light text-[14px]">
@@ -146,3 +168,5 @@ const GiftCertificatesPage = () => {
 };
 
 export default GiftCertificatesPage;
+
+

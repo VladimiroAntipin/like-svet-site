@@ -74,7 +74,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ data, onToggleFavorite }) => 
         <p className="text-sm text-gray-500">{data.category?.name}</p>
       </div>
       <div className="flex items-center justify-between">
-        <Currency data={data.price} />
+        {!data.isGiftCard && <Currency data={data.price} />}
       </div>
     </div>
   );

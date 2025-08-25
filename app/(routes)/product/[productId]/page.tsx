@@ -6,6 +6,7 @@ import ProductList from "@/components/product-list";
 import BackButton from "@/components/ui/back-button";
 import Container from "@/components/ui/container";
 import LoadMoreButton from "@/components/ui/load-more-button";
+import GiftCertificatesPage from "../../customers/gift-certificates/page";
 
 interface ProductPageProps {
   params: {
@@ -19,10 +20,16 @@ const ProductPage: React.FC<ProductPageProps> = async ({ params, searchParams }:
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
 
+  // Prendi il prodotto
   const product = await getProduct(resolvedParams.productId);
 
-  const limit = parseInt(resolvedSearchParams?.limit || "8", 10);
+  // Se il prodotto è una gift card, renderizza GiftCertificatesPage
+  if (product.isGiftCard) {
+    return <GiftCertificatesPage product={product} />;
+  }
 
+  // Altrimenti prodotti normali
+  const limit = parseInt(resolvedSearchParams?.limit || "8", 10);
   const suggested = await getProducts({
     isFeatured: true,
     limit: limit + 1,
@@ -59,4 +66,5 @@ const ProductPage: React.FC<ProductPageProps> = async ({ params, searchParams }:
 };
 
 export default ProductPage;
+
 

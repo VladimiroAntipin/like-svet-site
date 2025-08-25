@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/auth-context";
@@ -12,10 +12,30 @@ interface SidebarNavProps {
   onLinkClick?: () => void;
 }
 
+interface Product {
+  id: string;
+  isGiftCard: boolean;
+}
+
 const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick }) => {
   const pathname = usePathname();
   const [open, setOpen] = useState<string | null>(null);
+  const [giftProductId, setGiftProductId] = useState<string | null>(null);
   const { user, logout } = useAuth();
+
+  // Fetch prima gift card disponibile
+  useEffect(() => {
+    const fetchGiftProduct = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products?isGiftCard=true&limit=1`);
+        const data: Product[] = await res.json();
+        if (data.length > 0) setGiftProductId(data[0].id);
+      } catch (err) {
+        console.error("Errore fetch gift card:", err);
+      }
+    };
+    fetchGiftProduct();
+  }, []);
 
   const routes = [
     { href: "/account", label: "Мой профиль" },
@@ -26,7 +46,10 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick }) => {
       href: "/customers",
       label: "Покупателям",
       children: [
-        { href: "/customers/gift-certificates", label: "Подарочные сертификаты" },
+        {
+          href: giftProductId ? `/product/${giftProductId}` : "",
+          label: "Подарочные сертификаты",
+        },
         { href: "/customers/#packaging", label: "Упаковка" },
         { href: "/customers/#delivery", label: "Доставка" },
         { href: "/customers/#custom-orders", label: "Индивидуальные заказы" },

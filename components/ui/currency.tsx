@@ -2,19 +2,19 @@
 
 import { useEffect, useState } from "react";
 
-const formatter = (priceInKopecks: number) => {
-    const rubles = priceInKopecks / 100;
-
+const formatter = (priceInKopecks?: number | string | null) => {
+    if (priceInKopecks == null) return ""; // o "-"
+    const rubles = Number(priceInKopecks) / 100;
     return new Intl.NumberFormat("ru-RU", {
-        style: 'currency',
-        currency: 'RUB',
+        style: "currency",
+        currency: "RUB",
         minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+        maximumFractionDigits: 2,
     }).format(rubles);
 };
 
 interface CurrencyProps {
-    data?: string | number
+    data?: string | number | null
 }
 
 const Currency: React.FC<CurrencyProps> = ({ data }) => {

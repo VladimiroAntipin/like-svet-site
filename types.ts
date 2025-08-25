@@ -52,14 +52,29 @@ export interface Product {
   id: string;
   category: Category;
   name: string;
-  price: string;
+  price: string | null;
   isFeatured: boolean;
   images: Image[];
   productSizes: ProductSize[];
   productColors: ProductColor[];
+  isGiftCard?: boolean;
+  giftPrices?: GiftCardPrice[];
+}
+
+export interface GiftCardPrice {
+  id: string;
+  productId: string;
+  value: number; 
 }
 
 export interface Favorite {
   id: string;          
   product: Product;     
+}
+
+export interface Order {
+  id: string;
+  products: Product[];
+  totalAmount: string;
+  createdAt: string;
 }
