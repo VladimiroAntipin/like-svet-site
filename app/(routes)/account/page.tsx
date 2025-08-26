@@ -132,11 +132,22 @@ const AccountPage = () => {
       {/* Main */}
       <main className="flex flex-col items-center flex-1 pt-10 px-6 py-5 bg-white">
         {/* Foto utente con ImageUpload */}
-        <div className="flex justify-center mb-10 w-full max-w-5xl">
-          <ImageUpload
-            value={userImage}
-            onChange={(url) => setUserImage([url])}
-          />
+        <div className="flex flex-col items-center mb-10 w-full max-w-5xl relative">
+          {/* Cerchio colorato attorno all'immagine */}
+          <div className="relative">
+            <div className="rounded-full p-1 bg-gradient-to-r from-green-400 via-yellow-400 to-red-500">
+              <div className="rounded-full overflow-hidden w-32 h-32">
+                <ImageUpload
+                  value={userImage}
+                  onChange={(url) => setUserImage([url])}
+                />
+              </div>
+            </div>
+            {/* Percentuale in basso centrale */}
+            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 translate-y-1/2 bg-black text-white text-sm px-4 py-1 rounded-md min-w-max">
+              Твоя скидка: 3%
+            </div>
+          </div>
         </div>
 
         {/* Layout due colonne */}

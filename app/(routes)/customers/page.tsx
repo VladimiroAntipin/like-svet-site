@@ -106,18 +106,23 @@ const CustomerPage = () => {
             {/* СИСТЕМА ЛОЯЛЬНОСТИ */}
             <section className="px-6 py-16 max-w-6xl mx-auto text-center scroll-mt-20" id="loyalty">
                 <h2 className="text-3xl md:text-4xl font-bold mb-12 text-black">Система лояльности</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     <div className="p-6 bg-gray-50 rounded-lg shadow-sm">
-                        <h3 className="font-semibold text-lg mb-2">Бесплатная Доставка</h3>
+                        <h3 className="font-semibold text-lg mb-2">Скидка 3%</h3>
                         <p className="text-gray-700">
-                            До отделения Почты/СДЭК при заказе на сумму более 8000₽
+                            При сумме заказов до 8.000₽. Суммы заказов суммируются для повышения уровня.
+                        </p>
+                    </div>
+                    <div className="p-6 bg-gray-50 rounded-lg shadow-sm">
+                        <h3 className="font-semibold text-lg mb-2">Скидка 5%</h3>
+                        <p className="text-gray-700">
+                            При сумме заказов от 12.000₽. Суммы заказов суммируются для повышения уровня.
                         </p>
                     </div>
                     <div className="p-6 bg-gray-50 rounded-lg shadow-sm">
                         <h3 className="font-semibold text-lg mb-2">Скидка 10%</h3>
                         <p className="text-gray-700">
-                            При заказе на сумму более 15.000₽. А так же на весь ассортимент
-                            при повторном заказе
+                            При сумме заказов от 17.000₽. Суммы заказов суммируются для повышения уровня.
                         </p>
                     </div>
                     <div className="p-6 bg-gray-50 rounded-lg shadow-sm">
