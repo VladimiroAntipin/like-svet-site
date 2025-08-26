@@ -10,6 +10,7 @@ import ImageUpload from "@/components/image-upload";
 import { useAuth } from "@/context/auth-context";
 import { toast } from "sonner";
 import Loader from "@/components/loader";
+import { redeemPromoCode } from "@/actions/redeem-code";
 
 const AccountPage = () => {
   const { user, loading } = useAuth();
@@ -98,12 +99,28 @@ const AccountPage = () => {
     }
   };
 
-  const handleActivatePromo = () => {
+
+  const handleActivatePromo = async () => {
     if (!promoCode) return;
-    setBalance((prev) => prev + 100);
-    toast.success("🎁 Промокод активирован +100₽");
-    setPromoCode("");
+
+    try {
+      if (!user?.token) throw new Error("Необхоидмо авторизоваться");
+
+      const res = await redeemPromoCode(promoCode, user.token);
+
+      // prendi il balance corretto dal user ritornato
+      const newBalance = Number(res.user.balance ?? 0);
+
+      setBalance(newBalance);
+      const increment = (res.user.balance - balance) / 100;
+      toast.success(`🎁 Промокод активирован +${increment}₽`);
+      setPromoCode("");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error.message || "❌ Ошибка при активации промокода");
+    }
   };
+
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
@@ -165,7 +182,7 @@ const AccountPage = () => {
                 type="text"
                 value={formatBirthDate(birthDate)}
                 readOnly
-                className="mt-1 w-full border rounded-none px-3 py-2 bg-gray-100 text-gray-600 cursor-not-allowed font-light"
+                className="mt-1 w-full border rounded-none px-3 py-2 bg-gray-100 text-gray-600 cursor-auto font-light"
               />
             </div>
           </aside>
@@ -207,9 +224,9 @@ const AccountPage = () => {
               <label className="block text-sm font-bold text-gray-700">Баланс</label>
               <input
                 type="text"
-                value={`${balance} ₽`}
+                value={`${balance / 100} ₽`}
                 readOnly
-                className="mt-1 w-full border rounded-none px-3 py-2 bg-gray-100 text-gray-600 cursor-not-allowed font-light"
+                className="mt-1 w-full border rounded-none px-3 py-2 bg-gray-100 text-gray-600 cursor-auto font-light"
               />
             </div>
 
