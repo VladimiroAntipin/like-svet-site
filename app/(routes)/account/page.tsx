@@ -136,7 +136,7 @@ const AccountPage = () => {
           {/* Cerchio colorato attorno all'immagine */}
           <div className="relative">
             <div className="rounded-full p-1 bg-gradient-to-r from-green-400 via-yellow-400 to-red-500">
-              <div className="rounded-full overflow-hidden w-32 h-32">
+              <div className="rounded-full overflow-hidden w-full h-full">
                 <ImageUpload
                   value={userImage}
                   onChange={(url) => setUserImage([url])}

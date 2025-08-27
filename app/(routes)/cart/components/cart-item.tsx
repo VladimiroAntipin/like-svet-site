@@ -1,0 +1,61 @@
+"use client";
+
+import Image from "next/image";
+import { X } from "lucide-react";
+import IconButton from "@/components/ui/icon-button";
+import Currency from "@/components/ui/currency";
+import useCart from "@/hooks/use-cart";
+import { CartItem as CartItemType } from "@/hooks/use-cart";
+
+interface CartItemProps {
+  data: CartItemType;
+}
+
+const CartItem: React.FC<CartItemProps> = ({ data }) => {
+  const cart = useCart();
+
+  const onRemove = () => {
+    cart.removeItem(data.id);
+  };
+
+  const imageUrl = data.product.images?.[0]?.url || "/placeholder.png";
+
+  return (
+    <li className="flex items-center gap-4 p-4 mb-4 bg-white rounded-lg shadow-sm">
+      {/* Immagine prodotto */}
+      <div className="relative h-24 w-24 rounded-md overflow-hidden flex-shrink-0">
+        <Image
+          fill
+          src={imageUrl}
+          alt={data.product.name}
+          className="object-cover object-center"
+        />
+      </div>
+
+      {/* Info prodotto */}
+      <div className="flex-1 flex flex-col justify-center">
+        <p className="text-lg font-bold text-black">{data.product.name}</p>
+        <div className="mt-1 text-sm text-gray-600 space-y-1">
+          <p>{data.product.category.name}</p>
+          <p>{data.selectedSize.value}</p>
+          <p className="flex items-center gap-2">{data.selectedColor.name}
+            <span className="w-4 h-4 rounded-full border" style={{ backgroundColor: data.selectedColor.value }} />
+          </p>
+        </div>
+      </div>
+
+      {/* Prezzo e rimuovi accanto */}
+      <div className="flex items-center justify-between gap-12 max-[500px]:gap-6">
+        <Currency data={data.product.price} />
+        <IconButton
+          onClick={onRemove}
+          icon={<X size={16} />}
+          aria-label="Rimuovi prodotto"
+          className="cursor-pointer"
+        />
+      </div>
+    </li>
+  );
+};
+
+export default CartItem;

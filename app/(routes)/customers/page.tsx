@@ -110,7 +110,7 @@ const CustomerPage = () => {
                     <div className="p-6 bg-gray-50 rounded-lg shadow-sm">
                         <h3 className="font-semibold text-lg mb-2">Скидка 3%</h3>
                         <p className="text-gray-700">
-                            При сумме заказов до 8.000₽. Суммы заказов суммируются для повышения уровня.
+                            При сумме заказов от 8.000₽. Суммы заказов суммируются для повышения уровня.
                         </p>
                     </div>
                     <div className="p-6 bg-gray-50 rounded-lg shadow-sm">

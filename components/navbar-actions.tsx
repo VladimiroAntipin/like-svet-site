@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 import Sidebar from "./sidebar";
 import SidebarNav from "./sidebar-nav";
 import Link from "next/link";
+import useCart from "@/hooks/use-cart";
+import { useRouter } from "next/navigation";
 
 const NavbarActions = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -14,6 +16,9 @@ const NavbarActions = () => {
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  const cart = useCart();
+  const router = useRouter();
 
   if (!isMounted) return null;
 
@@ -27,10 +32,10 @@ const NavbarActions = () => {
             <Heart size={24} />
             </Link>
           </Button>
-          <Button className="flex items-center rounded-full px-4 py-2 max-[500px]:px-2 max-[500px]:py-1 relative">
+          <Button onClick={() => router.push("/cart")} className="flex items-center rounded-full px-4 py-2 max-[500px]:px-2 max-[500px]:py-1 relative">
             <ShoppingBag size={24} />
             <span className="text-xs font-medium bg-black text-white px-2 py-1 max-[500px]:px-1.5 max-[500px]:py-0.5 rounded-full absolute top-0 right-0.5">
-              0
+              {cart.items.length}
             </span>
           </Button>
         </div>

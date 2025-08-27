@@ -3,7 +3,7 @@
 import { Product } from "@/types";
 import Image from "next/image";
 import IconButton from "@/components/ui/icon-button";
-import { Heart, ShoppingBag } from "lucide-react";
+import { Heart } from "lucide-react";
 import Currency from "@/components/ui/currency";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
@@ -54,10 +54,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ data, onToggleFavorite }) => 
           className="object-cover"
         />
         <div className="absolute w-full px-6 top-5 flex justify-end gap-6">
-          <IconButton
-            icon={<ShoppingBag size={20} className="text-grey-600" />}
-            onClick={(e) => e.stopPropagation()}
-          />
           <IconButton
             icon={
               <Heart

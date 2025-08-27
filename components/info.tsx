@@ -10,6 +10,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { useFavorites } from "@/context/favorite-context";
 import { toast } from "sonner";
 import { useAuth } from "@/context/auth-context";
+import useCart from "@/hooks/use-cart";
 
 interface InfoProps {
   data: Product;
@@ -24,6 +25,7 @@ const Info: React.FC<InfoProps> = ({ data }) => {
 
   const selectedSizeLabel = data.productSizes?.find(ps => ps.size.id === selectedSize)?.size.value;
   const selectedColorObj = data.productColors?.find(pc => pc.color.id === selectedColor)?.color;
+  const cart = useCart();
 
   const handleToggleFavorite = async () => {
     if (!user) return toast.error("Необходимо войти в аккаунт");
@@ -132,18 +134,23 @@ const Info: React.FC<InfoProps> = ({ data }) => {
       {/* Bottone Carrello + Preferiti */}
       <div className="mt-10 flex items-center gap-x-3">
         <Button
-          className={`bg-black text-white flex items-center gap-x-4 rounded-none ${!selectedSize || !selectedColor ? "opacity-50 hover:opacity-50 cursor-not-allowed" : ""
-            }`}
-          disabled={!selectedSize || !selectedColor}
-          onClick={() => {
-            if (!selectedSize || !selectedColor) return;
-            console.log("Добавить в корзину", {
-              productId: data.id,
-              sizeId: selectedSize,
-              colorId: selectedColor,
-            });
-          }}
-        >
+  className={`bg-black text-white flex items-center gap-x-4 rounded-none ${!selectedSize || !selectedColor ? "opacity-50 cursor-not-allowed" : ""}`}
+  disabled={!selectedSize || !selectedColor}
+  onClick={() => {
+    if (!selectedSize || !selectedColor) return;
+
+    const sizeObj = data.productSizes.find(ps => ps.size.id === selectedSize)?.size;
+    const colorObj = data.productColors.find(pc => pc.color.id === selectedColor)?.color;
+
+    if (!sizeObj || !colorObj) {
+      toast.error("Выберите размер и цвет");
+      return;
+    }
+
+    // Passiamo prodotto + size + color al carrello
+    cart.addItem(data, sizeObj, colorObj);
+  }}
+>
           В корзину
           <ShoppingBag />
         </Button>
