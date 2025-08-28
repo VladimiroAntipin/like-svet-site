@@ -37,16 +37,26 @@ const CartItem: React.FC<CartItemProps> = ({ data }) => {
         <p className="text-lg font-bold text-black">{data.product.name}</p>
         <div className="mt-1 text-sm text-gray-600 space-y-1">
           <p>{data.product.category.name}</p>
-          <p>{data.selectedSize.value}</p>
-          <p className="flex items-center gap-2">{data.selectedColor.name}
-            <span className="w-4 h-4 rounded-full border" style={{ backgroundColor: data.selectedColor.value }} />
-          </p>
+
+          {data.product.isGiftCard ? (
+            <>
+              <p>Сумма: {data.giftCardAmount} ₽</p>
+              <p>Тип: {data.giftCardType}</p>
+            </>
+          ) : (
+            <>
+              <p>{data.selectedSize?.value}</p>
+              <p className="flex items-center gap-2">{data.selectedColor?.name}
+                <span className="w-4 h-4 rounded-full border" style={{ backgroundColor: data.selectedColor?.value }} />
+              </p>
+            </>
+          )}
         </div>
       </div>
 
       {/* Prezzo e rimuovi accanto */}
       <div className="flex items-center justify-between gap-12 max-[500px]:gap-6">
-        <Currency data={data.product.price} />
+        <Currency data={data.product.isGiftCard ? (data.giftCardAmount || 0) * 100 : data.product.price} />
         <IconButton
           onClick={onRemove}
           icon={<X size={16} />}
@@ -59,3 +69,5 @@ const CartItem: React.FC<CartItemProps> = ({ data }) => {
 };
 
 export default CartItem;
+
+

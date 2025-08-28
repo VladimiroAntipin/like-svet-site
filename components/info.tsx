@@ -134,23 +134,23 @@ const Info: React.FC<InfoProps> = ({ data }) => {
       {/* Bottone Carrello + Preferiti */}
       <div className="mt-10 flex items-center gap-x-3">
         <Button
-  className={`bg-black text-white flex items-center gap-x-4 rounded-none ${!selectedSize || !selectedColor ? "opacity-50 cursor-not-allowed" : ""}`}
-  disabled={!selectedSize || !selectedColor}
-  onClick={() => {
-    if (!selectedSize || !selectedColor) return;
+          className={`bg-black text-white flex items-center gap-x-4 rounded-none ${!selectedSize || !selectedColor ? "opacity-50 cursor-not-allowed" : ""}`}
+          disabled={!selectedSize || !selectedColor}
+          onClick={() => {
+            if (!selectedSize || !selectedColor) return;
 
-    const sizeObj = data.productSizes.find(ps => ps.size.id === selectedSize)?.size;
-    const colorObj = data.productColors.find(pc => pc.color.id === selectedColor)?.color;
+            const sizeObj = data.productSizes.find(ps => ps.size.id === selectedSize)?.size;
+            const colorObj = data.productColors.find(pc => pc.color.id === selectedColor)?.color;
 
-    if (!sizeObj || !colorObj) {
-      toast.error("Выберите размер и цвет");
-      return;
-    }
+            if (!sizeObj || !colorObj) {
+              toast.error("Выберите размер и цвет");
+              return;
+            }
 
-    // Passiamo prodotto + size + color al carrello
-    cart.addItem(data, sizeObj, colorObj);
-  }}
->
+            // Passiamo prodotto + size + color al carrello
+            cart.addItem(data, sizeObj, colorObj);
+          }}
+        >
           В корзину
           <ShoppingBag />
         </Button>

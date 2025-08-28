@@ -8,6 +8,7 @@ import { Product } from "@/types";
 import { useFavorites } from "@/context/favorite-context";
 import { useAuth } from "@/context/auth-context";
 import { toast } from "sonner";
+import useCart from "@/hooks/use-cart";
 
 interface GiftCertificatesProps {
   product: Product;
@@ -18,6 +19,7 @@ const GiftCertificatesPage: React.FC<GiftCertificatesProps> = ({ product }) => {
   const [type, setType] = useState<"электронный" | "бланк">("электронный");
   const [openDropdown, setOpenDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const cart = useCart();
 
   const { user } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -29,8 +31,7 @@ const GiftCertificatesPage: React.FC<GiftCertificatesProps> = ({ product }) => {
 
   const handleAddToCart = () => {
     if (!amount) return alert("Выберите сумму сертификата");
-    console.log("Добавить в корзину:", { amount, type });
-    alert(`Сертификат на ${amount}₽ (${type}) добавлен в корзину`);
+    cart.addItem(product, undefined, undefined, amount, type);
   };
 
   const handleToggleFavorite = async () => {

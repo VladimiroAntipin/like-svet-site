@@ -11,6 +11,7 @@ import useCart from "@/hooks/use-cart";
 import { toast } from "sonner";
 import { useAuth } from "@/context/auth-context";
 import { AnimatePresence, motion } from "framer-motion";
+import { purchaseGiftCode } from "@/actions/purchase-code";
 
 interface ShippingOption {
     name: string;
@@ -48,7 +49,11 @@ const Summary = () => {
         }
     }, [searchParams, removeAll]);
 
-    const itemsTotal = items.reduce((total, item) => total + Number(item.product.price), 0);
+    const itemsTotal = items.reduce((total, item) => {
+    if (item.product.isGiftCard) return total + ((item.giftCardAmount || 0) * 100);
+    return total + Number(item.product.price);
+}, 0);
+
     const userDiscount = 0.03;
     const discountAmount = Math.round(itemsTotal * userDiscount);
 
@@ -140,27 +145,61 @@ const Summary = () => {
     const isCheckoutDisabled = isSubmitting || (isCourier && (extraInfo.trim() === "" || invalidCourier));
 
     const onCheckout = async () => {
-        if (!user) { toast.error("❌ Необходимо авторизоваться"); router.push("/auth"); return; }
-        if (!selectedShipping) { toast.error("Выберите способ доставки"); return; }
-        if (selectedShipping.name !== "Самовывоз" && !isInternational && (!region.trim() || !address.trim())) {
-            toast.error("Введите город / регион и адрес доставки"); return;
-        }
+    if (!user) { 
+        toast.error("❌ Необходимо авторизоваться"); 
+        router.push("/auth"); 
+        return; 
+    }
+    if (!selectedShipping) { 
+        toast.error("Выберите способ доставки"); 
+        return; 
+    }
+    if (selectedShipping.name !== "Самовывоз" && !isInternational && (!region.trim() || !address.trim())) {
+        toast.error("Введите город / регион и адрес доставки"); 
+        return;
+    }
+    if (isCourier && extraInfo.trim() === "") {
+        toast.error("❌ Укажите желаемый интервал доставки для Курьер");
+        return;
+    }
 
-        if (isCourier && extraInfo.trim() === "") {
-            toast.error("❌ Укажите желаемый интервал доставки для Курьер");
-            return;
-        }
+    try {
+        setIsSubmitting(true);
 
-        const orderItems = items.map(item => ({
-            productId: item.product.id,
-            sizeId: item.selectedSize.id,
-            colorId: item.selectedColor.id,
-            quantity: Number(item.quantity) || 1
+        // 1️⃣ Creazione gift code per gli articoli gift card
+        const giftCardItems = items.filter(item => item.product.isGiftCard);
+        const giftCodeResults = await Promise.all(giftCardItems.map(async (item) => {
+            const res = await purchaseGiftCode(
+                (item.giftCardAmount || 0) * 100, // moltiplichiamo per 100 se serve
+                user.token,
+            );
+            return { itemId: item.id, giftCodeId: res.giftCode.id };
         }));
 
-        try {
-            setIsSubmitting(true);
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/orders`, {
+        // 2️⃣ Prepara items per l'ordine
+        const orderItems = items.map(item => {
+            if (item.product.isGiftCard) {
+                const giftCode = giftCodeResults.find(gc => gc.itemId === item.id);
+                return {
+                    productId: item.product.id,
+                    quantity: Number(item.quantity) || 1,
+                    giftCardAmount: item.giftCardAmount,
+                    giftCardType: item.giftCardType,
+                    giftCodeId: giftCode?.giftCodeId,
+                };
+            }
+            return {
+                productId: item.product.id,
+                sizeId: item.selectedSize?.id,
+                colorId: item.selectedColor?.id,
+                quantity: Number(item.quantity) || 1
+            };
+        });
+
+        // 3️⃣ Creazione ordine
+        await axios.post(
+            `${process.env.NEXT_PUBLIC_API_URL}/orders`,
+            {
                 items: orderItems,
                 shippingMethod: selectedShipping.name,
                 region,
@@ -170,15 +209,21 @@ const Summary = () => {
                 entrance,
                 extraInfo,
                 totalPrice: itemsTotal - discountAmount + (selectedShipping ? selectedShipping.price : 0)
-            }, { headers: { Authorization: `Bearer ${user?.token}` } });
+            },
+            { headers: { Authorization: `Bearer ${user?.token}` } }
+        );
 
-            toast.success("✅ Заказ успешно оформлен!");
-            removeAll();
-            router.push("/");
-        } catch {
-            toast.error("❌ Ошибка при оформлении заказа. Попробуйте снова.");
-        } finally { setIsSubmitting(false); }
-    };
+        toast.success("✅ Заказ успешно оформлен!");
+        removeAll();
+        router.push("/");
+    } catch (err) {
+        console.error(err);
+        toast.error("❌ Ошибка при оформлении заказа. Попробуйте снова.");
+    } finally {
+        setIsSubmitting(false);
+    }
+};
+
 
     const effectiveShipping = selectedShipping && showShippingPrice ? selectedShipping.price : 0;
     const totalPrice = itemsTotal - discountAmount + effectiveShipping;

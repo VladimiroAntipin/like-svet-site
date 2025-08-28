@@ -6,14 +6,22 @@ import { toast } from "sonner";
 export interface CartItem {
   id: string;
   product: Product;
-  selectedSize: Size;
-  selectedColor: Color;
+  selectedSize?: Size;
+  selectedColor?: Color;
   quantity: number;
+  giftCardAmount?: number; // importo della gift card
+  giftCardType?: "электронный" | "бланк"; // tipo di consegna
 }
 
 interface CartStoreProps {
   items: CartItem[];
-  addItem: (product: Product, size: Size, color: Color) => void;
+  addItem: (
+    product: Product,
+    size?: Size,
+    color?: Color,
+    giftCardAmount?: number,
+    giftCardType?: "электронный" | "бланк"
+  ) => void;
   removeItem: (id: string) => void;
   removeAll: () => void;
 }
@@ -22,8 +30,10 @@ const useCart = create(
   persist<CartStoreProps>(
     (set, get) => ({
       items: [],
-      addItem: (product: Product, size: Size, color: Color) => {
-        const id = `${product.id}-${size.id}-${color.id}-${Date.now()}`;
+      addItem: (product: Product, size?: Size, color?: Color, giftCardAmount?: number, giftCardType?: "электронный" | "бланк") => {
+        const id = product.isGiftCard
+          ? `${product.id}-${giftCardAmount}-${giftCardType}-${Date.now()}`
+          : `${product.id}-${size?.id}-${color?.id}-${Date.now()}`;
 
         const currentItems = get().items;
         const newItem: CartItem = {
@@ -32,6 +42,8 @@ const useCart = create(
           selectedSize: size,
           selectedColor: color,
           quantity: 1,
+          giftCardAmount,
+          giftCardType
         };
 
         set({ items: [...currentItems, newItem] });
@@ -50,27 +62,25 @@ const useCart = create(
       storage: createJSONStorage(() => localStorage),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
       migrate: (persistedState: any, version: number) => {
-        // Se non ci sono items validi, ritorna solo un array vuoto
-        const items: CartItem[] = persistedState?.state?.items
+        const items: CartItem[] =
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ?.filter((item: any) => item?.product && item?.selectedSize && item?.selectedColor)
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ?.map((item: any) => ({
-            id: `${item.product.id}-${item.selectedSize.id}-${item.selectedColor.id}`,
+          persistedState?.state?.items?.map((item: any) => ({
+            id: item.id,
             product: item.product,
             selectedSize: item.selectedSize,
             selectedColor: item.selectedColor,
             quantity: item.quantity || 1,
+            giftCardAmount: item.giftCardAmount,
+            giftCardType: item.giftCardType,
           })) || [];
 
-        // Restituiamo uno stato completo valido
         return {
           items,
           addItem: () => { },
           removeItem: () => { },
           removeAll: () => { },
         } as CartStoreProps;
-      },
+      }
     }
   )
 );
