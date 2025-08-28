@@ -52,6 +52,13 @@ const Summary = () => {
         }
     }, [searchParams, removeAll]);
 
+    // Verifica se ci sono solo gift card elettroniche nel carrello
+    const onlyElectronicGiftCards = items.length > 0 &&
+        items.every(item =>
+            item.product.isGiftCard &&
+            item.giftCardType === "электронный"
+        );
+
     const itemsTotal = items.reduce((total, item) => {
         if (item.product.isGiftCard) return total + ((item.giftCardAmount || 0) * 100);
         return total + Number(item.product.price);
@@ -106,6 +113,8 @@ const Summary = () => {
                 price += extraBlocks * 60000;
             }
         }
+        else if (name === "электронный")
+            price = 0;
 
         if (["СДЭК", "Яндекс Маркет", "Почта России"].includes(name)) {
             const blocks = Math.floor(items.length / 5);
@@ -115,7 +124,8 @@ const Summary = () => {
         return price;
     };
 
-    const shippingOptions: ShippingOption[] = [
+    // Opzioni di spedizione standard
+    const standardShippingOptions: ShippingOption[] = [
         { name: "СДЭК", price: getShippingPrice("СДЭК") },
         { name: "Яндекс Маркет", price: getShippingPrice("Яндекс Маркет") },
         { name: "Почта России", price: getShippingPrice("Почта России") },
@@ -123,6 +133,47 @@ const Summary = () => {
         { name: "Самовывоз", price: 0 },
         { name: "Международная доставка", price: getShippingPrice("Международная доставка") }
     ];
+
+    // Opzioni di spedizione solo per gift card elettroniche
+    const electronicShippingOptions: ShippingOption[] = [
+        { name: "электронный", price: 0 }
+    ];
+
+    // Seleziona le opzioni di spedizione in base al contenuto del carrello
+    const shippingOptions = onlyElectronicGiftCards ? electronicShippingOptions : standardShippingOptions;
+
+    // Gestione del cambio automatico della consegna
+    useEffect(() => {
+        // Se ci sono solo gift card elettroniche e non è già selezionata la consegna elettronica
+        if (onlyElectronicGiftCards && selectedShipping?.name !== "электронный") {
+            setSelectedShipping(electronicShippingOptions[0]);
+            // Reset dei campi per la nuova modalità di consegna
+            setRegion("");
+            setAddress("");
+            setApartment("");
+            setFloor("");
+            setEntrance("");
+            setExtraInfo("");
+            setExtraInfoError("");
+            setRegionError("");
+            setAddressError("");
+        }
+        // Se NON ci sono solo gift card elettroniche ma è selezionata la consegna elettronica
+        else if (!onlyElectronicGiftCards && selectedShipping?.name === "электронный") {
+            setSelectedShipping(null);
+            // Reset dei campi
+            setRegion("");
+            setAddress("");
+            setApartment("");
+            setFloor("");
+            setEntrance("");
+            setExtraInfo("");
+            setExtraInfoError("");
+            setRegionError("");
+            setAddressError("");
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [onlyElectronicGiftCards, items]); // Aggiunto items come dipendenza
 
     // Validazione per Курьер
     const validateCourierDate = (value: string): boolean => {
@@ -146,6 +197,29 @@ const Summary = () => {
     // Validazione per СДЭК / Яндекс Маркет
     const validateDeliveryPoint = (regionValue: string, addressValue: string): boolean => {
         return regionValue.trim().length > 0 && addressValue.trim().length > 0;
+    };
+
+    // Validazione email
+    const validateEmail = (email: string): boolean => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email.trim());
+    };
+
+    // Validazione telefono (deve contenere codice paese come +7 e numero)
+    const validatePhone = (phone: string): boolean => {
+        const phoneRegex = /^\+[1-9]\d{1,14}$/; // Formato E.164 internazionale
+        return phoneRegex.test(phone.trim());
+    };
+
+    // Validazione per электронный (email o telefono)
+    const validateElectronic = (email: string, phone: string): boolean => {
+        const hasEmail = email.trim().length > 0;
+        const hasPhone = phone.trim().length > 0;
+
+        if (hasEmail && !validateEmail(email)) return false;
+        if (hasPhone && !validatePhone(phone)) return false;
+
+        return hasEmail || hasPhone;
     };
 
     const handleRegionBlur = () => {
@@ -203,6 +277,25 @@ const Summary = () => {
                 setAddressError("");
             }
         }
+
+        // Validazione электронный
+        if (selectedShipping?.name === "электронный") {
+            const hasEmail = region.trim().length > 0;
+            const hasPhone = address.trim().length > 0;
+
+            if (!validateElectronic(region, address)) {
+                if (hasEmail && !validateEmail(region)) {
+                    setRegionError("Укажите корректный email");
+                } else if (hasPhone && !validatePhone(address)) {
+                    setAddressError("Укажите телефон в формате +7XXXXXXXXXX");
+                } else {
+                    setRegionError("Укажите email или телефон");
+                }
+            } else {
+                setRegionError("");
+                setAddressError("");
+            }
+        }
     };
 
     const handleAddressBlur = () => {
@@ -214,6 +307,25 @@ const Summary = () => {
                 setAddressError("");
             }
         }
+
+        // Validazione электронный
+        if (selectedShipping?.name === "электронный") {
+            const hasEmail = region.trim().length > 0;
+            const hasPhone = address.trim().length > 0;
+
+            if (!validateElectronic(region, address)) {
+                if (hasEmail && !validateEmail(region)) {
+                    setRegionError("Укажите корректный email");
+                } else if (hasPhone && !validatePhone(address)) {
+                    setAddressError("Укажите телефон в формате +7XXXXXXXXXX");
+                } else {
+                    setAddressError("Укажите email или телефон");
+                }
+            } else {
+                setRegionError("");
+                setAddressError("");
+            }
+        }
     };
 
     const isCourier = selectedShipping?.name === "Курьер";
@@ -221,12 +333,14 @@ const Summary = () => {
     const isInternational = selectedShipping?.name === "Международная доставка";
     const isDeliveryPoint = selectedShipping?.name === "СДЭК" || selectedShipping?.name === "Яндекс Маркет";
     const isPostRussia = selectedShipping?.name === "Почта России";
+    const isElectronic = selectedShipping?.name === "электронный";
 
     const isCheckoutDisabled = isSubmitting ||
         !selectedShipping ||
         (isSelfPickup ? false : !region.trim()) ||
         (isSelfPickup ? false : !address.trim()) ||
         (isCourier && (extraInfo.trim() === "" || invalidCourier || !!extraInfoError)) ||
+        (isElectronic && !validateElectronic(region, address)) ||
         !!regionError ||
         !!addressError ||
         (isInternational && !validateInternational(region)) ||
@@ -315,7 +429,11 @@ const Summary = () => {
                 <span className="mb-1 mt-2 font-medium">Выберите способ доставки:</span>
                 <Popover open={isOpen} onOpenChange={setIsOpen}>
                     <PopoverTrigger asChild>
-                        <Button className="w-full rounded-none border px-3 py-2 text-left mt-2" ref={buttonRef}>
+                        <Button
+                            className="w-full rounded-none border px-3 py-2 text-left mt-2"
+                            ref={buttonRef}
+                            disabled={onlyElectronicGiftCards}
+                        >
                             <div className="flex justify-between w-full">
                                 <span className="text-gray-900 text-base font-medium">
                                     {selectedShipping ? selectedShipping.name : "Служба доставки"}
@@ -337,6 +455,10 @@ const Summary = () => {
                                                 setRegion("г.Москва");
                                                 setAddress("105122, Щелковское шоссе, д.19");
                                                 setApartment(""); setFloor(""); setEntrance(""); setExtraInfo(""); setExtraInfoError(""); setRegionError("");
+                                            } else if (option.name === "электронный") {
+                                                setRegion("");
+                                                setAddress("");
+                                                setApartment(""); setFloor(""); setEntrance(""); setExtraInfo(""); setExtraInfoError(""); setRegionError("");
                                             } else {
                                                 setRegion(""); setAddress(""); setApartment(""); setFloor(""); setEntrance(""); setExtraInfo(""); setExtraInfoError(""); setRegionError("");
                                             }
@@ -351,13 +473,22 @@ const Summary = () => {
                         </Command>
                     </PopoverContent>
                 </Popover>
+                {onlyElectronicGiftCards && (
+                    <span className="text-xs text-gray-500 mt-1">
+                        Для электронных подарочных карт доступна только электронная доставка
+                    </span>
+                )}
                 {invalidCourier && <span className="text-red-600 mt-1 text-sm">Доставка Курьер недоступна в этом регионе, выберите другой способ</span>}
             </div>
 
             {/* Campi indirizzo */}
             {selectedShipping && !isSelfPickup && (
                 <div className="flex flex-col mb-6">
-                    <span className="mb-1 font-medium">{isInternational ? "Страна и город" : "Город / Регион"}</span>
+                    <span className="mb-1 font-medium">
+                        {isInternational ? "Страна и город" :
+                            isElectronic ? "Контакты" :
+                                "Город / Регион"}
+                    </span>
                     <input
                         type="text"
                         value={region}
@@ -368,12 +499,21 @@ const Summary = () => {
                         }}
                         onBlur={handleRegionBlur}
                         onFocus={() => setShowShippingPrice(false)}
-                        placeholder={isInternational ? "Germany, Berlin" : isPostRussia ? "Москва, 101000" : "г.Москва"}
+                        placeholder={
+                            isInternational ? "Germany, Berlin" :
+                                isPostRussia ? "Москва, 101000" :
+                                    isElectronic ? "Email (например: example@mail.ru)" :
+                                        "г.Москва"
+                        }
                         className={`border rounded-md px-3 py-2 mb-2 ${regionError ? "border-red-500" : ""}`}
                     />
                     {regionError && <span className="text-red-600 text-sm mb-2">{regionError}</span>}
 
-                    <span className="mb-1 font-medium">{isDeliveryPoint ? "Адрес пункт выдачи" : "Адрес доставки"}</span>
+                    <span className="mb-1 font-medium">
+                        {isDeliveryPoint ? "Адрес пункт выдачи" :
+                            isElectronic ? "Телефон" :
+                                "Адрес доставки"}
+                    </span>
                     <input
                         type="text"
                         value={address}
@@ -383,13 +523,23 @@ const Summary = () => {
                             if (addressError) setAddressError("");
                         }}
                         onBlur={handleAddressBlur}
-                        placeholder={isDeliveryPoint ? "Введите адрес пункта выдачи" : "Введите адрес"}
+                        placeholder={
+                            isDeliveryPoint ? "Введите адрес пункта выдачи" :
+                                isElectronic ? "Телефон (например: +79123456789)" :
+                                    "Введите адрес"
+                        }
                         className={`border rounded-md px-3 py-2 mb-2 ${addressError ? "border-red-500" : ""}`}
                     />
                     {addressError && <span className="text-red-600 text-sm mb-2">{addressError}</span>}
 
+                    {isElectronic && (
+                        <span className="text-xs text-gray-500 mt-1">
+                            Укажите email и телефон
+                        </span>
+                    )}
+
                     {/* Mostra solo per Kurier */}
-                    {!isDeliveryPoint && !isSelfPickup && (
+                    {!isDeliveryPoint && !isSelfPickup && !isElectronic && (
                         <>
                             <div className="flex justify-between gap-2 mb-2 w-full">
                                 <input type="text" value={apartment} onChange={e => setApartment(e.target.value)} placeholder="Квартира" className="border rounded-md px-3 py-2 w-[30%]" />
@@ -468,12 +618,10 @@ const Summary = () => {
             <Button
                 onClick={onCheckout}
                 disabled={isCheckoutDisabled}
-                className={`w-full mt-2 rounded-none ${isCheckoutDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-black text-white"}`}
+                className={`w-full mt-2 rounded-none ${isCheckoutDisabled ? "bg-gray-400 cursor-auto text-gray-200" : "bg-black text-white"}`}
             >
                 {isSubmitting ? "Оформление..." : "Оформить заказ"}
             </Button>
-
-
         </div>
     );
 };

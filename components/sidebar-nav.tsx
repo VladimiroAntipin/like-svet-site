@@ -7,14 +7,11 @@ import { useState, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/auth-context";
+import getProducts from "@/actions/get-products";
+import { Product } from "@/types";
 
 interface SidebarNavProps {
   onLinkClick?: () => void;
-}
-
-interface Product {
-  id: string;
-  isGiftCard: boolean;
 }
 
 const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick }) => {
@@ -23,13 +20,15 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick }) => {
   const [giftProductId, setGiftProductId] = useState<string | null>(null);
   const { user, logout } = useAuth();
 
-  // Fetch prima gift card disponibile
+  // Fetch prima gift card disponibile usando la categoria "Подарочный сертификат"
   useEffect(() => {
     const fetchGiftProduct = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products?isGiftCard=true&limit=1`);
-        const data: Product[] = await res.json();
-        if (data.length > 0) setGiftProductId(data[0].id);
+        const products: Product[] = await getProducts({ limit: 50 });
+        const giftCard = products.find(
+          (p) => p.isGiftCard || p.category?.name === "Подарочный сертификат"
+        );
+        if (giftCard) setGiftProductId(giftCard.id);
       } catch (err) {
         console.error("Errore fetch gift card:", err);
       }
