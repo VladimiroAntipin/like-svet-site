@@ -12,6 +12,10 @@ const font = Manrope({ subsets: ["latin", "cyrillic"], });
 export const metadata: Metadata = {
   title: "LikeSvet Shop",
   description: "Интернет магазин",
+  icons: {
+    icon: "/favicon.ico",       
+    shortcut: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
