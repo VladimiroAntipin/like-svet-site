@@ -35,6 +35,9 @@ const Summary = () => {
     const [floor, setFloor] = useState("");
     const [entrance, setEntrance] = useState("");
     const [extraInfo, setExtraInfo] = useState("");
+    const [extraInfoError, setExtraInfoError] = useState("");
+    const [regionError, setRegionError] = useState("");
+    const [addressError, setAddressError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showShippingPrice, setShowShippingPrice] = useState(false);
     const [invalidCourier, setInvalidCourier] = useState(false);
@@ -50,9 +53,9 @@ const Summary = () => {
     }, [searchParams, removeAll]);
 
     const itemsTotal = items.reduce((total, item) => {
-    if (item.product.isGiftCard) return total + ((item.giftCardAmount || 0) * 100);
-    return total + Number(item.product.price);
-}, 0);
+        if (item.product.isGiftCard) return total + ((item.giftCardAmount || 0) * 100);
+        return total + Number(item.product.price);
+    }, 0);
 
     const userDiscount = 0.03;
     const discountAmount = Math.round(itemsTotal * userDiscount);
@@ -121,6 +124,30 @@ const Summary = () => {
         { name: "Международная доставка", price: getShippingPrice("Международная доставка") }
     ];
 
+    // Validazione per Курьер
+    const validateCourierDate = (value: string): boolean => {
+        const regex = /^\d{2}[\/.-]\d{2}[\/.-]\d{2,4}\s+\d{2}:\d{2}-\d{2}:\d{2}$/;
+        return regex.test(value.trim());
+    };
+
+    // Validazione per Почта России
+    const validatePostIndex = (value: string): boolean => {
+        const indexRegex = /\b\d{6}\b/;
+        const hasCity = value.replace(indexRegex, "").trim().length > 0;
+        return indexRegex.test(value) && hasCity;
+    };
+
+    // Validazione per Международная доставка
+    const validateInternational = (value: string): boolean => {
+        const parts = value.split(',').map(part => part.trim());
+        return parts.length >= 2 && parts[0].length > 0 && parts[1].length > 0;
+    };
+
+    // Validazione per СДЭК / Яндекс Маркет
+    const validateDeliveryPoint = (regionValue: string, addressValue: string): boolean => {
+        return regionValue.trim().length > 0 && addressValue.trim().length > 0;
+    };
+
     const handleRegionBlur = () => {
         if (selectedShipping) {
             setSelectedShipping({
@@ -130,107 +157,159 @@ const Summary = () => {
         }
         setShowShippingPrice(true);
 
+        // Validazioni specifiche per ogni metodo di spedizione
         if (selectedShipping?.name === "Курьер") {
             const city = normalize(region);
             const available = city.includes("москва") || moscowOutsideMKAD.some(loc => city.includes(normalize(loc)));
             setInvalidCourier(!available);
+
+            // Validazione extraInfo per Курьер
+            if (!validateCourierDate(extraInfo)) {
+                setExtraInfoError("Укажите корректную дату и интервал (dd/mm/yy hh:mm-hh:mm)");
+            } else {
+                setExtraInfoError("");
+            }
         } else {
             setInvalidCourier(false);
+        }
+
+        // Validazione Почта России
+        if (selectedShipping?.name === "Почта России") {
+            if (!validatePostIndex(region)) {
+                setRegionError("Укажите город и индекс из 6 цифр");
+            } else {
+                setRegionError("");
+            }
+        } else {
+            setRegionError("");
+        }
+
+        // Validazione Международная доставка
+        if (selectedShipping?.name === "Международная доставка") {
+            if (!validateInternational(region)) {
+                setRegionError("Укажите страну и город через запятую (например: Germany, Berlin)");
+            } else {
+                setRegionError("");
+            }
+        }
+
+        // Validazione СДЭК / Яндекс Маркет
+        if (selectedShipping?.name === "СДЭК" || selectedShipping?.name === "Яндекс Маркет") {
+            if (!validateDeliveryPoint(region, address)) {
+                setRegionError(region.trim() === "" ? "Укажите регион" : "");
+                setAddressError(address.trim() === "" ? "Укажите адрес" : "");
+            } else {
+                setRegionError("");
+                setAddressError("");
+            }
+        }
+    };
+
+    const handleAddressBlur = () => {
+        // Validazione СДЭК / Яндекс Маркет
+        if (selectedShipping?.name === "СДЭК" || selectedShipping?.name === "Яндекс Маркет") {
+            if (address.trim() === "") {
+                setAddressError("Укажите адрес");
+            } else {
+                setAddressError("");
+            }
         }
     };
 
     const isCourier = selectedShipping?.name === "Курьер";
     const isSelfPickup = selectedShipping?.name === "Самовывоз";
     const isInternational = selectedShipping?.name === "Международная доставка";
-    const isCheckoutDisabled = isSubmitting || (isCourier && (extraInfo.trim() === "" || invalidCourier));
+    const isDeliveryPoint = selectedShipping?.name === "СДЭК" || selectedShipping?.name === "Яндекс Маркет";
+    const isPostRussia = selectedShipping?.name === "Почта России";
+
+    const isCheckoutDisabled = isSubmitting ||
+        !selectedShipping ||
+        (isSelfPickup ? false : !region.trim()) ||
+        (isSelfPickup ? false : !address.trim()) ||
+        (isCourier && (extraInfo.trim() === "" || invalidCourier || !!extraInfoError)) ||
+        !!regionError ||
+        !!addressError ||
+        (isInternational && !validateInternational(region)) ||
+        (isPostRussia && !validatePostIndex(region)) ||
+        ((isDeliveryPoint || isPostRussia) && !address.trim());
 
     const onCheckout = async () => {
-    if (!user) { 
-        toast.error("❌ Необходимо авторизоваться"); 
-        router.push("/auth"); 
-        return; 
-    }
-    if (!selectedShipping) { 
-        toast.error("Выберите способ доставки"); 
-        return; 
-    }
-    if (selectedShipping.name !== "Самовывоз" && !isInternational && (!region.trim() || !address.trim())) {
-        toast.error("Введите город / регион и адрес доставки"); 
-        return;
-    }
-    if (isCourier && extraInfo.trim() === "") {
-        toast.error("❌ Укажите желаемый интервал доставки для Курьер");
-        return;
-    }
+        if (!user) {
+            toast.error("❌ Необходимо авторизоваться");
+            router.push("/auth");
+            return;
+        }
+        if (!selectedShipping) {
+            toast.error("Выберите способ доставки");
+            return;
+        }
+        if (isCheckoutDisabled) {
+            toast.error("Проверьте правильность заполнения всех полей");
+            return;
+        }
 
-    try {
-        setIsSubmitting(true);
+        try {
+            setIsSubmitting(true);
 
-        // 1️⃣ Creazione gift code per gli articoli gift card
-        const giftCardItems = items.filter(item => item.product.isGiftCard);
-        const giftCodeResults = await Promise.all(giftCardItems.map(async (item) => {
-            const res = await purchaseGiftCode(
-                (item.giftCardAmount || 0) * 100, // moltiplichiamo per 100 se serve
-                user.token,
+            const giftCardItems = items.filter(item => item.product.isGiftCard);
+            const giftCodeResults = await Promise.all(
+                giftCardItems.map(async (item) => {
+                    const res = await purchaseGiftCode((item.giftCardAmount || 0) * 100, user.token);
+                    return { itemId: item.id, giftCodeId: res.giftCode.id };
+                })
             );
-            return { itemId: item.id, giftCodeId: res.giftCode.id };
-        }));
 
-        // 2️⃣ Prepara items per l'ordine
-        const orderItems = items.map(item => {
-            if (item.product.isGiftCard) {
-                const giftCode = giftCodeResults.find(gc => gc.itemId === item.id);
+            const orderItems = items.map(item => {
+                if (item.product.isGiftCard) {
+                    const giftCode = giftCodeResults.find(gc => gc.itemId === item.id);
+                    return {
+                        productId: item.product.id,
+                        quantity: Number(item.quantity) || 1,
+                        giftCardAmount: item.giftCardAmount,
+                        giftCardType: item.giftCardType,
+                        giftCodeId: giftCode?.giftCodeId,
+                    };
+                }
                 return {
                     productId: item.product.id,
-                    quantity: Number(item.quantity) || 1,
-                    giftCardAmount: item.giftCardAmount,
-                    giftCardType: item.giftCardType,
-                    giftCodeId: giftCode?.giftCodeId,
+                    sizeId: item.selectedSize?.id,
+                    colorId: item.selectedColor?.id,
+                    quantity: Number(item.quantity) || 1
                 };
-            }
-            return {
-                productId: item.product.id,
-                sizeId: item.selectedSize?.id,
-                colorId: item.selectedColor?.id,
-                quantity: Number(item.quantity) || 1
-            };
-        });
+            });
 
-        // 3️⃣ Creazione ordine
-        await axios.post(
-            `${process.env.NEXT_PUBLIC_API_URL}/orders`,
-            {
-                items: orderItems,
-                shippingMethod: selectedShipping.name,
-                region,
-                address,
-                apartment,
-                floor,
-                entrance,
-                extraInfo,
-                totalPrice: itemsTotal - discountAmount + (selectedShipping ? selectedShipping.price : 0)
-            },
-            { headers: { Authorization: `Bearer ${user?.token}` } }
-        );
+            await axios.post(
+                `${process.env.NEXT_PUBLIC_API_URL}/orders`,
+                {
+                    items: orderItems,
+                    shippingMethod: selectedShipping.name,
+                    region,
+                    address,
+                    apartment,
+                    floor,
+                    entrance,
+                    extraInfo,
+                    totalPrice: itemsTotal - discountAmount + (selectedShipping ? selectedShipping.price : 0)
+                },
+                { headers: { Authorization: `Bearer ${user?.token}` } }
+            );
 
-        toast.success("✅ Заказ успешно оформлен!");
-        removeAll();
-        router.push("/");
-    } catch (err) {
-        console.error(err);
-        toast.error("❌ Ошибка при оформлении заказа. Попробуйте снова.");
-    } finally {
-        setIsSubmitting(false);
-    }
-};
-
+            toast.success("✅ Заказ успешно оформлен!");
+            removeAll();
+            router.push("/");
+        } catch (err) {
+            console.error(err);
+            toast.error("❌ Ошибка при оформлении заказа. Попробуйте снова.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     const effectiveShipping = selectedShipping && showShippingPrice ? selectedShipping.price : 0;
     const totalPrice = itemsTotal - discountAmount + effectiveShipping;
 
     return (
         <div className="mt-16 rounded-lg bg-gray-50 px-4 py-4 sm:p-6 lg:col-span-5 lg:mt-0 lg:p-8">
-
             {/* Dropdown spedizione */}
             <div className="flex flex-col mb-4">
                 <span className="mb-1 mt-2 font-medium">Выберите способ доставки:</span>
@@ -257,9 +336,9 @@ const Summary = () => {
                                             if (option.name === "Самовывоз") {
                                                 setRegion("г.Москва");
                                                 setAddress("105122, Щелковское шоссе, д.19");
-                                                setApartment(""); setFloor(""); setEntrance("");
+                                                setApartment(""); setFloor(""); setEntrance(""); setExtraInfo(""); setExtraInfoError(""); setRegionError("");
                                             } else {
-                                                setRegion(""); setAddress(""); setApartment(""); setFloor(""); setEntrance(""); setExtraInfo("");
+                                                setRegion(""); setAddress(""); setApartment(""); setFloor(""); setEntrance(""); setExtraInfo(""); setExtraInfoError(""); setRegionError("");
                                             }
                                             setInvalidCourier(false);
                                         }}
@@ -282,26 +361,62 @@ const Summary = () => {
                     <input
                         type="text"
                         value={region}
-                        onChange={e => setRegion(e.target.value)}
+                        onChange={e => {
+                            setRegion(e.target.value);
+                            // Reset error when user starts typing
+                            if (regionError) setRegionError("");
+                        }}
                         onBlur={handleRegionBlur}
                         onFocus={() => setShowShippingPrice(false)}
-                        placeholder={isInternational ? "Germany, Berlin" : "Московская область / г.Москва, ..."}
-                        className="border rounded-md px-3 py-2 mb-2"
+                        placeholder={isInternational ? "Germany, Berlin" : isPostRussia ? "Москва, 101000" : "г.Москва"}
+                        className={`border rounded-md px-3 py-2 mb-2 ${regionError ? "border-red-500" : ""}`}
                     />
-                    <span className="mb-1 font-medium">Адрес доставки</span>
-                    <input type="text" value={address} onChange={e => setAddress(e.target.value)} placeholder="Введите адрес" className="border rounded-md px-3 py-2 mb-2" />
-                    <div className="flex justify-between gap-2 mb-2 w-full">
-                        <input type="text" value={apartment} onChange={e => setApartment(e.target.value)} placeholder="Квартира" className="border rounded-md px-3 py-2 w-[30%]" />
-                        <input type="text" value={floor} onChange={e => setFloor(e.target.value)} placeholder="Этаж" className="border rounded-md px-3 py-2 w-[30%]" />
-                        <input type="text" value={entrance} onChange={e => setEntrance(e.target.value)} placeholder="Подъезд" className="border rounded-md px-3 py-2 w-[30%]" />
-                    </div>
+                    {regionError && <span className="text-red-600 text-sm mb-2">{regionError}</span>}
+
+                    <span className="mb-1 font-medium">{isDeliveryPoint ? "Адрес пункт выдачи" : "Адрес доставки"}</span>
                     <input
                         type="text"
-                        value={extraInfo}
-                        onChange={e => setExtraInfo(e.target.value)}
-                        placeholder={isCourier ? "Укажите желаемый интервал доставки" : "Доп. информация"}
-                        className="border rounded-md px-3 py-2 mb-2"
+                        value={address}
+                        onChange={e => {
+                            setAddress(e.target.value);
+                            // Reset error when user starts typing
+                            if (addressError) setAddressError("");
+                        }}
+                        onBlur={handleAddressBlur}
+                        placeholder={isDeliveryPoint ? "Введите адрес пункта выдачи" : "Введите адрес"}
+                        className={`border rounded-md px-3 py-2 mb-2 ${addressError ? "border-red-500" : ""}`}
                     />
+                    {addressError && <span className="text-red-600 text-sm mb-2">{addressError}</span>}
+
+                    {/* Mostra solo per Kurier */}
+                    {!isDeliveryPoint && !isSelfPickup && (
+                        <>
+                            <div className="flex justify-between gap-2 mb-2 w-full">
+                                <input type="text" value={apartment} onChange={e => setApartment(e.target.value)} placeholder="Квартира" className="border rounded-md px-3 py-2 w-[30%]" />
+                                <input type="text" value={floor} onChange={e => setFloor(e.target.value)} placeholder="Этаж" className="border rounded-md px-3 py-2 w-[30%]" />
+                                <input type="text" value={entrance} onChange={e => setEntrance(e.target.value)} placeholder="Подъезд" className="border rounded-md px-3 py-2 w-[30%]" />
+                            </div>
+                            {isCourier && (
+                                <>
+                                    <input
+                                        type="text"
+                                        value={extraInfo}
+                                        onChange={e => {
+                                            setExtraInfo(e.target.value);
+                                            if (!validateCourierDate(e.target.value)) {
+                                                setExtraInfoError("Укажите корректную дату и интервал (dd/mm/yy hh:mm-hh:mm)");
+                                            } else {
+                                                setExtraInfoError("");
+                                            }
+                                        }}
+                                        placeholder="дата и интервал доставки например: 01/01/25 10:00-13:00"
+                                        className={`border rounded-md px-3 py-2 mb-2 ${extraInfoError ? "border-red-500" : ""}`}
+                                    />
+                                    {extraInfoError && <span className="text-red-600 text-sm mb-2">{extraInfoError}</span>}
+                                </>
+                            )}
+                        </>
+                    )}
                 </div>
             )}
 
@@ -358,9 +473,9 @@ const Summary = () => {
                 {isSubmitting ? "Оформление..." : "Оформить заказ"}
             </Button>
 
+
         </div>
     );
 };
 
 export default Summary;
-
