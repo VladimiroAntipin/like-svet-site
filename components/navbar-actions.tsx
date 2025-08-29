@@ -34,7 +34,7 @@ const NavbarActions = () => {
           </Button>
           <Button onClick={() => router.push("/cart")} className="flex items-center rounded-full px-4 py-2 max-[500px]:px-2 max-[500px]:py-1 relative">
             <ShoppingBag size={24} />
-            <span className="text-xs font-medium bg-black text-white px-2 py-1 max-[500px]:px-1.5 max-[500px]:py-0.5 rounded-full absolute top-0 right-0.5">
+            <span className="text-xs font-medium bg-black text-white px-2.5 py-1 max-[500px]:px-1.5 max-[500px]:py-0.5 rounded-full absolute top-0 right-0.5">
               {cart.items.length}
             </span>
           </Button>
