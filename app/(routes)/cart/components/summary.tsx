@@ -12,6 +12,8 @@ import { toast } from "sonner";
 import { useAuth } from "@/context/auth-context";
 import { AnimatePresence, motion } from "framer-motion";
 import { purchaseGiftCode } from "@/actions/purchase-code";
+import { getUserDiscount } from "@/lib/get-user-discount";
+import { getUserOrders, OrderItem } from "@/actions/get-user-orders";
 
 interface ShippingOption {
     name: string;
@@ -28,6 +30,9 @@ const Summary = () => {
 
     const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
     const [isOpen, setIsOpen] = useState(false);
+    const [userOrders, setUserOrders] = useState<OrderItem[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [isLoadingOrders, setIsLoadingOrders] = useState(false);
 
     const [region, setRegion] = useState("");
     const [address, setAddress] = useState("");
@@ -52,6 +57,33 @@ const Summary = () => {
         }
     }, [searchParams, removeAll]);
 
+    // Recupera gli ordini dell'utente per calcolare lo sconto
+    useEffect(() => {
+        const fetchUserOrders = async () => {
+            if (!user?.token) return;
+            
+            setIsLoadingOrders(true);
+            try {
+                const data = await getUserOrders();
+                setUserOrders(data);
+            } catch (error) {
+                console.error("Errore nel recupero ordini utente:", error);
+            } finally {
+                setIsLoadingOrders(false);
+            }
+        };
+
+        if (user) {
+            fetchUserOrders();
+        }
+    }, [user]);
+
+    // Verifica se ci sono solo gift card nel carrello
+    const onlyGiftCards = items.length > 0 && items.every(item => item.product.isGiftCard);
+
+    // Calcola lo sconto utente (0 se ci sono solo gift card)
+    const userDiscountPercentage = (user && !onlyGiftCards) ? getUserDiscount(user, userOrders) : 0;
+
     // Verifica se ci sono solo gift card elettroniche nel carrello
     const onlyElectronicGiftCards = items.length > 0 &&
         items.every(item =>
@@ -64,8 +96,11 @@ const Summary = () => {
         return total + Number(item.product.price);
     }, 0);
 
-    const userDiscount = 0.03;
-    const discountAmount = Math.round(itemsTotal * userDiscount);
+    // MODIFICA: Applica lo sconto solo ai prodotti non gift card
+    const discountAmount = items.reduce((total, item) => {
+        if (item.product.isGiftCard) return total;
+        return total + Math.round(Number(item.product.price) * (userDiscountPercentage / 100));
+    }, 0);
 
     const moscowOutsideMKAD = [
         "зеленоград", "северный район", "куркино", "новокосино", "косино-ухтомский",
@@ -147,7 +182,7 @@ const Summary = () => {
         // Se ci sono solo gift card elettroniche e non è già selezionata la consegna elettronica
         if (onlyElectronicGiftCards && selectedShipping?.name !== "электронный") {
             setSelectedShipping(electronicShippingOptions[0]);
-            // Reset dei campi per la nuova modalità di consegna
+            // Reset dei campi per la nuova modalità deconsegna
             setRegion("");
             setAddress("");
             setApartment("");
@@ -302,7 +337,7 @@ const Summary = () => {
         // Validazione СДЭК / Яндекс Маркет
         if (selectedShipping?.name === "СДЭК" || selectedShipping?.name === "Яндекс Маркет") {
             if (address.trim() === "") {
-                setAddressError("Укажите адрес");
+                setAddressError("Укажите адрос");
             } else {
                 setAddressError("");
             }
@@ -348,6 +383,10 @@ const Summary = () => {
         ((isDeliveryPoint || isPostRussia) && !address.trim());
 
     const onCheckout = async () => {
+        if (isSubmitting) {
+            toast.error("Обрабатываем ваш заказ…");
+            return;
+        }
         if (!user) {
             toast.error("❌ Необходимо авторизоваться");
             router.push("/auth");
@@ -595,10 +634,13 @@ const Summary = () => {
                 )}
             </AnimatePresence>
 
-            <div className="flex justify-between mb-2">
-                <span>Твоя скидка</span>
-                <span className="flex">-<Currency data={discountAmount} /></span>
-            </div>
+            {/* MODIFICA: Mostra lo sconto solo se non ci sono solo gift card */}
+            {userDiscountPercentage > 0 && !onlyGiftCards && (
+                <div className="flex justify-between mb-2">
+                    <span>Твоя скидка ({userDiscountPercentage}%)</span>
+                    <span className="flex">-<Currency data={discountAmount} /></span>
+                </div>
+            )}
 
             <div className="flex justify-between font-semibold text-lg mb-4 border-t border-gray-200 pt-4">
                 <span>Итого</span>
@@ -615,10 +657,11 @@ const Summary = () => {
                 </AnimatePresence>
             </div>
 
+            {/* MODIFICA: Aggiungi isSubmitting ai disabled conditions */}
             <Button
                 onClick={onCheckout}
-                disabled={isCheckoutDisabled}
-                className={`w-full mt-2 rounded-none ${isCheckoutDisabled ? "bg-gray-400 cursor-auto text-gray-200" : "bg-black text-white"}`}
+                disabled={isCheckoutDisabled || isSubmitting}
+                className={`w-full mt-2 rounded-none ${isCheckoutDisabled || isSubmitting ? "bg-gray-400 cursor-auto text-gray-200" : "bg-black text-white"}`}
             >
                 {isSubmitting ? "Оформление..." : "Оформить заказ"}
             </Button>

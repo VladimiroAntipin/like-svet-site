@@ -4,13 +4,14 @@ import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
 import { updateCustomer } from "@/actions/update-profile";
+import { getUserOrders, OrderItem } from "@/actions/get-user-orders";
 import ImageUpload from "@/components/image-upload";
 import { useAuth } from "@/context/auth-context";
 import { toast } from "sonner";
 import Loader from "@/components/loader";
 import { redeemPromoCode } from "@/actions/redeem-code";
+import { getUserDiscount } from "@/lib/get-user-discount";
 
 const AccountPage = () => {
   const { user, loading } = useAuth();
@@ -27,6 +28,10 @@ const AccountPage = () => {
   const [promoCode, setPromoCode] = useState("");
   const [saving, setSaving] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [orders, setOrders] = useState<OrderItem[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
+
+  const discount = getUserDiscount(user, orders);
 
   const formatBirthDate = (dateStr: string) => {
     if (!dateStr) return "";
@@ -56,7 +61,23 @@ const AccountPage = () => {
     }
   }, [user]);
 
-  if (loading) return <Loader />;
+  useEffect(() => {
+    const fetchOrders = async () => {
+      if (!user?.token) return;
+      setOrdersLoading(true);
+      try {
+        const data = await getUserOrders();
+        setOrders(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setOrdersLoading(false);
+      }
+    };
+    fetchOrders();
+  }, [user]);
+
+  if (loading || ordersLoading) return <Loader />;
   if (!user) return null;
 
   const handleSave = async () => {
@@ -99,7 +120,6 @@ const AccountPage = () => {
     }
   };
 
-
   const handleActivatePromo = async () => {
     if (!promoCode) return;
 
@@ -107,10 +127,7 @@ const AccountPage = () => {
       if (!user?.token) throw new Error("Необхоидмо авторизоваться");
 
       const res = await redeemPromoCode(promoCode, user.token);
-
-      // prendi il balance corretto dal user ritornato
       const newBalance = Number(res.user.balance ?? 0);
-
       setBalance(newBalance);
       const increment = (res.user.balance - balance) / 100;
       toast.success(`🎁 Промокод активирован +${increment}₽`);
@@ -120,7 +137,6 @@ const AccountPage = () => {
       toast.error(error.message || "❌ Ошибка при активации промокода");
     }
   };
-
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
@@ -133,7 +149,6 @@ const AccountPage = () => {
       <main className="flex flex-col items-center flex-1 pt-10 px-6 py-5 bg-white">
         {/* Foto utente con ImageUpload */}
         <div className="flex flex-col items-center mb-10 w-full max-w-5xl relative">
-          {/* Cerchio colorato attorno all'immagine */}
           <div className="relative">
             <div className="rounded-full p-1 bg-gradient-to-r from-green-400 via-yellow-400 to-red-500">
               <div className="rounded-full overflow-hidden w-full h-full">
@@ -143,9 +158,9 @@ const AccountPage = () => {
                 />
               </div>
             </div>
-            {/* Percentuale in basso centrale */}
+            {/* Percentuale dinamica */}
             <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 translate-y-1/2 bg-black text-white text-sm px-4 py-1 rounded-md min-w-max">
-              Твоя скидка: 3%
+              Твоя скидка: {discount}%
             </div>
           </div>
         </div>
