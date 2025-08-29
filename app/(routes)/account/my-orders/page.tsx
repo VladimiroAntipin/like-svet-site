@@ -100,10 +100,10 @@ const MyOrdersPage: React.FC = () => {
           <div key={order.id} className="border rounded-lg shadow-sm bg-white flex flex-col">
 
             {/* Riga principale: prodotti + info ordine */}
-            <div className="flex flex-row justify-between p-4 max-[500px]:flex-col max-[500px]:gap-4">
+            <div className="flex flex-row justify-between p-4 max-[895px]:flex-col max-[895px]:gap-4">
 
               {/* Prodotti */}
-              <div className="flex flex-col gap-3 w-1/2 max-[500px]:w-full">
+              <div className="flex flex-col gap-3 w-1/2 max-[895px]:w-full">
                 {order.products.map((product, index) => (
                   <div
                     key={`${product.id}-${index}`}
@@ -116,7 +116,7 @@ const MyOrdersPage: React.FC = () => {
                       height={80}
                       className="object-cover rounded"
                     />
-                    <div className="flex flex-col justify-center max-[500px]:gap-2">
+                    <div className="flex flex-col justify-center max-[895px]:gap-2">
                       <p className="font-semibold">{product.name}</p>
                       <p className="text-xs text-gray-500">{product.category.name}</p>
                       {product.giftCardAmount && (
@@ -129,7 +129,7 @@ const MyOrdersPage: React.FC = () => {
               </div>
 
               {/* Info ordine (senza indirizzo) */}
-              <div className="flex flex-col gap-1 w-[30%] text-sm text-gray-700 text-right max-[500px]:w-full max-[500px]:text-left">
+              <div className="flex flex-col gap-1 w-[30%] text-sm text-gray-700 text-right max-[895px]:w-full max-[895px]:text-left">
                 <p><span className="font-semibold">Заказ от:</span> {new Date(order.createdAt).toLocaleString('ru-RU')}</p>
                 <p><span className="font-semibold">Способ доставки:</span> {order.shippingMethod ?? "Не указан"}</p>
               </div>
@@ -137,7 +137,7 @@ const MyOrdersPage: React.FC = () => {
             </div>
 
             {/* Riga totale + indirizzo */}
-            <div className="border-t p-4 flex justify-between items-center max-[500px]:flex-col max-[500px]:items-start max-[500px]:gap-5">
+            <div className="border-t p-4 flex justify-between items-center max-[895px]:flex-col max-[895px]:items-start max-[895px]:gap-5">
               <div className="text-sm text-gray-700">
                 <p>
                   <span className="font-semibold">Адрес доставки: <br /></span>

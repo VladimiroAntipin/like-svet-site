@@ -25,16 +25,18 @@ const NavbarActions = () => {
   return (
     <>
       {/* Navbar Buttons */}
-      <div className="flex items-center justify-between gap-x-4 w-full">
-        <div className="flex items-center max-[500px]:flex-row-reverse gap-2">
-          <Button className="flex items-center rounded-full px-4 py-2 max-[500px]:px-2 max-[500px]:py-1">
+      <div className="flex items-center justify-between gap-x-2 w-full max-[750px]:w-fit">
+        <div className="flex items-center gap-2">
+
+          <Button className="flex items-center rounded-full px-4 py-2 max-[750px]:px-2 max-[7500px]:py-1">
             <Link href="/favorites">
-            <Heart size={24} />
+              <Heart size={24} />
             </Link>
           </Button>
-          <Button onClick={() => router.push("/cart")} className="flex items-center rounded-full px-4 py-2 max-[500px]:px-2 max-[500px]:py-1 relative">
+
+          <Button onClick={() => router.push("/cart")} className="flex items-center rounded-full px-4 py-2 max-[750px]:px-2 max-[750px]:py-1 relative">
             <ShoppingBag size={24} />
-            <span className="text-xs font-medium bg-black text-white px-2.5 py-1 max-[500px]:px-1.5 max-[500px]:py-0.5 rounded-full absolute top-0 right-0.5">
+            <span className="text-xs font-medium bg-black text-white px-2.5 py-1 max-[750px]:px-1.5 max-[750px]:py-0.5 rounded-full absolute top-0 right-0.5">
               {cart.items.length}
             </span>
           </Button>

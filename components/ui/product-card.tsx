@@ -51,6 +51,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ data, onToggleFavorite }) => 
           src={data.images[0]?.url || "/placeholder.png"}
           alt={data.name}
           fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           className="object-cover"
         />
         <div className="absolute w-full px-6 top-5 flex justify-end gap-6">

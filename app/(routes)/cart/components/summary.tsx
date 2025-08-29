@@ -14,13 +14,14 @@ import { AnimatePresence, motion } from "framer-motion";
 import { purchaseGiftCode } from "@/actions/purchase-code";
 import { getUserDiscount } from "@/lib/get-user-discount";
 import { getUserOrders, OrderItem } from "@/actions/get-user-orders";
+import { LoadingDots } from "@/components/ui/loading-dots";
 
 interface ShippingOption {
     name: string;
     price: number;
 }
 
-const Summary = () => {
+const Summary = ({ onOrderComplete }: { onOrderComplete: () => void }) => {
     const searchParams = useSearchParams();
     const items = useCart((state) => state.items);
     const removeAll = useCart((state) => state.removeAll);
@@ -61,7 +62,7 @@ const Summary = () => {
     useEffect(() => {
         const fetchUserOrders = async () => {
             if (!user?.token) return;
-            
+
             setIsLoadingOrders(true);
             try {
                 const data = await getUserOrders();
@@ -240,7 +241,7 @@ const Summary = () => {
         return emailRegex.test(email.trim());
     };
 
-    // Validazione telefono (deve contenere codice paese come +7 e numero)
+    // Validazione telefono (deve contenere codice paese come +7 и numero)
     const validatePhone = (phone: string): boolean => {
         const phoneRegex = /^\+[1-9]\d{1,14}$/; // Formato E.164 internazionale
         return phoneRegex.test(phone.trim());
@@ -272,10 +273,15 @@ const Summary = () => {
             const available = city.includes("москва") || moscowOutsideMKAD.some(loc => city.includes(normalize(loc)));
             setInvalidCourier(!available);
 
-            // Validazione extraInfo per Курьер
-            if (!validateCourierDate(extraInfo)) {
-                setExtraInfoError("Укажите корректную дату и интервал (dd/mm/yy hh:mm-hh:mm)");
+            // Validazione extraInfo per Курьер - solo se la città è valida
+            if (available) {
+                if (!validateCourierDate(extraInfo)) {
+                    setExtraInfoError("Укажите корректную дату и интервал (dd/mm/yy hh:mm-hh:mm)");
+                } else {
+                    setExtraInfoError("");
+                }
             } else {
+                // Se la città non è valida, nascondi l'errore di extraInfo
                 setExtraInfoError("");
             }
         } else {
@@ -337,7 +343,7 @@ const Summary = () => {
         // Validazione СДЭК / Яндекс Маркет
         if (selectedShipping?.name === "СДЭК" || selectedShipping?.name === "Яндекс Маркет") {
             if (address.trim() === "") {
-                setAddressError("Укажите адрос");
+                setAddressError("Укажите адрес");
             } else {
                 setAddressError("");
             }
@@ -352,7 +358,7 @@ const Summary = () => {
                 if (hasEmail && !validateEmail(region)) {
                     setRegionError("Укажите корректный email");
                 } else if (hasPhone && !validatePhone(address)) {
-                    setAddressError("Укажите телефон в формате +7XXXXXXXXXX");
+                    setAddressError("Укажите телефон в format +7XXXXXXXXXX");
                 } else {
                     setAddressError("Укажите email или телефон");
                 }
@@ -449,7 +455,7 @@ const Summary = () => {
 
             toast.success("✅ Заказ успешно оформлен!");
             removeAll();
-            router.push("/");
+            if (onOrderComplete) onOrderComplete();
         } catch (err) {
             console.error(err);
             toast.error("❌ Ошибка при оформлении заказа. Попробуйте снова.");
@@ -462,7 +468,7 @@ const Summary = () => {
     const totalPrice = itemsTotal - discountAmount + effectiveShipping;
 
     return (
-        <div className="mt-16 rounded-lg bg-gray-50 px-4 py-4 sm:p-6 lg:col-span-5 lg:mt-0 lg:p-8">
+        <div className="mt-16 max-[450px]:mt-8 rounded-lg bg-gray-50 px-4 py-4 sm:p-6 lg:col-span-5 lg:mt-0 lg:p-8">
             {/* Dropdown spedizione */}
             <div className="flex flex-col mb-4">
                 <span className="mb-1 mt-2 font-medium">Выберите способ доставки:</span>
@@ -490,18 +496,23 @@ const Summary = () => {
                                             setSelectedShipping(option);
                                             setIsOpen(false);
                                             setShowShippingPrice(false);
+                                            // Reset di tutti gli errori quando si cambia corriere
+                                            setExtraInfoError("");
+                                            setRegionError("");
+                                            setAddressError("");
+                                            setInvalidCourier(false);
+
                                             if (option.name === "Самовывоз") {
                                                 setRegion("г.Москва");
                                                 setAddress("105122, Щелковское шоссе, д.19");
-                                                setApartment(""); setFloor(""); setEntrance(""); setExtraInfo(""); setExtraInfoError(""); setRegionError("");
+                                                setApartment(""); setFloor(""); setEntrance(""); setExtraInfo("");
                                             } else if (option.name === "электронный") {
                                                 setRegion("");
                                                 setAddress("");
-                                                setApartment(""); setFloor(""); setEntrance(""); setExtraInfo(""); setExtraInfoError(""); setRegionError("");
+                                                setApartment(""); setFloor(""); setEntrance(""); setExtraInfo("");
                                             } else {
-                                                setRegion(""); setAddress(""); setApartment(""); setFloor(""); setEntrance(""); setExtraInfo(""); setExtraInfoError(""); setRegionError("");
+                                                setRegion(""); setAddress(""); setApartment(""); setFloor(""); setEntrance(""); setExtraInfo("");
                                             }
-                                            setInvalidCourier(false);
                                         }}
                                         className="cursor-pointer"
                                     >
@@ -592,16 +603,21 @@ const Summary = () => {
                                         value={extraInfo}
                                         onChange={e => {
                                             setExtraInfo(e.target.value);
-                                            if (!validateCourierDate(e.target.value)) {
-                                                setExtraInfoError("Укажите корректную дату и интервал (dd/mm/yy hh:mm-hh:mm)");
-                                            } else {
-                                                setExtraInfoError("");
+                                            // Solo se la città è valida, validare extraInfo
+                                            if (!invalidCourier) {
+                                                if (!validateCourierDate(e.target.value)) {
+                                                    setExtraInfoError("Укажите корректную дату и интервал (dd/mm/yy hh:mm-hh:mm)");
+                                                } else {
+                                                    setExtraInfoError("");
+                                                }
                                             }
                                         }}
                                         placeholder="дата и интервал доставки например: 01/01/25 10:00-13:00"
                                         className={`border rounded-md px-3 py-2 mb-2 ${extraInfoError ? "border-red-500" : ""}`}
+                                        disabled={invalidCourier} // Disabilita il campo se la città non è valida
                                     />
-                                    {extraInfoError && <span className="text-red-600 text-sm mb-2">{extraInfoError}</span>}
+                                    {/* Mostra l'errore di extraInfo solo se la città è valida */}
+                                    {!invalidCourier && extraInfoError && <span className="text-red-600 text-sm mb-2">{extraInfoError}</span>}
                                 </>
                             )}
                         </>
@@ -661,9 +677,19 @@ const Summary = () => {
             <Button
                 onClick={onCheckout}
                 disabled={isCheckoutDisabled || isSubmitting}
-                className={`w-full mt-2 rounded-none ${isCheckoutDisabled || isSubmitting ? "bg-gray-400 cursor-auto text-gray-200" : "bg-black text-white"}`}
+                className={`w-full mt-2 rounded-none flex justify-center items-center gap-2 ${isCheckoutDisabled || isSubmitting
+                    ? "bg-gray-400 cursor-auto text-gray-200"
+                    : "bg-black text-white"
+                    }`}
             >
-                {isSubmitting ? "Оформление..." : "Оформить заказ"}
+                {isSubmitting ? (
+                    <>
+                        <span>Оформление</span>
+                        <LoadingDots />
+                    </>
+                ) : (
+                    "Оформить заказ"
+                )}
             </Button>
         </div>
     );

@@ -12,6 +12,20 @@ import { toast } from "sonner";
 import Loader from "@/components/loader";
 import { redeemPromoCode } from "@/actions/redeem-code";
 import { getUserDiscount } from "@/lib/get-user-discount";
+import { FiArrowLeft } from "react-icons/fi";
+
+// Loader a pallini inline (mini)
+const DotsLoader = () => (
+  <div className="flex gap-1 justify-center items-center">
+    {Array.from({ length: 3 }).map((_, i) => (
+      <span
+        key={i}
+        className="w-2 h-2 bg-white rounded-full animate-ping"
+        style={{ animationDelay: `${i * 0.2}s` }}
+      />
+    ))}
+  </div>
+);
 
 const AccountPage = () => {
   const { user, loading } = useAuth();
@@ -27,6 +41,7 @@ const AccountPage = () => {
   const [userImage, setUserImage] = useState<string[]>([]);
   const [promoCode, setPromoCode] = useState("");
   const [saving, setSaving] = useState(false);
+  const [activating, setActivating] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [orders, setOrders] = useState<OrderItem[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
@@ -123,6 +138,7 @@ const AccountPage = () => {
   const handleActivatePromo = async () => {
     if (!promoCode) return;
 
+    setActivating(true);
     try {
       if (!user?.token) throw new Error("Необхоидмо авторизоваться");
 
@@ -135,19 +151,28 @@ const AccountPage = () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error.message || "❌ Ошибка при активации промокода");
+    } finally {
+      setActivating(false);
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
       {/* Header */}
-      <header className="w-full bg-gray-200 shadow-sm py-4 px-6">
+      <header className="w-full bg-gray-200 shadow-sm py-4 px-6 flex items-center justify-between">
+        <button
+          onClick={() => router.push("/")}
+          className="flex items-center gap-1 p-2 rounded-none bg-transparent cursor-pointer"
+        >
+          <FiArrowLeft className="text-gray-700 text-lg" />
+          <span className="text-gray-700 font-medium text-sm">На главную</span>
+        </button>
         <h1 className="text-lg font-semibold text-gray-700">Мой профиль</h1>
       </header>
 
       {/* Main */}
       <main className="flex flex-col items-center flex-1 pt-10 px-6 py-5 bg-white">
-        {/* Foto utente con ImageUpload */}
+        {/* Foto utente */}
         <div className="flex flex-col items-center mb-10 w-full max-w-5xl relative">
           <div className="relative">
             <div className="rounded-full p-1 bg-gradient-to-r from-green-400 via-yellow-400 to-red-500">
@@ -158,7 +183,6 @@ const AccountPage = () => {
                 />
               </div>
             </div>
-            {/* Percentuale dinamica */}
             <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 translate-y-1/2 bg-black text-white text-sm px-4 py-1 rounded-md min-w-max">
               Твоя скидка: {discount}%
             </div>
@@ -176,7 +200,7 @@ const AccountPage = () => {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder="Введите имя"
-                className="mt-1 w-full border rounded-none px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none font-light"
+                className="mt-1 w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none font-light"
               />
             </div>
 
@@ -187,7 +211,7 @@ const AccountPage = () => {
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 placeholder="Введите фамилию"
-                className="mt-1 w-full border rounded-none px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none font-light"
+                className="mt-1 w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none font-light"
               />
             </div>
 
@@ -198,7 +222,7 @@ const AccountPage = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Введите email"
-                className="mt-1 w-full border rounded-none px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none font-light"
+                className="mt-1 w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none font-light"
               />
             </div>
 
@@ -208,7 +232,7 @@ const AccountPage = () => {
                 type="text"
                 value={formatBirthDate(birthDate)}
                 readOnly
-                className="mt-1 w-full border rounded-none px-3 py-2 bg-gray-100 text-gray-600 cursor-auto font-light"
+                className="mt-1 w-full border px-3 py-2 bg-gray-100 text-gray-600 cursor-auto font-light"
               />
             </div>
           </aside>
@@ -222,7 +246,7 @@ const AccountPage = () => {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="Введите телефон"
-                className="mt-1 w-full border rounded-none px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none font-light"
+                className="mt-1 w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none font-light"
               />
             </div>
 
@@ -234,7 +258,7 @@ const AccountPage = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Введите новый пароль"
-                  className="w-full border rounded-none px-3 py-2 pr-10 focus:ring-2 focus:ring-black focus:outline-none font-light"
+                  className="w-full border px-3 py-2 pr-10 focus:ring-2 focus:ring-black focus:outline-none font-light"
                 />
                 <button
                   type="button"
@@ -252,7 +276,7 @@ const AccountPage = () => {
                 type="text"
                 value={`${balance / 100} ₽`}
                 readOnly
-                className="mt-1 w-full border rounded-none px-3 py-2 bg-gray-100 text-gray-600 cursor-auto font-light"
+                className="mt-1 w-full border px-3 py-2 bg-gray-100 text-gray-600 cursor-auto font-light"
               />
             </div>
 
@@ -264,13 +288,15 @@ const AccountPage = () => {
                   value={promoCode}
                   onChange={(e) => setPromoCode(e.target.value)}
                   placeholder="Введите промокод"
-                  className="flex-1 border rounded-none px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none font-light"
+                  className="flex-1 border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none font-light w-2/4 "
                 />
                 <button
                   onClick={handleActivatePromo}
-                  className="px-4 py-2 bg-black text-white rounded-none hover:bg-gray-800 transition font-light cursor-pointer"
+                  disabled={activating}
+                  className={`px-4 py-2 bg-black text-white transition font-light cursor-pointer min-w-[150px] flex items-center justify-center gap-3 ${activating ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-800"
+                    }`}
                 >
-                  Активировать
+                  {activating ? <>Активация <DotsLoader /></> : "Активировать"}
                 </button>
               </div>
             </div>
@@ -278,28 +304,28 @@ const AccountPage = () => {
         </div>
 
         {/* Footer */}
-        <div className="flex flex-col max-[500px]:flex-col max-[500px]:gap-3 max-[500px]:mb-10 md:flex-row justify-between items-center w-full max-w-5xl mt-10">
+        <div className="flex flex-col max-[500px]:gap-3 md:flex-row justify-between items-center w-full max-w-5xl mt-10">
           <Link
             href="/account/my-orders"
-            className="px-5 py-2 bg-black text-white text-center rounded-none hover:bg-gray-800 transition font-light w-full md:w-auto"
+            className="px-5 py-2 bg-black text-white text-center hover:bg-gray-800 transition font-light w-full md:w-auto"
           >
             Мои заказы
           </Link>
 
-          <div className="flex max-[500px]:flex-col max-[500px]:gap-3 max-[500px]:mt-8 md:flex-row gap-4 w-full md:w-auto mt-3 md:mt-0">
+          <div className="flex max-[500px]:flex-col max-[500px]:gap-3 md:flex-row gap-4 w-full md:w-auto mt-3 md:mt-0">
             <button
               onClick={handleReset}
-              className="px-5 py-2 border rounded-none hover:bg-gray-100 transition font-light w-full md:w-auto cursor-pointer"
+              className="px-5 py-2 border hover:bg-gray-100 transition font-light w-full md:w-auto cursor-pointer"
             >
               Сбросить
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
-              className={`px-5 py-2 bg-black text-white rounded-none hover:bg-gray-800 transition font-light w-full md:w-auto cursor-pointer ${saving ? "opacity-50 cursor-not-allowed" : ""
+              className={`px-5 py-2 bg-black text-white transition font-light w-full md:w-auto cursor-pointer min-w-[150px] flex items-center justify-center gap-3 ${saving ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-800"
                 }`}
             >
-              {saving ? "Сохраняем..." : "Сохранить"}
+              {saving ? <>Сохранение <DotsLoader /></> : "Сохранить"}
             </button>
           </div>
         </div>

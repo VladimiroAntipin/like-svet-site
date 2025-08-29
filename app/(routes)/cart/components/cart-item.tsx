@@ -23,7 +23,7 @@ const CartItem: React.FC<CartItemProps> = ({ data }) => {
   return (
     <li className="flex items-center gap-4 p-4 mb-4 bg-white rounded-lg shadow-sm">
       {/* Immagine prodotto */}
-      <div className="relative h-24 w-24 rounded-md overflow-hidden flex-shrink-0">
+      <div className="relative h-24 w-24 max-[450px]:h-18 max-[450px]:w-18 rounded-md overflow-hidden flex-shrink-0">
         <Image
           fill
           src={imageUrl}
@@ -34,8 +34,8 @@ const CartItem: React.FC<CartItemProps> = ({ data }) => {
 
       {/* Info prodotto */}
       <div className="flex-1 flex flex-col justify-center">
-        <p className="text-lg font-bold text-black">{data.product.name}</p>
-        <div className="mt-1 text-sm text-gray-600 space-y-1">
+        <p className="text-lg font-bold text-black max-[450px]:text-sm">{data.product.name}</p>
+        <div className="mt-1 text-sm max-[450px]:text-xs text-gray-600 space-y-1">
           <p>{data.product.category.name}</p>
 
           {data.product.isGiftCard ? (
@@ -55,7 +55,7 @@ const CartItem: React.FC<CartItemProps> = ({ data }) => {
       </div>
 
       {/* Prezzo e rimuovi accanto */}
-      <div className="flex items-center justify-between gap-12 max-[500px]:gap-6">
+      <div className="flex items-center justify-between gap-12 max-[500px]:gap-6 max-[450px]:text-sm">
         <Currency data={data.product.isGiftCard ? (data.giftCardAmount || 0) * 100 : data.product.price} />
         <IconButton
           onClick={onRemove}

@@ -1,14 +1,14 @@
 const TermsAndConditions = () => {
   return (
-    <div className="min-h-screen px-6 py-12">
-      <div className="max-w-4xl mx-auto p-8">
-        <h1 className="text-3xl font-bold mb-8 text-center">
+    <div className="min-h-screen px-4 py-8 sm:px-6 sm:py-12">
+      <div className="max-w-4xl mx-auto p-4 sm:p-8">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center">
           УСЛОВИЯ ПРОДАЖИ ТОВАРОВ
         </h1>
 
-        <div className="space-y-8 text-gray-800 leading-relaxed">
+        <div className="space-y-6 sm:space-y-8 text-gray-800 leading-relaxed text-sm sm:text-base">
           <section>
-            <h2 className="text-xl font-light mb-4">
+            <h2 className="text-lg sm:text-xl font-light mb-3 sm:mb-4">
               1. ОСНОВНЫЕ ОПРЕДЕЛЕНИЯ
             </h2>
             <p>
@@ -44,7 +44,7 @@ const TermsAndConditions = () => {
           </section>
 
           <section>
-            <h2 className="text-xl font-light mb-4">2. ОБЩИЕ ПОЛОЖЕНИЯ</h2>
+            <h2 className="text-lg sm:text-xl font-light mb-3 sm:mb-4">2. ОБЩИЕ ПОЛОЖЕНИЯ</h2>
             <p>
               Настоящие условия продажи определяют порядок покупки Товаров
               через Интернет-магазин. Заказывая Товары, Покупатель соглашается с
@@ -54,7 +54,7 @@ const TermsAndConditions = () => {
           </section>
 
           <section>
-            <h2 className="text-xl font-light mb-4">
+            <h2 className="text-lg sm:text-xl font-light mb-3 sm:mb-4">
               3. РЕГИСТРАЦИЯ В ИНТЕРНЕТ-МАГАЗИНЕ
             </h2>
             <p>
@@ -67,7 +67,7 @@ const TermsAndConditions = () => {
           </section>
 
           <section>
-            <h2 className="text-xl font-light mb-4">
+            <h2 className="text-lg sm:text-xl font-light mb-3 sm:mb-4">
               4. ОФОРМЛЕНИЕ И ВЫПОЛНЕНИЕ ЗАКАЗА
             </h2>
             <p>
@@ -79,7 +79,7 @@ const TermsAndConditions = () => {
           </section>
 
           <section>
-            <h2 className="text-xl font-light mb-4">5. ОПЛАТА ТОВАРА</h2>
+            <h2 className="text-lg sm:text-xl font-light mb-3 sm:mb-4">5. ОПЛАТА ТОВАРА</h2>
             <p>
               Цены указаны за единицу товара. Оплата принимается только от
               Покупателя одним из способов, предложенных на сайте. Договор
@@ -88,7 +88,7 @@ const TermsAndConditions = () => {
           </section>
 
           <section>
-            <h2 className="text-xl font-light mb-4 scroll-mt-30" id="delivery-and-refund">6. ДОСТАВКА</h2>
+            <h2 className="text-lg sm:text-xl font-light mb-3 sm:mb-4 scroll-mt-30" id="delivery-and-refund">6. ДОСТАВКА</h2>
             <p>
               Продавец старается соблюдать сроки доставки, но возможны задержки
               по независящим от него причинам. Риск случайной гибели Товара
@@ -97,7 +97,7 @@ const TermsAndConditions = () => {
           </section>
 
           <section>
-            <h2 className="text-xl font-light mb-4">7. ВОЗВРАТ ТОВАРА</h2>
+            <h2 className="text-lg sm:text-xl font-light mb-3 sm:mb-4">7. ВОЗВРАТ ТОВАРА</h2>
             <p>
               Обмен и возврат осуществляется в соответствии с законодательством
               РФ. Возможность возврата согласуется по телефону, указанному на
@@ -106,19 +106,19 @@ const TermsAndConditions = () => {
           </section>
 
           <section>
-            <h2 className="text-xl font-light mb-4">
+            <h2 className="text-lg sm:text-xl font-light mb-3 sm:mb-4">
               8. ГАРАНТИИ И ОТВЕТСТВЕННОСТЬ
             </h2>
             <p>
               Продавец не несет ответственности за ущерб от ненадлежащего
               использования Товара. Покупатель отвечает за достоверность
-              указанных данных. Стороны освобождаются от ответственности в случае
+              указанных данных. Стороны освобождаются от responsabilità в случае
               обстоятельств непреодолимой силы.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-light mb-4">
+            <h2 className="text-lg sm:text-xl font-light mb-3 sm:mb-4">
               9. КОНФИДЕНЦИАЛЬНОСТЬ
             </h2>
             <p>
@@ -131,7 +131,7 @@ const TermsAndConditions = () => {
           </section>
 
           <section>
-            <h2 className="text-xl font-light mb-4">10. ПРОЧИЕ УСЛОВИЯ</h2>
+            <h2 className="text-lg sm:text-xl font-light mb-3 sm:mb-4">10. ПРОЧИЕ УСЛОВИЯ</h2>
             <p>
               Отношения регулируются действующим законодательством. Все споры
               решаются переговорами или в суде. Если Покупатель не согласен с

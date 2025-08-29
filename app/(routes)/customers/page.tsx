@@ -3,12 +3,23 @@
 import Link from "next/link";
 import Image from "next/image";
 import { FaInstagram, FaTelegramPlane, FaWhatsapp } from "react-icons/fa";
+import { FiArrowLeft } from "react-icons/fi";
+import { useRouter } from "next/navigation";
 
 const CustomerPage = () => {
+    const router = useRouter()
+
     return (
         <div className="min-h-screen w-full flex flex-col items-center">
             {/* HEADER */}
-            <header className="w-full py-6 bg-black text-white text-center text-2xl font-bold tracking-wide mb-4">
+            <header className="w-full py-6 bg-black text-white text-center text-2xl font-bold tracking-wide mb-4 relative max-[750px]:flex max-[750px]:justify-between max-[750px]:px-6 max-[420px]:flex-col max-[420px]:gap-6 ">
+                <button
+                    onClick={() => router.push("/")}
+                    className="absolute top-6 left-8 flex gap-1 p-2 rounded-none bg-transparent cursor-pointer max-[750px]:static max-[420px]:mx-auto"
+                >
+                    <FiArrowLeft className="text-white text-lg" />
+                    <span className="text-white font-medium text-sm">На главную</span>
+                </button>
                 Покупателям
             </header>
 
@@ -52,26 +63,26 @@ const CustomerPage = () => {
             <section className="px-6 py-8 max-w-6xl mx-auto text-center scroll-mt-35" id="delivery">
                 <h2 className="text-3xl md:text-4xl font-bold mb-12 text-black">Доставка</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <div className="p-4">
+                    <div className="p-4 bg-gray-50 rounded-lg shadow-sm">
                         <h3 className="font-semibold text-lg mb-2">Почтой России</h3>
                         <p className="text-gray-700 text-[14px]">
                             Отправление 1 классом, срок 3−7 дней по России, стоимость —
                             300-500₽, в другие страны рассчитывается индивидуально
                         </p>
                     </div>
-                    <div className="p-4">
+                    <div className="p-4 bg-gray-50 rounded-lg shadow-sm">
                         <h3 className="font-semibold text-lg mb-2">Яндекс Маркет</h3>
                         <p className="text-gray-700 text-[14px]">
                             По Москве от 100₽ <br /> По России от 300₽
                         </p>
                     </div>
-                    <div className="p-4">
+                    <div className="p-4 bg-gray-50 rounded-lg shadow-sm">
                         <h3 className="font-semibold text-lg mb-2">СДЭК до отделения</h3>
                         <p className="text-gray-700 text-[14px]">
                             Срок 2−8 рабочих дней, по России — 300-400₽
                         </p>
                     </div>
-                    <div className="p-4">
+                    <div className="p-4 bg-gray-50 rounded-lg shadow-sm">
                         <h3 className="font-semibold text-lg mb-2">Курьер до двери</h3>
                         <p className="text-gray-700 text-[14px]">По Москве от 500₽</p>
                     </div>
@@ -106,7 +117,7 @@ const CustomerPage = () => {
             {/* СИСТЕМА ЛОЯЛЬНОСТИ */}
             <section className="px-6 py-16 max-w-6xl mx-auto text-center scroll-mt-20" id="loyalty">
                 <h2 className="text-3xl md:text-4xl font-bold mb-12 text-black">Система лояльности</h2>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-4 md:grid-cols-2 gap-8">
                     <div className="p-6 bg-gray-50 rounded-lg shadow-sm">
                         <h3 className="font-semibold text-lg mb-2">Скидка 3%</h3>
                         <p className="text-gray-700">

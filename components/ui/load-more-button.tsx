@@ -1,6 +1,8 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { LoadingDots } from "@/components/ui/loading-dots";
 
 interface LoadMoreButtonProps {
   limit: number;
@@ -23,8 +25,11 @@ const LoadMoreButton: React.FC<LoadMoreButtonProps> = ({
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [loading, setLoading] = useState(false);
 
   const handleClick = () => {
+    setLoading(true);
+
     const newLimit = limit + 8;
     const params = new URLSearchParams(searchParams.toString());
 
@@ -46,19 +51,24 @@ const LoadMoreButton: React.FC<LoadMoreButtonProps> = ({
     else params.delete("sort");
 
     router.push(`${basePath || "/"}?${params.toString()}`, { scroll: false });
+
+    setTimeout(() => setLoading(false), 500);
   };
 
   return (
     <button
       onClick={handleClick}
-      className="px-4 py-2 bg-black hover:bg-gray-800 text-white cursor-pointer w-full"
+      className="px-4 py-2 bg-black hover:bg-gray-800 text-white cursor-pointer w-full flex items-center justify-center gap-2"
+      disabled={loading}
     >
       Показать еще
+      {loading && <LoadingDots />}
     </button>
   );
 };
 
 export default LoadMoreButton;
+
 
 
 

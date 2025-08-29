@@ -19,6 +19,8 @@ interface InfoProps {
 const Info: React.FC<InfoProps> = ({ data }) => {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [sizePopoverOpen, setSizePopoverOpen] = useState(false);
+  const [colorPopoverOpen, setColorPopoverOpen] = useState(false);
 
   const { user } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -43,6 +45,16 @@ const Info: React.FC<InfoProps> = ({ data }) => {
     }
   };
 
+  const handleSizeSelect = (sizeId: string) => {
+    setSelectedSize(sizeId);
+    setSizePopoverOpen(false); // Chiudi il dropdown dopo la selezione
+  };
+
+  const handleColorSelect = (colorId: string) => {
+    setSelectedColor(colorId);
+    setColorPopoverOpen(false); // Chiudi il dropdown dopo la selezione
+  };
+
   return (
     <div>
       <h1 className="text-3xl font-bold text-gray-900">{data.name}</h1>
@@ -59,7 +71,7 @@ const Info: React.FC<InfoProps> = ({ data }) => {
       <div className="flex flex-col gap-y-6">
         <div className="flex items-center gap-x-4">
           <h3 className="font-semibold text-black">Размер:</h3>
-          <Popover>
+          <Popover open={sizePopoverOpen} onOpenChange={setSizePopoverOpen}>
             <PopoverTrigger asChild>
               <Button
                 role="combobox"
@@ -75,7 +87,10 @@ const Info: React.FC<InfoProps> = ({ data }) => {
                   <CommandEmpty>Ничего не найдено.</CommandEmpty>
                   <CommandGroup>
                     {data.productSizes?.map(ps => (
-                      <CommandItem key={ps.size.id} onSelect={() => setSelectedSize(ps.size.id)}>
+                      <CommandItem
+                        key={ps.size.id}
+                        onSelect={() => handleSizeSelect(ps.size.id)}
+                      >
                         {ps.size.value}
                       </CommandItem>
                     ))}
@@ -91,7 +106,7 @@ const Info: React.FC<InfoProps> = ({ data }) => {
       <div className="flex flex-col gap-y-6 mt-6">
         <div className="flex items-center gap-x-4">
           <h3 className="font-semibold text-black">Цвет:</h3>
-          <Popover>
+          <Popover open={colorPopoverOpen} onOpenChange={setColorPopoverOpen}>
             <PopoverTrigger asChild>
               <Button
                 role="combobox"
@@ -116,7 +131,7 @@ const Info: React.FC<InfoProps> = ({ data }) => {
                     {data.productColors?.map(pc => (
                       <CommandItem
                         key={pc.color.id}
-                        onSelect={() => setSelectedColor(pc.color.id)}
+                        onSelect={() => handleColorSelect(pc.color.id)}
                         className="flex items-center gap-x-2"
                       >
                         <span>{pc.color.name}</span>
@@ -132,9 +147,9 @@ const Info: React.FC<InfoProps> = ({ data }) => {
       </div>
 
       {/* Bottone Carrello + Preferiti */}
-      <div className="mt-10 flex items-center gap-x-3">
+      <div className="mt-10 flex items-center gap-x-3 max-[500px]:w-full max-[500px]:justify-between max-[500px]:flex-col max-[500px]:gap-4 ">
         <Button
-          className={`bg-black text-white flex items-center gap-x-4 rounded-none ${!selectedSize || !selectedColor ? "opacity-50 cursor-not-allowed" : ""}`}
+          className={`bg-black text-white flex items-center justify-center gap-x-4 max-[500px]:w-full rounded-none ${!selectedSize || !selectedColor ? "opacity-50 cursor-not-allowed" : ""}`}
           disabled={!selectedSize || !selectedColor}
           onClick={() => {
             if (!selectedSize || !selectedColor) return;
@@ -156,7 +171,7 @@ const Info: React.FC<InfoProps> = ({ data }) => {
         </Button>
 
         <Button
-          className={`${isFavorite(data.id) ? "text-red-500 border-red-500" : "text-gray-600 border-gray-300"} flex items-center gap-x-2 rounded-none border`}
+          className={`${isFavorite(data.id) ? "text-red-500 border-red-500" : "text-gray-600 border-gray-300"} flex items-center justify-center gap-x-2 rounded-none max-[500px]:w-full border`}
           onClick={handleToggleFavorite}
         >
           <Heart className={`${isFavorite(data.id) ? "fill-red-500" : ""}`} />

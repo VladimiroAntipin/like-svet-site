@@ -3,8 +3,8 @@ import photo from "@/public/about-us.webp";
 
 const AboutUs = () => {
     return (
-        <div className="mt-15 max-[500px]:mt-6 flex max-[500px]:flex-col-reverse gap-6 w-[50vw] max-[500px]:w-full mx-auto scroll-mt-40 max-[500px]:scroll-mt-30" id="about">
-            <Image src={photo} alt="photo" className="w-[50%] max-[500px]:w-full" />
+        <div className="mt-15 max-[500px]:mt-6 flex max-[1200px]:flex-col-reverse gap-6 w-[50vw] max-[1200px]:w-[85%] max-[500px]:w-full mx-auto scroll-mt-40 max-[500px]:scroll-mt-30" id="about">
+            <Image src={photo} alt="photo" className="w-[50%] max-[500px]:w-full object-cover" />
             <div className="flex flex-col gap-y-4">
                 <h2 className="font-bold text-3xl">О нас</h2>
                 <hr className="my-2 border-gray-900" />
