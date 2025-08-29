@@ -27,6 +27,7 @@ const AuthPage = () => {
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false); // Aggiunto stato per tracciare l'invio
 
   const [form, setForm] = useState({
     firstName: "",
@@ -90,7 +91,13 @@ const AuthPage = () => {
     e.preventDefault();
     resetErrors();
 
-    if (!validateForm()) return;
+    // Disabilita il pulsante di invio
+    setIsSubmitting(true);
+
+    if (!validateForm()) {
+      setIsSubmitting(false); // Riabilita se la validazione fallisce
+      return;
+    }
 
     try {
       if (isLogin) {
@@ -135,6 +142,9 @@ const AuthPage = () => {
       } else {
         setGeneralError(message);
       }
+    } finally {
+      // Riabilita il pulsante di invio in ogni caso
+      setIsSubmitting(false);
     }
   };
 
@@ -164,27 +174,62 @@ const AuthPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium mb-1">Имя</label>
-              <input type="text" name="firstName" value={form.firstName} onChange={handleChange} className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none" />
+              <input
+                type="text"
+                name="firstName"
+                value={form.firstName}
+                onChange={handleChange}
+                className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none"
+                disabled={isSubmitting} // Disabilita input durante l'invio
+              />
               {fieldErrors.firstName && <p className="text-red-600 text-sm">{fieldErrors.firstName}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Фамилия</label>
-              <input type="text" name="lastName" value={form.lastName} onChange={handleChange} className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none" />
+              <input
+                type="text"
+                name="lastName"
+                value={form.lastName}
+                onChange={handleChange}
+                className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none"
+                disabled={isSubmitting} // Disabilita input durante l'invio
+              />
               {fieldErrors.lastName && <p className="text-red-600 text-sm">{fieldErrors.lastName}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Дата рождения</label>
-              <input type="date" name="birthDate" value={form.birthDate} onChange={handleChange} className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none" />
+              <input
+                type="date"
+                name="birthDate"
+                value={form.birthDate}
+                onChange={handleChange}
+                className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none"
+                disabled={isSubmitting} // Disabilita input durante l'invio
+              />
               {fieldErrors.birthDate && <p className="text-red-600 text-sm">{fieldErrors.birthDate}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Телефон</label>
-              <input type="text" name="phone" value={form.phone} onChange={handleChange} className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none" />
+              <input
+                type="text"
+                name="phone"
+                value={form.phone}
+                onChange={handleChange}
+                className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none"
+                disabled={isSubmitting} // Disabilita input durante l'invio
+              />
               {fieldErrors.phone && <p className="text-red-600 text-sm">{fieldErrors.phone}</p>}
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium mb-1">Email</label>
-              <input type="text" name="email" value={form.email} onChange={handleChange} className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none" />
+              <input
+                type="text"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none"
+                disabled={isSubmitting} // Disabilita input durante l'invio
+              />
               {fieldErrors.email && <p className="text-red-600 text-sm">{fieldErrors.email}</p>}
             </div>
           </div>
@@ -193,7 +238,14 @@ const AuthPage = () => {
         {isLogin && (
           <div>
             <label className="block text-sm font-medium mb-1">Email или Телефон</label>
-            <input type="text" name="identifier" value={form.identifier} onChange={handleChange} className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none" />
+            <input
+              type="text"
+              name="identifier"
+              value={form.identifier}
+              onChange={handleChange}
+              className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none"
+              disabled={isSubmitting} // Disabilita input durante l'invio
+            />
             {fieldErrors.identifier && <p className="text-red-600 text-sm">{fieldErrors.identifier}</p>}
           </div>
         )}
@@ -201,8 +253,20 @@ const AuthPage = () => {
         <div>
           <label className="block text-sm font-medium mb-1">Пароль</label>
           <div className="relative">
-            <input type={showPassword ? "text" : "password"} name="password" value={form.password} onChange={handleChange} className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none pr-10" />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-black cursor-pointer">
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none pr-10"
+              disabled={isSubmitting} // Disabilita input durante l'invio
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-black cursor-pointer"
+              disabled={isSubmitting} // Disabilita button durante l'invio
+            >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
@@ -213,8 +277,20 @@ const AuthPage = () => {
           <div>
             <label className="block text-sm font-medium mb-1">Повторите пароль</label>
             <div className="relative">
-              <input type={showConfirmPassword ? "text" : "password"} name="confirmPassword" value={form.confirmPassword} onChange={handleChange} className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none pr-10" />
-              <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-black cursor-pointer">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                name="confirmPassword"
+                value={form.confirmPassword}
+                onChange={handleChange}
+                className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none pr-10"
+                disabled={isSubmitting} // Disabilita input durante l'invio
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-black cursor-pointer"
+                disabled={isSubmitting} // Disabilita button durante l'invio
+              >
                 {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
@@ -224,8 +300,17 @@ const AuthPage = () => {
 
         {generalError && <p className="text-red-600 text-sm font-medium">{generalError}</p>}
 
-        <button type="submit" className="w-full bg-black text-white py-3 hover:bg-gray-800 transition text-lg cursor-pointer">
-          {isLogin ? "Войти" : "Зарегистрироваться"}
+        <button
+          type="submit"
+          className="w-full bg-black text-white py-3 hover:bg-gray-800 transition text-lg cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <div className="flex items-center justify-center">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+              {isLogin ? "Вход..." : "Регистрация..."}
+            </div>
+          ) : isLogin ? "Войти" : "Зарегистрироваться"}
         </button>
       </form>
     </div>

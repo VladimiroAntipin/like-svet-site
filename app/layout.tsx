@@ -33,7 +33,7 @@ export default function RootLayout({
               {children}
             </main>
             <Footer />
-            <Toaster position="top-left" richColors /> {/* 👈 aggiunto */}
+            <Toaster position="top-left" richColors />
           </FavoritesProvider>
         </AuthProvider>
       </body>
