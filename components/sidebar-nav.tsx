@@ -14,6 +14,17 @@ interface SidebarNavProps {
   onLinkClick?: () => void;
 }
 
+interface RouteChild {
+  href: string;
+  label: string;
+}
+
+interface Route {
+  href: string;
+  label: string;
+  children?: (RouteChild | null)[];
+}
+
 const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick }) => {
   const pathname = usePathname();
   const [open, setOpen] = useState<string | null>(null);
@@ -36,7 +47,7 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick }) => {
     fetchGiftProduct();
   }, []);
 
-  const routes = [
+  const routes: Route[] = [
     { href: "/account", label: "Мой профиль" },
     { href: "/#products", label: "Каталог" },
     { href: "/#about", label: "О нас" },
@@ -45,10 +56,9 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick }) => {
       href: "/customers",
       label: "Покупателям",
       children: [
-        {
-          href: giftProductId ? `/product/${giftProductId}` : "",
-          label: "Подарочные сертификаты",
-        },
+        giftProductId
+          ? { href: `/product/${giftProductId}`, label: "Подарочные сертификаты" }
+          : null,
         { href: "/customers/#packaging", label: "Упаковка" },
         { href: "/customers/#delivery", label: "Доставка" },
         { href: "/customers/#custom-orders", label: "Индивидуальные заказы" },
@@ -95,6 +105,12 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick }) => {
 
         if (route.children) {
           const isOpen = open === route.href;
+
+          // filtriamo i null dai children e informiamo TS che non sono più null
+          const validChildren = route.children.filter(
+            (child): child is RouteChild => Boolean(child)
+          );
+
           return (
             <div key={route.href}>
               <button
@@ -124,7 +140,7 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick }) => {
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                     className="overflow-hidden ml-2 mt-2"
                   >
-                    {route.children.map((child, i) => {
+                    {validChildren.map((child, i) => {
                       const childActive = pathname === child.href;
                       return (
                         <motion.div
