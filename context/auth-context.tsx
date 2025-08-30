@@ -8,7 +8,7 @@ import { toast } from "sonner";
 interface User {
   id: string;
   email: string;
-  phone?: string;        // 👈 aggiunto
+  phone?: string;
   firstName: string;
   lastName: string;
   birthDate: string;
@@ -26,10 +26,11 @@ interface AuthContextType {
     lastName: string;
     birthDate: string;
     email: string;
-    phone: string;        // 👈 aggiunto
+    phone: string;
     password: string;
   }) => Promise<void>;
   logout: () => void;
+  updateUserBalance: (newBalance: number) => void; // 👈 Aggiunta nuova funzione
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -87,8 +88,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     toast.info("Вы вышли из аккаунта 👋");
   };
 
+  // 👈 Nuova funzione per aggiornare il balance
+  const updateUserBalance = (newBalance: number) => {
+    setUser(prev => {
+      if (!prev) return null;
+      return { ...prev, balance: newBalance };
+    });
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{
+      user,
+      loading,
+      login,
+      register,
+      logout,
+      updateUserBalance // 👈 Aggiunta al context
+    }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -26,14 +27,15 @@ const Summary = ({ onOrderComplete }: { onOrderComplete: () => void }) => {
     const items = useCart((state) => state.items);
     const removeAll = useCart((state) => state.removeAll);
     const buttonRef = useRef<HTMLButtonElement>(null);
-    const { user } = useAuth();
+    const { user, updateUserBalance } = useAuth();
     const router = useRouter();
 
     const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
     const [isOpen, setIsOpen] = useState(false);
     const [userOrders, setUserOrders] = useState<OrderItem[]>([]);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+    const [useBalance, setUseBalance] = useState(false);
+    const [maxBalanceToUse, setMaxBalanceToUse] = useState(0);
 
     const [region, setRegion] = useState("");
     const [address, setAddress] = useState("");
@@ -97,11 +99,38 @@ const Summary = ({ onOrderComplete }: { onOrderComplete: () => void }) => {
         return total + Number(item.product.price);
     }, 0);
 
-    // MODIFICA: Applica lo sconto solo ai prodotti non gift card
+    // Applica lo sconto solo ai prodotti non gift card
     const discountAmount = items.reduce((total, item) => {
         if (item.product.isGiftCard) return total;
         return total + Math.round(Number(item.product.price) * (userDiscountPercentage / 100));
     }, 0);
+
+    // Calcola il prezzo dopo lo sconto
+    const priceAfterDiscount = itemsTotal - discountAmount;
+
+    // Calcola il prezzo di spedizione
+    const effectiveShipping = selectedShipping && showShippingPrice ? selectedShipping.price : 0;
+
+    // Calcola il totale prima di applicare il balance
+    const totalBeforeBalance = priceAfterDiscount + effectiveShipping;
+
+    // Calcola il massimo balance utilizzabile (quasi tutto il totale, lasciando 1 rublo)
+    useEffect(() => {
+        if (user && user.balance) {
+            const userBalance = user.balance;
+            // Permetti di usare quasi tutto il balance, lasciando 1 rublo da pagare
+            const availableBalance = Math.min(userBalance, Math.max(0, totalBeforeBalance - 100));
+            setMaxBalanceToUse(availableBalance);
+        } else {
+            setMaxBalanceToUse(0);
+        }
+    }, [user, totalBeforeBalance]);
+
+    // Calcola il totale finale dopo aver applicato il balance
+    // Se stiamo usando il balance, assicuriamoci che rimanga almeno 1 rublo da pagare
+    const finalTotal = useBalance ?
+        Math.max(100, totalBeforeBalance - maxBalanceToUse) :
+        totalBeforeBalance;
 
     const moscowOutsideMKAD = [
         "зеленоград", "северный район", "куркино", "новокосино", "косино-ухтомский",
@@ -437,7 +466,7 @@ const Summary = ({ onOrderComplete }: { onOrderComplete: () => void }) => {
                 };
             });
 
-            await axios.post(
+            const response = await axios.post(
                 `${process.env.NEXT_PUBLIC_API_URL}/orders`,
                 {
                     items: orderItems,
@@ -448,10 +477,30 @@ const Summary = ({ onOrderComplete }: { onOrderComplete: () => void }) => {
                     floor,
                     entrance,
                     extraInfo,
-                    totalPrice: itemsTotal - discountAmount + (selectedShipping ? selectedShipping.price : 0)
+                    totalPrice: finalTotal,
+                    usedBalance: useBalance ? maxBalanceToUse : 0
                 },
                 { headers: { Authorization: `Bearer ${user?.token}` } }
             );
+
+            // Aggiorna il balance dell'utente lato backend
+            if (useBalance && maxBalanceToUse > 0) {
+                try {
+                    const balanceRes = await axios.patch(
+                        `${process.env.NEXT_PUBLIC_API_URL}/customers/${user.id}/balance`,
+                        { amount: -maxBalanceToUse }, // sempre in копейках
+                        { headers: { Authorization: `Bearer ${user.token}` } }
+                    );
+
+                    const updatedCustomer = balanceRes.data;
+
+                    // Aggiorna subito il contesto React
+                    updateUserBalance(updatedCustomer.balance);
+                } catch (balanceErr) {
+                    console.error("Errore aggiornando баланс:", balanceErr);
+                    toast.error("⚠️ Заказ создан, но баланс не обновлён.");
+                }
+            }
 
             toast.success("✅ Заказ успешно оформлен!");
             removeAll();
@@ -463,9 +512,6 @@ const Summary = ({ onOrderComplete }: { onOrderComplete: () => void }) => {
             setIsSubmitting(false);
         }
     };
-
-    const effectiveShipping = selectedShipping && showShippingPrice ? selectedShipping.price : 0;
-    const totalPrice = itemsTotal - discountAmount + effectiveShipping;
 
     return (
         <div className="mt-16 max-[450px]:mt-8 rounded-lg bg-gray-50 px-4 py-4 sm:p-6 lg:col-span-5 lg:mt-0 lg:p-8">
@@ -635,6 +681,28 @@ const Summary = ({ onOrderComplete }: { onOrderComplete: () => void }) => {
                 </div>
             )}
 
+            {/* Mostra il balance dell'utente se disponibile */}
+            {user && user.balance !== undefined && user.balance > 0 && (
+                <div className="flex flex-col mb-4 p-3 bg-gray-100 rounded-md">
+                    <div className="flex justify-between items-center mb-2">
+                        <span className="font-medium">Ваш баланс:</span>
+                        <Currency data={user.balance} />
+                    </div>
+                    <div className="flex items-center">
+                        <input
+                            type="checkbox"
+                            id="useBalance"
+                            checked={useBalance}
+                            onChange={(e) => setUseBalance(e.target.checked)}
+                            className="mr-2"
+                        />
+                        <label htmlFor="useBalance" className="text-sm">
+                            Использовать баланс (макс. {maxBalanceToUse / 100} ₽)
+                        </label>
+                    </div>
+                </div>
+            )}
+
             {/* Costi */}
             <div className="flex justify-between mb-2">
                 <span>Стоимость товаров</span>
@@ -650,7 +718,7 @@ const Summary = ({ onOrderComplete }: { onOrderComplete: () => void }) => {
                 )}
             </AnimatePresence>
 
-            {/* MODIFICA: Mostra lo sconto solo se non ci sono solo gift card */}
+            {/* Mostra lo sconto solo se non ci sono solo gift card */}
             {userDiscountPercentage > 0 && !onlyGiftCards && (
                 <div className="flex justify-between mb-2">
                     <span>Твоя скидка ({userDiscountPercentage}%)</span>
@@ -658,22 +726,29 @@ const Summary = ({ onOrderComplete }: { onOrderComplete: () => void }) => {
                 </div>
             )}
 
+            {/* Mostra l'utilizzo del balance se selezionato */}
+            {useBalance && maxBalanceToUse > 0 && (
+                <div className="flex justify-between mb-2 text-green-600">
+                    <span>Использовано с баланса</span>
+                    <span className="flex">-<Currency data={maxBalanceToUse} /></span>
+                </div>
+            )}
+
             <div className="flex justify-between font-semibold text-lg mb-4 border-t border-gray-200 pt-4">
-                <span>Итого</span>
+                <span>К оплате:</span>
                 <AnimatePresence mode="wait">
-                    {selectedShipping && showShippingPrice ? (
-                        <motion.div key={totalPrice} initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.3 }}>
-                            <Currency data={totalPrice} />
-                        </motion.div>
-                    ) : (
-                        <motion.div key={totalPrice + "_hidden"} initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.3 }}>
-                            <Currency data={itemsTotal - discountAmount} />
-                        </motion.div>
-                    )}
+                    <motion.div
+                        key={finalTotal}
+                        initial={{ opacity: 0, y: -5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -5 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <Currency data={finalTotal} />
+                    </motion.div>
                 </AnimatePresence>
             </div>
 
-            {/* MODIFICA: Aggiungi isSubmitting ai disabled conditions */}
             <Button
                 onClick={onCheckout}
                 disabled={isCheckoutDisabled || isSubmitting}
