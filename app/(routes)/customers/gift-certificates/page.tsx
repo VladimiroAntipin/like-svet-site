@@ -18,6 +18,24 @@ interface GiftCertificatesProps {
   product: Product;
 }
 
+// Skeleton component
+const Skeleton = () => (
+  <div className="animate-pulse flex flex-col md:flex-row gap-12 min-h-screen max-w-7xl mx-auto px-6 py-12">
+    <div className="w-full md:w-1/2 h-96 bg-gray-300 rounded" />
+    <div className="w-full md:w-1/2 flex flex-col gap-4">
+      <div className="h-8 bg-gray-300 rounded w-3/4" />
+      <div className="h-6 bg-gray-300 rounded w-1/2" />
+      <div className="grid grid-cols-3 gap-4 mt-6">
+        <div className="h-12 bg-gray-300 rounded" />
+        <div className="h-12 bg-gray-300 rounded" />
+        <div className="h-12 bg-gray-300 rounded" />
+      </div>
+      <div className="h-12 bg-gray-300 rounded mt-6 w-full" />
+      <div className="h-12 bg-gray-300 rounded mt-2 w-full" />
+    </div>
+  </div>
+);
+
 const GiftCertificatesPage: React.FC<any> = ({ product }: any) => {
   const [amount, setAmount] = useState<number | null>(null);
   const [type, setType] = useState<"электронный" | "бланк">("электронный");
@@ -63,6 +81,11 @@ const GiftCertificatesPage: React.FC<any> = ({ product }: any) => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+   // Mostra skeleton se product non è definito
+  if (!product) {
+    return <Skeleton />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row items-center md:items-start px-6 py-12 max-[500px]:py-6 gap-12 max-w-7xl mx-auto relative">
