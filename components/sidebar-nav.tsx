@@ -14,25 +14,21 @@ interface SidebarNavProps {
   onLinkClick?: () => void;
 }
 
-interface RouteChild {
-  href: string;
-  label: string;
-}
-
-interface Route {
-  href: string;
-  label: string;
-  children?: (RouteChild | null)[];
-}
-
 const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick }) => {
   const pathname = usePathname();
   const [open, setOpen] = useState<string | null>(null);
   const [giftProductId, setGiftProductId] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
   const { user, logout } = useAuth();
 
-  // Fetch prima gift card disponibile usando la categoria "Подарочный сертификат"
   useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Fetch prima gift card disponibile
+  useEffect(() => {
+    if (!isClient) return;
+    
     const fetchGiftProduct = async () => {
       try {
         const products: Product[] = await getProducts({ limit: 50 });
@@ -45,9 +41,9 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick }) => {
       }
     };
     fetchGiftProduct();
-  }, []);
+  }, [isClient]);
 
-  const routes: Route[] = [
+  const routes = [
     { href: "/account", label: "Мой профиль" },
     { href: "/#products", label: "Каталог" },
     { href: "/#about", label: "О нас" },
@@ -56,9 +52,11 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick }) => {
       href: "/customers",
       label: "Покупателям",
       children: [
-        giftProductId
-          ? { href: `/product/${giftProductId}`, label: "Подарочные сертификаты" }
-          : null,
+        {
+          href: giftProductId ? `/product/${giftProductId}` : "#",
+          label: "Подарочные сертификаты",
+          disabled: !giftProductId
+        },
         { href: "/customers/#packaging", label: "Упаковка" },
         { href: "/customers/#delivery", label: "Доставка" },
         { href: "/customers/#custom-orders", label: "Индивидуальные заказы" },
@@ -105,12 +103,6 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick }) => {
 
         if (route.children) {
           const isOpen = open === route.href;
-
-          // filtriamo i null dai children e informiamo TS che non sono più null
-          const validChildren = route.children.filter(
-            (child): child is RouteChild => Boolean(child)
-          );
-
           return (
             <div key={route.href}>
               <button
@@ -140,7 +132,7 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick }) => {
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                     className="overflow-hidden ml-2 mt-2"
                   >
-                    {validChildren.map((child, i) => {
+                    {route.children.map((child, i) => {
                       const childActive = pathname === child.href;
                       return (
                         <motion.div
