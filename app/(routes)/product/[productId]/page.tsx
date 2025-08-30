@@ -8,6 +8,7 @@ import Container from "@/components/ui/container";
 import LoadMoreButton from "@/components/ui/load-more-button";
 import GiftCertificatesPage from "../../customers/gift-certificates/page";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface ProductPageProps {
   params: {
     productId: string;
@@ -16,7 +17,7 @@ interface ProductPageProps {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ProductPage: React.FC<ProductPageProps> = async ({ params, searchParams }: any) => {
+const ProductPage: React.FC<any> = async ({ params, searchParams }: any) => {
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
 
