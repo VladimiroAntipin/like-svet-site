@@ -9,7 +9,7 @@ interface OrderSuccessProps {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const OrderSuccess: React.FC<any> = ({ onHome }) => {
+const OrderSuccess: React.FC<any> = ({ onHome }: any) => {
   const router = useRouter();
 
   const goHome = () => {

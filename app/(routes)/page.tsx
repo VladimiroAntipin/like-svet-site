@@ -30,7 +30,7 @@ interface HomePageProps {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const HomePage: React.FC<any> = async ({ searchParams }) => {
+const HomePage: React.FC<any> = async ({ searchParams }: any) => {
   const billboards = await getBillboards();
   const categories = await getCategories();
   const colors = await getColors();

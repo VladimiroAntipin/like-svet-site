@@ -18,7 +18,7 @@ interface GiftCertificatesProps {
   product: Product;
 }
 
-const GiftCertificatesPage: React.FC<any> = ({ product }) => {
+const GiftCertificatesPage: React.FC<any> = ({ product }: any) => {
   const [amount, setAmount] = useState<number | null>(null);
   const [type, setType] = useState<"электронный" | "бланк">("электронный");
   const [openDropdown, setOpenDropdown] = useState(false);

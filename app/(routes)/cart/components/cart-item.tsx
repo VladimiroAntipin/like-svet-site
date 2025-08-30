@@ -13,7 +13,7 @@ interface CartItemProps {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const CartItem: React.FC<any> = ({ data }) => {
+const CartItem: React.FC<any> = ({ data }: any) => {
   const cart = useCart();
 
   const onRemove = () => {
