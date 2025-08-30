@@ -47,7 +47,7 @@ const GiftCertificatesPage: React.FC<any> = ({ product }: any) => {
   const { user } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
 
-  const amounts = (product.giftPrices || []).map((gp: any) => ({
+  const amounts = (product?.giftPrices ?? []).map((gp: any) => ({
     ...gp,
     value: gp.value / 100,
   }));
