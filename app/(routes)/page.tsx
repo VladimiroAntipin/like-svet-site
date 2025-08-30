@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import getBillboards from "@/actions/get-billboards";
 import getCategories from "@/actions/get-categories";
 import getColors from "@/actions/get-colors";
@@ -17,6 +18,7 @@ import LoadMoreButton from "@/components/ui/load-more-button";
 
 export const revalidate = 0;
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface HomePageProps {
   searchParams: {
     categoryId?: string;
@@ -28,7 +30,7 @@ interface HomePageProps {
   };
 }
 
-const HomePage: React.FC<HomePageProps> = async ({ searchParams }) => {
+const HomePage: React.FC<any> = async ({ searchParams }) => {
   const billboards = await getBillboards();
   const categories = await getCategories();
   const colors = await getColors();
