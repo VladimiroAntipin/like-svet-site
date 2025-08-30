@@ -6,6 +6,7 @@ import Navbar from "@/components/navbar";
 import { AuthProvider } from "@/context/auth-context";
 import { Toaster } from "sonner";
 import { FavoritesProvider } from "@/context/favorite-context";
+import ScrollToTop from "@/components/scroll-to-top";
 
 const font = Manrope({ subsets: ["latin", "cyrillic"], });
 
@@ -34,6 +35,7 @@ export default function RootLayout({
         <AuthProvider>
           <FavoritesProvider>
             <Navbar />
+            <ScrollToTop />
             <main className="pt-[104px]">
               {children}
             </main>
