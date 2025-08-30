@@ -190,145 +190,154 @@ const AccountPage = () => {
         </div>
 
         {/* Layout due colonne */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 w-full max-w-5xl">
-          {/* Colonna sinistra */}
-          <aside className="flex flex-col gap-6">
-            <div>
-              <label className="block text-sm font-bold text-gray-700">Имя</label>
-              <input
-                type="text"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                placeholder="Введите имя"
-                className="mt-1 w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none font-light"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-gray-700">Фамилия</label>
-              <input
-                type="text"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                placeholder="Введите фамилию"
-                className="mt-1 w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none font-light"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-gray-700">Email</label>
-              <input
-                type="text"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Введите email"
-                className="mt-1 w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none font-light"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-gray-700">Дата рождения</label>
-              <input
-                type="text"
-                value={formatBirthDate(birthDate)}
-                readOnly
-                className="mt-1 w-full border px-3 py-2 bg-gray-100 text-gray-600 cursor-auto font-light"
-              />
-            </div>
-          </aside>
-
-          {/* Colonna destra */}
-          <section className="flex flex-col gap-6">
-            <div>
-              <label className="block text-sm font-bold text-gray-700">Телефон</label>
-              <input
-                type="text"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="Введите телефон"
-                className="mt-1 w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none font-light"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-gray-700">Новый пароль</label>
-              <div className="relative mt-1 w-full">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Введите новый пароль"
-                  className="w-full border px-3 py-2 pr-10 focus:ring-2 focus:ring-black focus:outline-none font-light"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-3 flex items-center text-gray-500"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-gray-700">Баланс</label>
-              <input
-                type="text"
-                value={`${balance / 100} ₽`}
-                readOnly
-                className="mt-1 w-full border px-3 py-2 bg-gray-100 text-gray-600 cursor-auto font-light"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-gray-700">Промокод</label>
-              <div className="flex gap-3 mt-1">
+        <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 w-full max-w-5xl">
+            {/* Colonna sinistra */}
+            <aside className="flex flex-col gap-6">
+              <div>
+                <label className="block text-sm font-bold text-gray-700">Имя</label>
                 <input
                   type="text"
-                  value={promoCode}
-                  onChange={(e) => setPromoCode(e.target.value)}
-                  placeholder="Введите промокод"
-                  className="flex-1 border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none font-light w-2/4 "
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  autoComplete="given-name"
+                  placeholder="Введите имя"
+                  className="mt-1 w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none font-light"
                 />
-                <button
-                  onClick={handleActivatePromo}
-                  disabled={activating}
-                  className={`px-4 py-2 bg-black text-white transition font-light cursor-pointer min-w-[150px] flex items-center justify-center gap-3 ${activating ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-800"
-                    }`}
-                >
-                  {activating ? <>Активация <DotsLoader /></> : "Активировать"}
-                </button>
               </div>
-            </div>
-          </section>
-        </div>
 
-        {/* Footer */}
-        <div className="flex flex-col max-[500px]:gap-3 md:flex-row justify-between items-center w-full max-w-5xl mt-10">
-          <Link
-            href="/account/my-orders"
-            className="px-5 py-2 bg-black text-white text-center hover:bg-gray-800 transition font-light w-full md:w-auto"
-          >
-            Мои заказы
-          </Link>
+              <div>
+                <label className="block text-sm font-bold text-gray-700">Фамилия</label>
+                <input
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  autoComplete="family-name"
+                  placeholder="Введите фамилию"
+                  className="mt-1 w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none font-light"
+                />
+              </div>
 
-          <div className="flex max-[500px]:flex-col max-[500px]:gap-3 md:flex-row gap-4 w-full md:w-auto mt-3 md:mt-0">
-            <button
-              onClick={handleReset}
-              className="px-5 py-2 border hover:bg-gray-100 transition font-light w-full md:w-auto cursor-pointer"
-            >
-              Сбросить
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className={`px-5 py-2 bg-black text-white transition font-light w-full md:w-auto cursor-pointer min-w-[150px] flex items-center justify-center gap-3 ${saving ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-800"
-                }`}
-            >
-              {saving ? <>Сохранение <DotsLoader /></> : "Сохранить"}
-            </button>
+              <div>
+                <label className="block text-sm font-bold text-gray-700">Email</label>
+                <input
+                  type="text"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="username"
+                  placeholder="Введите email"
+                  className="mt-1 w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none font-light"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700">Дата рождения</label>
+                <input
+                  type="text"
+                  value={formatBirthDate(birthDate)}
+                  readOnly
+                  className="mt-1 w-full border px-3 py-2 bg-gray-100 text-gray-600 cursor-auto font-light"
+                />
+              </div>
+            </aside>
+
+            {/* Colonna destra */}
+            <section className="flex flex-col gap-6">
+              <div>
+                <label className="block text-sm font-bold text-gray-700">Телефон</label>
+                <input
+                  type="text"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  autoComplete="tel"
+                  placeholder="Введите телефон"
+                  className="mt-1 w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none font-light"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700">Новый пароль</label>
+                <div className="relative mt-1 w-full">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="new-password"
+                    placeholder="Введите новый пароль"
+                    className="w-full border px-3 py-2 pr-10 focus:ring-2 focus:ring-black focus:outline-none font-light"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700">Баланс</label>
+                <input
+                  type="text"
+                  value={`${balance / 100} ₽`}
+                  readOnly
+                  className="mt-1 w-full border px-3 py-2 bg-gray-100 text-gray-600 cursor-auto font-light"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700">Промокод</label>
+                <div className="flex gap-3 mt-1">
+                  <input
+                    type="text"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value)}
+                    placeholder="Введите промокод"
+                    className="flex-1 border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none font-light w-2/4 "
+                  />
+                  <button
+                    type="button"
+                    onClick={handleActivatePromo}
+                    disabled={activating}
+                    className={`px-4 py-2 bg-black text-white transition font-light cursor-pointer min-w-[150px] flex items-center justify-center gap-3 ${activating ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-800"
+                      }`}
+                  >
+                    {activating ? <>Активация <DotsLoader /></> : "Активировать"}
+                  </button>
+                </div>
+              </div>
+            </section>
           </div>
-        </div>
+
+          {/* Footer */}
+          <div className="flex flex-col max-[500px]:gap-3 md:flex-row justify-between items-center w-full max-w-5xl mt-10">
+            <Link
+              href="/account/my-orders"
+              className="px-5 py-2 bg-black text-white text-center hover:bg-gray-800 transition font-light w-full md:w-auto"
+            >
+              Мои заказы
+            </Link>
+
+            <div className="flex max-[500px]:flex-col max-[500px]:gap-3 md:flex-row gap-4 w-full md:w-auto mt-3 md:mt-0">
+              <button
+                type="button"
+                onClick={handleReset}
+                className="px-5 py-2 border hover:bg-gray-100 transition font-light w-full md:w-auto cursor-pointer"
+              >
+                Сбросить
+              </button>
+              <button
+                type="submit"
+                disabled={saving}
+                className={`px-5 py-2 bg-black text-white transition font-light w-full md:w-auto cursor-pointer min-w-[150px] flex items-center justify-center gap-3 ${saving ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-800"
+                  }`}
+              >
+                {saving ? <>Сохранение <DotsLoader /></> : "Сохранить"}
+              </button>
+            </div>
+          </div>
+        </form>
       </main>
     </div>
   );

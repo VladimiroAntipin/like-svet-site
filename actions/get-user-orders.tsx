@@ -44,7 +44,6 @@ export async function getUserOrders(): Promise<OrderItem[]> {
   }
 
   const data = await res.json();
-  console.log("ORDERS RESPONSE:", data);
 
   const orders: OrderItem[] = data.map((order: any) => ({
     id: order.id,

@@ -112,8 +112,10 @@ const MyOrdersPage: React.FC = () => {
                     <Image
                       src={product.images[0]?.url || "/placeholder.png"}
                       alt={product.name}
-                      width={80}
-                      height={80}
+                      width={60}
+                      height={60}
+                      style={{ width: "auto" }}
+                      priority
                       className="object-cover rounded"
                     />
                     <div className="flex flex-col justify-center max-[895px]:gap-2">

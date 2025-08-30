@@ -29,6 +29,7 @@ const CartItem: React.FC<CartItemProps> = ({ data }) => {
           src={imageUrl}
           alt={data.product.name}
           className="object-cover object-center"
+          sizes="(max-width: 450px) 72px, 96px"
         />
       </div>
 
@@ -69,5 +70,3 @@ const CartItem: React.FC<CartItemProps> = ({ data }) => {
 };
 
 export default CartItem;
-
-

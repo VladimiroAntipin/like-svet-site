@@ -8,6 +8,7 @@ import { useState } from "react";
 import OrderSuccess from "./components/order-success";
 import Button from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 
 const CartPage = () => {
     const cart = useCart();
@@ -31,8 +32,9 @@ const CartPage = () => {
                                         <p className="text-neutral-500">Нет товаров в корзине</p>
                                         <Button
                                             onClick={goHome}
-                                            className="bg-black text-white px-6 py-3 rounded-none hover:bg-gray-800 transition mt-6 font-thin"
+                                            className="bg-black text-white px-6 py-3 rounded-none hover:bg-gray-800 transition mt-6 font-thin flex items-center gap-3"
                                         >
+                                            <ArrowLeft size={16}/>
                                             На главную
                                         </Button>
                                     </div>
