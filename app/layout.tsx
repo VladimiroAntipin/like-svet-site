@@ -13,8 +13,13 @@ export const metadata: Metadata = {
   title: "LikeSvet Shop",
   description: "Интернет магазин",
   icons: {
-    icon: "/favicon.ico",       
+    icon: "/favicon.ico",
     shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",       
+    other: [
+      { rel: "icon", url: "/android-chrome-192x192.png", sizes: "192x192" },
+      { rel: "icon", url: "/android-chrome-512x512.png", sizes: "512x512" },
+    ],
   },
 };
 
