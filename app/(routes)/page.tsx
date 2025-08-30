@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import getBillboards from "@/actions/get-billboards";
 import getCategories from "@/actions/get-categories";
 import getColors from "@/actions/get-colors";
@@ -30,6 +29,7 @@ interface HomePageProps {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const HomePage: React.FC<any> = async ({ searchParams }) => {
   const billboards = await getBillboards();
   const categories = await getCategories();
