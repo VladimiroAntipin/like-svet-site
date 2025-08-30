@@ -3,45 +3,20 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/auth-context";
-import getProducts from "@/actions/get-products";
-import { Product } from "@/types";
 
 interface SidebarNavProps {
   onLinkClick?: () => void;
+  giftProductId: string | null;
 }
 
-const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick }) => {
+const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick, giftProductId }) => {
   const pathname = usePathname();
   const [open, setOpen] = useState<string | null>(null);
-  const [giftProductId, setGiftProductId] = useState<string | null>(null);
-  const [isClient, setIsClient] = useState(false);
   const { user, logout } = useAuth();
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  // Fetch prima gift card disponibile
-  useEffect(() => {
-    if (!isClient) return;
-    
-    const fetchGiftProduct = async () => {
-      try {
-        const products: Product[] = await getProducts({ limit: 50 });
-        const giftCard = products.find(
-          (p) => p.isGiftCard || p.category?.name === "Подарочный сертификат"
-        );
-        if (giftCard) setGiftProductId(giftCard.id);
-      } catch (err) {
-        console.error("Errore fetch gift card:", err);
-      }
-    };
-    fetchGiftProduct();
-  }, [isClient]);
 
   const routes = [
     { href: "/account", label: "Мой профиль" },
@@ -53,9 +28,8 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick }) => {
       label: "Покупателям",
       children: [
         {
-          href: giftProductId ? `/product/${giftProductId}` : "#",
+          href: giftProductId ? `/product/${giftProductId}` : "",
           label: "Подарочные сертификаты",
-          disabled: !giftProductId
         },
         { href: "/customers/#packaging", label: "Упаковка" },
         { href: "/customers/#delivery", label: "Доставка" },
