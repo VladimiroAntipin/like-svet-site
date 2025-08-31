@@ -1,3 +1,4 @@
+// actions/auth.ts
 "use server";
 
 interface RegisterPayload {
@@ -5,16 +6,25 @@ interface RegisterPayload {
   lastName: string;
   birthDate: string;
   email: string;
-  phone: string;       // 👈 aggiunto
+  phone: string;
   password: string;
 }
 
 interface LoginPayload {
-  identifier: string;  // 👈 può essere email o phone
+  identifier: string;
   password: string;
 }
 
 const CMS_URL = process.env.NEXT_PUBLIC_API_URL!;
+
+async function parseResponse(res: Response) {
+  const text = await res.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { message: text };
+  }
+}
 
 export async function registerUser(data: RegisterPayload) {
   const res = await fetch(`${CMS_URL}/auth/register`, {
@@ -24,12 +34,13 @@ export async function registerUser(data: RegisterPayload) {
     cache: "no-store",
   });
 
+  const json = await parseResponse(res);
+
   if (!res.ok) {
-    const err = await res.text();
-    throw new Error(err);
+    throw new Error(json.message || "Ошибка регистрации");
   }
 
-  return res.json();
+  return json;
 }
 
 export async function loginUser(data: LoginPayload) {
@@ -40,10 +51,11 @@ export async function loginUser(data: LoginPayload) {
     cache: "no-store",
   });
 
+  const json = await parseResponse(res);
+
   if (!res.ok) {
-    const err = await res.text();
-    throw new Error(err);
+    throw new Error(json.message || "Ошибка авторизации");
   }
 
-  return res.json();
+  return json;
 }
