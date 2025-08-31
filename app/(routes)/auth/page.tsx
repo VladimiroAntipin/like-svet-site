@@ -27,7 +27,7 @@ const AuthPage = () => {
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false); 
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [form, setForm] = useState({
     firstName: "",
@@ -185,7 +185,7 @@ const AuthPage = () => {
                 onChange={handleChange}
                 autoComplete="family-name"
                 className={`w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none ${fieldErrors.lastName ? "border-red-500" : ""}`}
-                disabled={isSubmitting} 
+                disabled={isSubmitting}
               />
               {fieldErrors.lastName && <p className="text-red-600 text-sm mt-1">{fieldErrors.lastName}</p>}
             </div>
@@ -198,7 +198,7 @@ const AuthPage = () => {
                 onChange={handleChange}
                 autoComplete="given-name"
                 className={`w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none ${fieldErrors.firstName ? "border-red-500" : ""}`}
-                disabled={isSubmitting} 
+                disabled={isSubmitting}
               />
               {fieldErrors.firstName && <p className="text-red-600 text-sm mt-1">{fieldErrors.firstName}</p>}
             </div>
@@ -211,7 +211,7 @@ const AuthPage = () => {
                 onChange={handleChange}
                 autoComplete="bday"
                 className={`w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none ${fieldErrors.birthDate ? "border-red-500" : ""}`}
-                disabled={isSubmitting} 
+                disabled={isSubmitting}
               />
               {fieldErrors.birthDate && <p className="text-red-600 text-sm mt-1">{fieldErrors.birthDate}</p>}
             </div>
@@ -224,7 +224,7 @@ const AuthPage = () => {
                 onChange={handleChange}
                 autoComplete="tel"
                 className={`w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none ${fieldErrors.phone ? "border-red-500" : ""}`}
-                disabled={isSubmitting} 
+                disabled={isSubmitting}
               />
               {fieldErrors.phone && <p className="text-red-600 text-sm mt-1">{fieldErrors.phone}</p>}
             </div>
@@ -237,7 +237,7 @@ const AuthPage = () => {
                 onChange={handleChange}
                 autoComplete="username"
                 className={`w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none ${fieldErrors.email ? "border-red-500" : ""}`}
-                disabled={isSubmitting} 
+                disabled={isSubmitting}
               />
               {fieldErrors.email && <p className="text-red-600 text-sm mt-1">{fieldErrors.email}</p>}
             </div>
@@ -254,7 +254,7 @@ const AuthPage = () => {
               onChange={handleChange}
               autoComplete="username"
               className={`w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none ${fieldErrors.identifier ? "border-red-500" : ""}`}
-              disabled={isSubmitting} 
+              disabled={isSubmitting}
             />
             {fieldErrors.identifier && <p className="text-red-600 text-sm mt-1">{fieldErrors.identifier}</p>}
           </div>
@@ -297,13 +297,13 @@ const AuthPage = () => {
                 onChange={handleChange}
                 autoComplete="new-password"
                 className={`w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none pr-10 ${fieldErrors.confirmPassword ? "border-red-500" : ""}`}
-                disabled={isSubmitting} 
+                disabled={isSubmitting}
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-black cursor-pointer"
-                disabled={isSubmitting} 
+                disabled={isSubmitting}
               >
                 {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>

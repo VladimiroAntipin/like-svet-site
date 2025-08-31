@@ -1,16 +1,14 @@
-
-
 interface RegisterPayload {
   firstName: string;
   lastName: string;
   birthDate: string;
   email: string;
-  phone: string;       // 👈 aggiunto
+  phone: string;     
   password: string;
 }
 
 interface LoginPayload {
-  identifier: string;  // 👈 può essere email o phone
+  identifier: string;  
   password: string;
 }
 
