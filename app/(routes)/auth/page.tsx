@@ -94,72 +94,63 @@ const AuthPage = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  resetErrors();
-  setIsSubmitting(true);
+    e.preventDefault();
+    resetErrors();
 
-  if (!validateForm()) {
-    setIsSubmitting(false);
-    return;
-  }
+    setIsSubmitting(true);
 
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let res: any;
-    if (isLogin) {
-      res = await login({
-        identifier: form.identifier,
-        password: form.password,
-      });
-    } else {
-      res = await register({
-        firstName: form.firstName,
-        lastName: form.lastName,
-        birthDate: form.birthDate,
-        email: form.email,
-        phone: form.phone,
-        password: form.password,
-      });
-    }
-
-    // 🔹 Gestione errori lato client
-    if (res.error) {
-      const msg = res.error.toLowerCase();
-
-      if (msg.includes("invalid credentials") || msg.includes("нет такого пользователя")) {
-        setFieldErrors({ identifier: "Нет такого пользователя", password: " " });
-      } else if (msg.includes("wrong password") || msg.includes("неправильный пароль")) {
-        setFieldErrors({ password: "Неправильный пароль" });
-      } else if (msg.includes("существует")) {
-        setFieldErrors({ email: "Пользователь с таким email уже существует" });
-      } else {
-        setGeneralError(res.error);
-      }
+    if (!validateForm()) {
+      setIsSubmitting(false);
       return;
     }
 
-    // 🔹 Login o registrazione riuscita
-    if (isLogin) router.push("/");
-    else {
-      toast.success("Регистрация успешна 🎉");
-      router.push("/auth?mode=login");
+    try {
+      if (isLogin) {
+        await login({
+          identifier: form.identifier,
+          password: form.password,
+        });
+        router.push("/");
+      } else {
+        await register({
+          firstName: form.firstName,
+          lastName: form.lastName,
+          birthDate: form.birthDate,
+          email: form.email,
+          phone: form.phone,
+          password: form.password,
+        });
+        toast.success("Регистрация успешна 🎉");
+        router.push("/auth?mode=login");
+      }
+
+      setForm({
+        firstName: "",
+        lastName: "",
+        birthDate: "",
+        email: "",
+        phone: "",
+        identifier: "",
+        password: "",
+        confirmPassword: "",
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      const message = err.message || "Ошибка авторизации";
+
+      if (message.toLowerCase().includes("invalid credentials")) {
+        setFieldErrors({ identifier: "Нет такого пользователя", password: " " });
+      } else if (message.toLowerCase().includes("wrong password")) {
+        setFieldErrors({ password: "Неправильный пароль" });
+      } else if (message.toLowerCase().includes("user already exists")) {
+        setFieldErrors({ email: "Пользователь с таким email уже существует" });
+      } else {
+        setGeneralError(message);
+      }
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setForm({
-      firstName: "",
-      lastName: "",
-      birthDate: "",
-      email: "",
-      phone: "",
-      identifier: "",
-      password: "",
-      confirmPassword: "",
-    });
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
+  };
 
   if (loading) return <Loader />;
 
