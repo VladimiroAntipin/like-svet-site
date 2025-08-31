@@ -31,6 +31,7 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick, giftProductId }) =
           href: giftProductId ? `/product/${giftProductId}` : "",
           label: "Подарочные сертификаты",
         },
+        { href: "/customers/jewelry-care", label: "Уход за украшениями" },
         { href: "/customers/#packaging", label: "Упаковка" },
         { href: "/customers/#delivery", label: "Доставка" },
         { href: "/customers/#custom-orders", label: "Индивидуальные заказы" },

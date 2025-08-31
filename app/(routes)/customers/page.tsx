@@ -60,31 +60,73 @@ const CustomerPage = () => {
 
 
             {/* ДОСТАВКА */}
-            <section className="px-6 py-8 max-w-6xl mx-auto text-center scroll-mt-35" id="delivery">
+            <section className="px-6 py-8 max-w-6xl mx-auto text-center scroll-mt-35 mb-10" id="delivery">
                 <h2 className="text-3xl md:text-4xl font-bold mb-12 text-black">Доставка</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <div className="p-4 bg-gray-50 rounded-lg shadow-sm">
-                        <h3 className="font-semibold text-lg mb-2">Почтой России</h3>
-                        <p className="text-gray-700 text-[14px]">
-                            Отправление 1 классом, срок 3−7 дней по России, стоимость —
-                            300-500₽, в другие страны рассчитывается индивидуально
-                        </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+                    <div className="p-6 bg-gray-50 rounded-lg shadow-sm transition-all hover:shadow-md">
+                        <h3 className="font-semibold text-lg mb-4 text-gray-900">Яндекс Маркет</h3>
+                        <div className="text-gray-700 text-[15px] space-y-3">
+                            <div>
+                                <div className="font-medium">По Москве:</div>
+                                <div>3-4 дня от <strong>270₽</strong></div>
+                            </div>
+                            <div>
+                                <div className="font-medium">По России:</div>
+                                <div>4-8 дней от <strong>370₽</strong></div>
+                            </div>
+                        </div>
                     </div>
-                    <div className="p-4 bg-gray-50 rounded-lg shadow-sm">
-                        <h3 className="font-semibold text-lg mb-2">Яндекс Маркет</h3>
-                        <p className="text-gray-700 text-[14px]">
-                            По Москве от 100₽ <br /> По России от 300₽
-                        </p>
+
+                    <div className="p-6 bg-gray-50 rounded-lg shadow-sm transition-all hover:shadow-md">
+                        <h3 className="font-semibold text-lg mb-4 text-gray-900">Почта России</h3>
+                        <div className="text-gray-700 text-[15px] space-y-3">
+                            <div>
+                                <div className="font-medium">По Москве:</div>
+                                <div>1-3 дня от <strong>300₽</strong></div>
+                            </div>
+                            <div>
+                                <div className="font-medium">По России:</div>
+                                <div>3-10 дней от <strong>400₽</strong></div>
+                            </div>
+                        </div>
                     </div>
-                    <div className="p-4 bg-gray-50 rounded-lg shadow-sm">
-                        <h3 className="font-semibold text-lg mb-2">СДЭК до отделения</h3>
-                        <p className="text-gray-700 text-[14px]">
-                            Срок 2−8 рабочих дней, по России — 300-400₽
-                        </p>
+
+                    <div className="p-6 bg-gray-50 rounded-lg shadow-sm transition-all hover:shadow-md">
+                        <h3 className="font-semibold text-lg mb-4 text-gray-900">СДЭК</h3>
+                        <div className="text-gray-700 text-[15px] space-y-3">
+                            <div>
+                                <div className="font-medium">По Москве:</div>
+                                <div>1-3 дня от <strong>300₽</strong></div>
+                            </div>
+                            <div>
+                                <div className="font-medium">По России:</div>
+                                <div>3-8 дней от <strong>400₽</strong></div>
+                            </div>
+                        </div>
                     </div>
-                    <div className="p-4 bg-gray-50 rounded-lg shadow-sm">
-                        <h3 className="font-semibold text-lg mb-2">Курьер до двери</h3>
-                        <p className="text-gray-700 text-[14px]">По Москве от 500₽</p>
+
+                    <div className="p-6 bg-gray-50 rounded-lg shadow-sm transition-all hover:shadow-md">
+                        <h3 className="font-semibold text-lg mb-4 text-gray-900">Курьер по Москве</h3>
+                        <div className="text-gray-700 text-[15px] space-y-3">
+                            <div className="text-center py-1">
+                                <div className="text-lg font-bold">от 700₽</div>
+                            </div>
+                            <div className="text-sm text-gray-600 mt-2">
+                                Быстрая доставка до двери
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="p-6 bg-gray-50 rounded-lg shadow-sm transition-all hover:shadow-md">
+                        <h3 className="font-semibold text-lg mb-4 text-gray-900">Cамовывоз</h3>
+                        <div className="text-gray-700 text-[15px] space-y-3">
+                            <div className="text-center py-1">
+                                <div className="font-medium">По договоренности!<br />Адрес доставки:</div>
+                            </div>
+                            <div className="text-sm text-gray-600 mt-2">
+                                Москва, Щелковское шоссе, дом 19
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -115,7 +157,7 @@ const CustomerPage = () => {
             </section>
 
             {/* СИСТЕМА ЛОЯЛЬНОСТИ */}
-            <section className="px-6 py-16 max-w-6xl mx-auto text-center scroll-mt-20" id="loyalty">
+            <section className="px-6 py-16 max-w-6xl mx-auto text-center scroll-mt-20 mb-10" id="loyalty">
                 <h2 className="text-3xl md:text-4xl font-bold mb-12 text-black">Система лояльности</h2>
                 <div className="grid grid-cols-1 lg:grid-cols-4 md:grid-cols-2 gap-8">
                     <div className="p-6 bg-gray-50 rounded-lg shadow-sm">

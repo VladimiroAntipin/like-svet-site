@@ -177,19 +177,6 @@ const AuthPage = () => {
         {!isLogin && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium mb-1">Имя</label>
-              <input
-                type="text"
-                name="firstName"
-                value={form.firstName}
-                onChange={handleChange}
-                autoComplete="given-name"
-                className={`w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none ${fieldErrors.firstName ? "border-red-500" : ""}`}
-                disabled={isSubmitting} 
-              />
-              {fieldErrors.firstName && <p className="text-red-600 text-sm mt-1">{fieldErrors.firstName}</p>}
-            </div>
-            <div>
               <label className="block text-sm font-medium mb-1">Фамилия</label>
               <input
                 type="text"
@@ -201,6 +188,19 @@ const AuthPage = () => {
                 disabled={isSubmitting} 
               />
               {fieldErrors.lastName && <p className="text-red-600 text-sm mt-1">{fieldErrors.lastName}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Имя и Отчество</label>
+              <input
+                type="text"
+                name="firstName"
+                value={form.firstName}
+                onChange={handleChange}
+                autoComplete="given-name"
+                className={`w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none ${fieldErrors.firstName ? "border-red-500" : ""}`}
+                disabled={isSubmitting} 
+              />
+              {fieldErrors.firstName && <p className="text-red-600 text-sm mt-1">{fieldErrors.firstName}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Дата рождения</label>
