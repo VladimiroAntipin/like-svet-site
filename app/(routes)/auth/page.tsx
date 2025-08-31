@@ -50,7 +50,13 @@ const AuthPage = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    resetErrors();
+    // Rimuovi l'errore specifico per questo campo quando l'utente inizia a digitare
+    if (fieldErrors[e.target.name]) {
+      const newErrors = { ...fieldErrors };
+      delete newErrors[e.target.name];
+      setFieldErrors(newErrors);
+    }
+    setGeneralError("");
   };
 
   const validateForm = () => {
@@ -59,7 +65,7 @@ const AuthPage = () => {
     if (!form.password) newErrors.password = "Поле обязательно для заполнения";
 
     if (!isLogin) {
-      // Registrazione
+      // Validazione registrazione
       if (!form.firstName) newErrors.firstName = "Поле обязательно для заполнения";
       if (!form.lastName) newErrors.lastName = "Поле обязательно для заполнения";
       if (!form.birthDate) newErrors.birthDate = "Поле обязательно для заполнения";
@@ -75,7 +81,7 @@ const AuthPage = () => {
       if (!form.email) newErrors.email = "Поле обязательно для заполнения";
       else if (!emailRegex.test(form.email)) newErrors.email = "Неверный формат email";
     } else {
-      // Login
+      // Validazione login
       if (!form.identifier) {
         newErrors.identifier = "Введите email или номер телефона";
       } else if (!emailRegex.test(form.identifier) && !phoneRegex.test(form.identifier)) {
@@ -133,7 +139,7 @@ const AuthPage = () => {
       const message = err.message || "Ошибка авторизации";
 
       if (message.toLowerCase().includes("invalid credentials")) {
-        setFieldErrors({ identifier: "Нет такого пользователя" });
+        setFieldErrors({ identifier: "Нет такого пользователя", password: " " });
       } else if (message.toLowerCase().includes("wrong password")) {
         setFieldErrors({ password: "Неправильный пароль" });
       } else if (message.toLowerCase().includes("user already exists")) {
@@ -178,10 +184,10 @@ const AuthPage = () => {
                 value={form.firstName}
                 onChange={handleChange}
                 autoComplete="given-name"
-                className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none"
+                className={`w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none ${fieldErrors.firstName ? "border-red-500" : ""}`}
                 disabled={isSubmitting} 
               />
-              {fieldErrors.firstName && <p className="text-red-600 text-sm">{fieldErrors.firstName}</p>}
+              {fieldErrors.firstName && <p className="text-red-600 text-sm mt-1">{fieldErrors.firstName}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Фамилия</label>
@@ -191,10 +197,10 @@ const AuthPage = () => {
                 value={form.lastName}
                 onChange={handleChange}
                 autoComplete="family-name"
-                className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none"
+                className={`w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none ${fieldErrors.lastName ? "border-red-500" : ""}`}
                 disabled={isSubmitting} 
               />
-              {fieldErrors.lastName && <p className="text-red-600 text-sm">{fieldErrors.lastName}</p>}
+              {fieldErrors.lastName && <p className="text-red-600 text-sm mt-1">{fieldErrors.lastName}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Дата рождения</label>
@@ -204,10 +210,10 @@ const AuthPage = () => {
                 value={form.birthDate}
                 onChange={handleChange}
                 autoComplete="bday"
-                className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none"
+                className={`w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none ${fieldErrors.birthDate ? "border-red-500" : ""}`}
                 disabled={isSubmitting} 
               />
-              {fieldErrors.birthDate && <p className="text-red-600 text-sm">{fieldErrors.birthDate}</p>}
+              {fieldErrors.birthDate && <p className="text-red-600 text-sm mt-1">{fieldErrors.birthDate}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Телефон</label>
@@ -217,10 +223,10 @@ const AuthPage = () => {
                 value={form.phone}
                 onChange={handleChange}
                 autoComplete="tel"
-                className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none"
+                className={`w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none ${fieldErrors.phone ? "border-red-500" : ""}`}
                 disabled={isSubmitting} 
               />
-              {fieldErrors.phone && <p className="text-red-600 text-sm">{fieldErrors.phone}</p>}
+              {fieldErrors.phone && <p className="text-red-600 text-sm mt-1">{fieldErrors.phone}</p>}
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium mb-1">Email</label>
@@ -230,10 +236,10 @@ const AuthPage = () => {
                 value={form.email}
                 onChange={handleChange}
                 autoComplete="username"
-                className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none"
+                className={`w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none ${fieldErrors.email ? "border-red-500" : ""}`}
                 disabled={isSubmitting} 
               />
-              {fieldErrors.email && <p className="text-red-600 text-sm">{fieldErrors.email}</p>}
+              {fieldErrors.email && <p className="text-red-600 text-sm mt-1">{fieldErrors.email}</p>}
             </div>
           </div>
         )}
@@ -247,10 +253,10 @@ const AuthPage = () => {
               value={form.identifier}
               onChange={handleChange}
               autoComplete="username"
-              className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none"
+              className={`w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none ${fieldErrors.identifier ? "border-red-500" : ""}`}
               disabled={isSubmitting} 
             />
-            {fieldErrors.identifier && <p className="text-red-600 text-sm">{fieldErrors.identifier}</p>}
+            {fieldErrors.identifier && <p className="text-red-600 text-sm mt-1">{fieldErrors.identifier}</p>}
           </div>
         )}
 
@@ -263,7 +269,7 @@ const AuthPage = () => {
               value={form.password}
               onChange={handleChange}
               autoComplete="current-password"
-              className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none pr-10"
+              className={`w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none pr-10 ${fieldErrors.password ? "border-red-500" : ""}`}
               disabled={isSubmitting}
             />
             <button
@@ -275,7 +281,9 @@ const AuthPage = () => {
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
-          {fieldErrors.password && <p className="text-red-600 text-sm">{fieldErrors.password}</p>}
+          {fieldErrors.password && fieldErrors.password !== " " && (
+            <p className="text-red-600 text-sm mt-1">{fieldErrors.password}</p>
+          )}
         </div>
 
         {!isLogin && (
@@ -288,7 +296,7 @@ const AuthPage = () => {
                 value={form.confirmPassword}
                 onChange={handleChange}
                 autoComplete="new-password"
-                className="w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none pr-10"
+                className={`w-full border px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none pr-10 ${fieldErrors.confirmPassword ? "border-red-500" : ""}`}
                 disabled={isSubmitting} 
               />
               <button
@@ -300,11 +308,17 @@ const AuthPage = () => {
                 {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
-            {fieldErrors.confirmPassword && <p className="text-red-600 text-sm">{fieldErrors.confirmPassword}</p>}
+            {fieldErrors.confirmPassword && (
+              <p className="text-red-600 text-sm mt-1">{fieldErrors.confirmPassword}</p>
+            )}
           </div>
         )}
 
-        {generalError && <p className="text-red-600 text-sm font-medium">{generalError}</p>}
+        {generalError && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-red-800 text-sm font-medium">{generalError}</p>
+          </div>
+        )}
 
         <button
           type="submit"
@@ -324,4 +338,3 @@ const AuthPage = () => {
 };
 
 export default AuthPage;
-
