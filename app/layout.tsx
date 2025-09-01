@@ -16,12 +16,13 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",
-    apple: "/apple-touch-icon.png",       
+    apple: "/apple-touch-icon.png",
     other: [
       { rel: "icon", url: "/android-chrome-192x192.png", sizes: "192x192" },
       { rel: "icon", url: "/android-chrome-512x512.png", sizes: "512x512" },
     ],
   },
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({
@@ -31,6 +32,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru" data-scroll-behavior="smooth">
+      <head>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="theme-color" content="#ffffff" />
+      </head>
       <body className={font.className} >
         <AuthProvider>
           <FavoritesProvider>
