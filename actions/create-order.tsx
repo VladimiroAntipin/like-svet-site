@@ -10,6 +10,7 @@ interface OrderPayload {
   address: string;
   totalPrice: number;
   shippingMethod: string;
+  isPaid?: boolean;
 }
 
 const CMS_URL = process.env.NEXT_PUBLIC_API_URL;
