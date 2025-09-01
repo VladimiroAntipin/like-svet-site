@@ -171,7 +171,7 @@ const AccountPage = () => {
       </header>
 
       {/* Main */}
-      <main className="flex flex-col items-center flex-1 pt-10 px-6 py-5 bg-white">
+      <main className="flex flex-col items-center flex-1 pt-10 px-6 py-5 bg-white max-[500px]:mb-16">
         {/* Foto utente */}
         <div className="flex flex-col items-center mb-10 w-full max-w-5xl relative">
           <div className="relative">

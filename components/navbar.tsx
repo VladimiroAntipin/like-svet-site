@@ -11,7 +11,7 @@ const Navbar = async () => {
     const giftProductId = await getGiftProductId();
 
     return (
-        <div className="border-none w-full fixed top-0 left-0 z-50 bg-white">
+        <div className="border-none w-full fixed top-0 left-0 z-50 bg-white" style={{ paddingTop: "env(safe-area-inset-top)" }}>
             <Container>
                 <div className="relative px-4 lg:px-8 flex h-26 items-center w-full max-[500px]:px-0 max-[750px]:justify-between">
                     <Link href="/" className="absolute left-1/2 -translate-x-1/2 flex gap-x-2 max-[750px]:static max-[750px]:translate-x-0" >

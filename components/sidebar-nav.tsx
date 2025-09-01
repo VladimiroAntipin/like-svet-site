@@ -105,7 +105,7 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ onLinkClick, giftProductId }) =
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.3, ease: "easeInOut" }}
-                    className="overflow-hidden ml-2 mt-2"
+                    className="overflow-hidden ml-2 mt-3 flex flex-col gap-2"
                   >
                     {route.children.map((child, i) => {
                       const childActive = pathname === child.href;

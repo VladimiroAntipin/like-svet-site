@@ -36,7 +36,7 @@ export default function RootLayout({
           <FavoritesProvider>
             <Navbar />
             <ScrollToTop />
-            <main className="pt-[104px]">
+            <main className="pt-[104px]" style={{ paddingTop: `calc(104px + env(safe-area-inset-top))` }}>
               {children}
             </main>
             <Footer />

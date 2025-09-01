@@ -40,7 +40,7 @@ const FiltersByCategory: React.FC<FiltersByCategoryProps> = ({ data, valueKey })
   };
 
   return (
-    <div className="w-full flex gap-6 overflow-x-auto">
+    <div className="w-full flex gap-6 overflow-x-auto no-scrollbar">
       {data.map((category) => {
         const isSelected = category.id === selectedValue;
 
