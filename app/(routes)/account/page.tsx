@@ -157,7 +157,7 @@ const AccountPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100">
+    <div className="min-h-screen flex flex-col bg-white">
       {/* Header */}
       <header className="w-full bg-gray-200 shadow-sm py-4 px-6 flex items-center justify-between">
         <button

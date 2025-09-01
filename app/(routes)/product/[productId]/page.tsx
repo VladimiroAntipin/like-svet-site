@@ -43,7 +43,7 @@ const ProductPage: React.FC<any> = async ({ params, searchParams }: any) => {
   return (
     <div className="bg-white">
       <Container>
-        <div className="py-10 max-[500px]:py-5">
+        <div className="py-10 max-[500px]:py-5 mb-10">
           <BackButton />
           <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
             <Gallery images={product.images} />

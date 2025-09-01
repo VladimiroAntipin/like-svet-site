@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const Footer = () => {
     return (
-        <footer className="bg-black border-t py-12 max-[500px]:px-7 max-[500px]:py-4 flex justify-center items-center">
+        <footer className="bg-black border-t py-12 max-[500px]:px-7 max-[500px]:py-4 flex justify-center items-center max-[780px]:mt-10">
             <div className="flex justify-between w-[80vw] max-[500px]:w-full max-[500px]:flex-col-reverse max-[500px]:gap-10">
                 <div className="flex flex-col">
                     <p className="text-sm font-thin text-gray-300">ИП Рязанова Светлана Владимировна</p>

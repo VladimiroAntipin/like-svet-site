@@ -60,19 +60,19 @@ const CustomerPage = () => {
 
 
             {/* ДОСТАВКА */}
-            <section className="px-6 py-8 max-w-6xl mx-auto text-center scroll-mt-35 mb-10" id="delivery">
+            <section className="px-6 py-8 max-w-6xl mx-auto text-center scroll-mt-35" id="delivery">
                 <h2 className="text-3xl md:text-4xl font-bold mb-12 text-black">Доставка</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
                     <div className="p-6 bg-gray-50 rounded-lg shadow-sm transition-all hover:shadow-md">
                         <h3 className="font-semibold text-lg mb-4 text-gray-900">Яндекс Маркет</h3>
                         <div className="text-gray-700 text-[15px] space-y-3">
                             <div>
                                 <div className="font-medium">По Москве:</div>
-                                <div>3-4 дня от <strong>270₽</strong></div>
+                                <div>3-4 дня от &nbsp;<strong>270₽</strong></div>
                             </div>
                             <div>
                                 <div className="font-medium">По России:</div>
-                                <div>4-8 дней от <strong>370₽</strong></div>
+                                <div>4-8 дней от &nbsp;<strong>370₽</strong></div>
                             </div>
                         </div>
                     </div>
@@ -82,11 +82,11 @@ const CustomerPage = () => {
                         <div className="text-gray-700 text-[15px] space-y-3">
                             <div>
                                 <div className="font-medium">По Москве:</div>
-                                <div>1-3 дня от <strong>300₽</strong></div>
+                                <div>1-3 дня от &nbsp;<strong>300₽</strong></div>
                             </div>
                             <div>
                                 <div className="font-medium">По России:</div>
-                                <div>3-10 дней от <strong>400₽</strong></div>
+                                <div>3-10 дней от &nbsp;<strong>400₽</strong></div>
                             </div>
                         </div>
                     </div>
@@ -96,11 +96,11 @@ const CustomerPage = () => {
                         <div className="text-gray-700 text-[15px] space-y-3">
                             <div>
                                 <div className="font-medium">По Москве:</div>
-                                <div>1-3 дня от <strong>300₽</strong></div>
+                                <div>1-3 дня от &nbsp;<strong>300₽</strong></div>
                             </div>
                             <div>
                                 <div className="font-medium">По России:</div>
-                                <div>3-8 дней от <strong>400₽</strong></div>
+                                <div>3-8 дней от &nbsp;<strong>400₽</strong></div>
                             </div>
                         </div>
                     </div>
@@ -108,11 +108,25 @@ const CustomerPage = () => {
                     <div className="p-6 bg-gray-50 rounded-lg shadow-sm transition-all hover:shadow-md">
                         <h3 className="font-semibold text-lg mb-4 text-gray-900">Курьер по Москве</h3>
                         <div className="text-gray-700 text-[15px] space-y-3">
-                            <div className="text-center py-1">
-                                <div className="text-lg font-bold">от 700₽</div>
+                            <div>
+                                <div className="font-medium"></div>
+                                <div>от &nbsp;<strong>700₽</strong></div>
                             </div>
                             <div className="text-sm text-gray-600 mt-2">
                                 Быстрая доставка до двери
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="p-6 bg-gray-50 rounded-lg shadow-sm transition-all hover:shadow-md">
+                        <h3 className="font-semibold text-lg mb-4 text-gray-900">Международная доставка</h3>
+                        <div className="text-gray-700 text-[15px] space-y-3">
+                            <div>
+                                <div className="font-medium"></div>
+                                <div>от &nbsp;<strong>1600₽</strong></div>
+                            </div>
+                            <div className="text-sm text-gray-600 mt-2">
+                                Доставка занимает примерно 30 дней, срок может варьироваться в зависимости от страны.
                             </div>
                         </div>
                     </div>

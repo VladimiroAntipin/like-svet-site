@@ -88,7 +88,7 @@ const GiftCertificatesPage: React.FC<any> = ({ product }: any) => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row items-center md:items-start px-6 py-12 max-[500px]:py-6 gap-12 max-w-7xl mx-auto relative">
+    <div className="min-h-screen flex flex-col md:flex-row items-center md:items-start px-6 py-12 max-[500px]:pt-6 max-[500px]:pb-16 gap-12 max-w-7xl mx-auto relative">
 
       {/* FOTO */}
       <div className="w-full md:w-1/2 flex flex-col justify-center ">
