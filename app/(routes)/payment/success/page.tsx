@@ -9,7 +9,7 @@ import useCart from "@/hooks/use-cart";
 import { purchaseGiftCode } from "@/actions/purchase-code";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const PaymentSuccessPage = ({ onOrderComplete }: { onOrderComplete?: () => void }) => {
+const PaymentSuccessPage = ({ onOrderComplete }: any) => {
     const router = useRouter();
     const { loading, user } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
