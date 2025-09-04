@@ -16,6 +16,7 @@ export interface OrderProduct {
   category: { id: string; name: string };
   giftPrices?: GiftPrice[]; 
   giftCardAmount?: number;
+  giftCode?: string | null;
 }
 
 export interface OrderItem {
@@ -24,6 +25,10 @@ export interface OrderItem {
   totalAmount: number; // in rubli
   region: string | null;
   address: string | null;
+  apartment?: string | null;
+  floor?: string | null;
+  entrance?: string | null;
+  extraInfo?: string | null;
   shippingMethod: string | null;
   products: OrderProduct[];
 }
@@ -52,7 +57,7 @@ export async function getUserOrders(): Promise<OrderItem[]> {
     region: order.region ?? null,
     address: order.address ?? null,
     apartment: order.apartment ?? null,
-    floor: order.floor ??  null,
+    floor: order.floor ?? null,
     entrance: order.entrance ?? null,
     extraInfo: order.extraInfo ?? null,
     shippingMethod: order.shippingMethod ?? null,
@@ -63,6 +68,7 @@ export async function getUserOrders(): Promise<OrderItem[]> {
       images: p.images,
       category: p.category,
       giftCardAmount: p.giftCardAmount,
+      giftCode: p.giftCode ?? null,
     })),
   }));
 

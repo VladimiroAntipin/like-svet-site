@@ -11,7 +11,7 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phoneRegex = /^\+?[0-9]{7,15}$/;
 
 const AuthPage = () => {
-  const { loading, login, register } = useAuth();
+  const { loading, login, register, user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -19,6 +19,12 @@ const AuthPage = () => {
     const mode = searchParams.get("mode");
     return mode !== "register";
   });
+
+   useEffect(() => {
+    if (user) {
+      router.replace("/");
+    }
+  }, [user, router]);
 
   useEffect(() => {
     const mode = searchParams.get("mode");

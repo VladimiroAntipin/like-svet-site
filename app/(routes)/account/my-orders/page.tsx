@@ -30,6 +30,7 @@ interface OrderItem {
     images: { id: string; url: string }[];
     category: { id: string; name: string };
     giftCardAmount?: number;
+    giftCode?: string | null;
   }[];
 }
 
@@ -121,16 +122,42 @@ const MyOrdersPage: React.FC = () => {
                     <div className="flex flex-col justify-center max-[895px]:gap-2">
                       <p className="font-semibold">{product.name}</p>
                       <p className="text-xs text-gray-500">{product.category.name}</p>
+
+                      {/* Se è gift card */}
                       {product.giftCardAmount && (
-                        <span className="text-xs text-green-600">Gift Card</span>
+                        <span className="text-xs text-gray-500">Gift Card</span>
                       )}
-                      <Currency data={product.giftCardAmount ?? product.price} />
+
+                      {/* Prezzo */}
+                      <Currency
+                        data={
+                          product.giftCardAmount
+                            ? product.giftCardAmount * 100 // gift card → centesimi → rubli
+                            : product.price // prodotto normale → già rubli
+                        }
+                      />
+
+                      {/* Codice regalo se esiste */}
+                      {product.giftCode && (
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-mono text-gray-500">
+                            Код активации: {product.giftCode}
+                          </p>
+                          <button
+                            onClick={() => navigator.clipboard.writeText(product.giftCode!)}
+                            className="text-xs text-gray-500 hover:text-gray-800 cursor-pointer"
+                            title="Скопировать код"
+                          >
+                            Копировать
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
               </div>
 
-              {/* Info ordine (senza indirizzo) */}
+              {/* Info ordine */}
               <div className="flex flex-col gap-1 w-[30%] text-sm text-gray-700 text-right max-[895px]:w-full max-[895px]:text-left">
                 <p><span className="font-semibold">Заказ от:</span> {new Date(order.createdAt).toLocaleString('ru-RU')}</p>
                 <p><span className="font-semibold">Способ доставки:</span> {order.shippingMethod ?? "Не указан"}</p>

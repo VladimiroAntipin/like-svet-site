@@ -2,14 +2,14 @@
 
 const CMS_URL = process.env.NEXT_PUBLIC_API_URL!;
 
-export async function purchaseGiftCode(amount: number, token: string, expiresAt?: string) {
+export async function purchaseGiftCode(amount: number, orderItemId: string, token: string, expiresAt?: string) {
     const res = await fetch(`${CMS_URL}/gift-codes/purchase`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ amount, expiresAt }),
+        body: JSON.stringify({ amount, orderItemId, expiresAt }),
         cache: "no-store",
     });
 
@@ -18,5 +18,5 @@ export async function purchaseGiftCode(amount: number, token: string, expiresAt?
         throw new Error(err.error || "Ошибка при покупке сертификата");
     }
 
-    return res.json(); // ti torna sia giftCode che purchase
+    return res.json();
 }

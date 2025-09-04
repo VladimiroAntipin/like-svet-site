@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 "use client";
 
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandList, CommandItem } from "@/components/ui/command";
 import Button from "@/components/ui/button";
@@ -12,20 +12,19 @@ import useCart from "@/hooks/use-cart";
 import { toast } from "sonner";
 import { useAuth } from "@/context/auth-context";
 import { AnimatePresence, motion } from "framer-motion";
-import { purchaseGiftCode } from "@/actions/purchase-code";
 import { getUserDiscount } from "@/lib/get-user-discount";
 import { getUserOrders, OrderItem } from "@/actions/get-user-orders";
-import { LoadingDots } from "@/components/ui/loading-dots";
+import AlfaBankButton from "@/components/alfabutton";
+import { validateCourierDate, validateDeliveryPoint, validateElectronic, validateEmail, validateInternational, validatePhone, validatePostIndex } from "@/lib/cart-validation";
+import { moscowOutsideMKAD } from "@/lib/moscow-out-mkad";
 
 interface ShippingOption {
     name: string;
     price: number;
 }
 
-const Summary = ({ onOrderComplete }: { onOrderComplete: () => void }) => {
-    const searchParams = useSearchParams();
+const Summary = () => {
     const items = useCart((state) => state.items);
-    const removeAll = useCart((state) => state.removeAll);
     const buttonRef = useRef<HTMLButtonElement>(null);
     const { user, updateUserBalance } = useAuth();
     const router = useRouter();
@@ -33,6 +32,7 @@ const Summary = ({ onOrderComplete }: { onOrderComplete: () => void }) => {
     const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
     const [isOpen, setIsOpen] = useState(false);
     const [userOrders, setUserOrders] = useState<OrderItem[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [isLoadingOrders, setIsLoadingOrders] = useState(false);
     const [useBalance, setUseBalance] = useState(false);
     const [maxBalanceToUse, setMaxBalanceToUse] = useState(0);
@@ -49,16 +49,6 @@ const Summary = ({ onOrderComplete }: { onOrderComplete: () => void }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showShippingPrice, setShowShippingPrice] = useState(false);
     const [invalidCourier, setInvalidCourier] = useState(false);
-
-    useEffect(() => {
-        if (searchParams.get("success")) {
-            toast.success("Заказ оформлен");
-            removeAll();
-        }
-        if (searchParams.get("canceled")) {
-            toast.error("Что-то пошло не так");
-        }
-    }, [searchParams, removeAll]);
 
     // Recupera gli ordini dell'utente per calcolare lo sconto
     useEffect(() => {
@@ -107,10 +97,8 @@ const Summary = ({ onOrderComplete }: { onOrderComplete: () => void }) => {
 
     // Calcola il prezzo dopo lo sconto
     const priceAfterDiscount = itemsTotal - discountAmount;
-
     // Calcola il prezzo di spedizione
     const effectiveShipping = selectedShipping && showShippingPrice ? selectedShipping.price : 0;
-
     // Calcola il totale prima di applicare il balance
     const totalBeforeBalance = priceAfterDiscount + effectiveShipping;
 
@@ -131,25 +119,6 @@ const Summary = ({ onOrderComplete }: { onOrderComplete: () => void }) => {
     const finalTotal = useBalance ?
         Math.max(100, totalBeforeBalance - maxBalanceToUse) :
         totalBeforeBalance;
-
-    const moscowOutsideMKAD = [
-        "зеленоград", "северный район", "куркино", "новокосино", "косино-ухтомский",
-        "митино", "внуково", "некрасовка", "солнцево", "ново-переделкино",
-        "бачурино", "газопровод", "зимёнки", "коммунарка", "ларёво", "летово",
-        "макарово", "николо-хованское", "прокшино", "сосенки", "столбово",
-        "щербинка", "бабенки", "бакланово", "безобразово", "богоявление", "вороново",
-        "клёново", "лукошкино", "маврино", "мешково", "никоново", "починки", "сальково",
-        "свитино", "старогромово", "товарищево", "чегодаево", "чернецкое", "чириково", "юрово",
-        "былово", "варварино", "городок", "колотилово", "красная пахра", "красное",
-        "малыгино", "подосинки", "подсобного хозяйства минзаг", "поляны", "раево",
-        "романцево", "софьино", "страдань", "шарапово", "шахово",
-        "дешино", "дома отдыха «плесково»", "дровнино", "заболотье", "исаково",
-        "конаково", "лужки", "михайловского лесничества", "михайловское", "новомихайловское",
-        "пудово-сипягино", "секерино", "сенькино-секерино", "терехово", "шишкин лес", "ярцево",
-        "алымовка", "архангельское", "белоусово", "голохвастово", "долгино", "зверево",
-        "зосимова пустынь", "игнатово", "капустинка", "круги", "кузнецово", "лукино",
-        "малеевка", "новиково", "ожигово", "пахо"
-    ];
 
     const normalize = (str: string) => str.toLowerCase().replace(/[ё]/g, "е").trim();
 
@@ -239,53 +208,6 @@ const Summary = ({ onOrderComplete }: { onOrderComplete: () => void }) => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [onlyElectronicGiftCards, items]); // Aggiunto items come dipendenza
-
-    // Validazione per Курьер
-    const validateCourierDate = (value: string): boolean => {
-        const regex = /^\d{2}[\/.-]\d{2}[\/.-]\d{2,4}\s+\d{2}:\d{2}-\d{2}:\d{2}$/;
-        return regex.test(value.trim());
-    };
-
-    // Validazione per Почта России
-    const validatePostIndex = (value: string): boolean => {
-        const indexRegex = /\b\d{6}\b/;
-        const hasCity = value.replace(indexRegex, "").trim().length > 0;
-        return indexRegex.test(value) && hasCity;
-    };
-
-    // Validazione per Международная доставка
-    const validateInternational = (value: string): boolean => {
-        const parts = value.split(',').map(part => part.trim());
-        return parts.length >= 2 && parts[0].length > 0 && parts[1].length > 0;
-    };
-
-    // Validazione per СДЭК / Яндекс Маркет
-    const validateDeliveryPoint = (regionValue: string, addressValue: string): boolean => {
-        return regionValue.trim().length > 0 && addressValue.trim().length > 0;
-    };
-
-    // Validazione email
-    const validateEmail = (email: string): boolean => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email.trim());
-    };
-
-    // Validazione telefono (deve contenere codice paese come +7 и numero)
-    const validatePhone = (phone: string): boolean => {
-        const phoneRegex = /^\+[1-9]\d{1,14}$/; // Formato E.164 internazionale
-        return phoneRegex.test(phone.trim());
-    };
-
-    // Validazione per электронный (email o telefono)
-    const validateElectronic = (email: string, phone: string): boolean => {
-        const hasEmail = email.trim().length > 0;
-        const hasPhone = phone.trim().length > 0;
-
-        if (hasEmail && !validateEmail(email)) return false;
-        if (hasPhone && !validatePhone(phone)) return false;
-
-        return hasEmail || hasPhone;
-    };
 
     const handleRegionBlur = () => {
         if (selectedShipping) {
@@ -439,23 +361,16 @@ const Summary = ({ onOrderComplete }: { onOrderComplete: () => void }) => {
         try {
             setIsSubmitting(true);
 
-            const giftCardItems = items.filter(item => item.product.isGiftCard);
-            const giftCodeResults = await Promise.all(
-                giftCardItems.map(async (item) => {
-                    const res = await purchaseGiftCode((item.giftCardAmount || 0) * 100, user.token);
-                    return { itemId: item.id, giftCodeId: res.giftCode.id };
-                })
-            );
-
+            // --- 1. Costruzione orderItems
+            // --- Costruzione orderItems senza generare giftCodeId
             const orderItems = items.map(item => {
                 if (item.product.isGiftCard) {
-                    const giftCode = giftCodeResults.find(gc => gc.itemId === item.id);
                     return {
                         productId: item.product.id,
                         quantity: Number(item.quantity) || 1,
                         giftCardAmount: item.giftCardAmount,
                         giftCardType: item.giftCardType,
-                        giftCodeId: giftCode?.giftCodeId,
+                        // giftCodeId verrà generato dopo il pagamento
                     };
                 }
                 return {
@@ -466,6 +381,10 @@ const Summary = ({ onOrderComplete }: { onOrderComplete: () => void }) => {
                 };
             });
 
+            // --- 2. Calcolo del balance effettivamente usato
+            const usedBalance = useBalance ? (totalBeforeBalance - finalTotal) : 0;
+
+            // --- 3. Creazione ordine sul backend (isPaid: false)
             const response = await axios.post(
                 `${process.env.NEXT_PUBLIC_API_URL}/orders`,
                 {
@@ -477,34 +396,37 @@ const Summary = ({ onOrderComplete }: { onOrderComplete: () => void }) => {
                     floor,
                     entrance,
                     extraInfo,
+                    isPaid: false,
                     totalPrice: finalTotal,
-                    usedBalance: useBalance ? maxBalanceToUse : 0
+                    usedBalance: usedBalance
                 },
-                { headers: { Authorization: `Bearer ${user?.token}` } }
+                { headers: { Authorization: `Bearer ${user.token}` } }
             );
 
-            // Aggiorna il balance dell'utente lato backend
+            console.log("📝 Order created response:", response.data);
+
+            const orderId = response.data.id;
+
+            // --- 4. Aggiornamento balance se necessario
             if (useBalance && maxBalanceToUse > 0) {
                 try {
                     const balanceRes = await axios.patch(
                         `${process.env.NEXT_PUBLIC_API_URL}/customers/${user.id}/balance`,
-                        { amount: -maxBalanceToUse }, // sempre in копейках
+                        { amount: -maxBalanceToUse },
                         { headers: { Authorization: `Bearer ${user.token}` } }
                     );
 
-                    const updatedCustomer = balanceRes.data;
-
-                    // Aggiorna subito il contesto React
-                    updateUserBalance(updatedCustomer.balance);
+                    updateUserBalance(balanceRes.data.balance);
                 } catch (balanceErr) {
                     console.error("Errore aggiornando баланс:", balanceErr);
                     toast.error("⚠️ Заказ создан, но баланс не обновлён.");
                 }
             }
 
-            toast.success("✅ Заказ успешно оформлен!");
-            removeAll();
-            if (onOrderComplete) onOrderComplete();
+            // --- 5. Apri la pagina di Alfa-Bank con orderId, amount ed email
+            const url = `/payment/checkout.html?orderId=${orderId}&amount=${finalTotal}&email=${encodeURIComponent(user.email)}&usedBalance=${usedBalance}`;
+            window.location.href = url;
+
         } catch (err) {
             console.error(err);
             toast.error("❌ Ошибка при оформлении заказа. Попробуйте снова.");
@@ -682,7 +604,7 @@ const Summary = ({ onOrderComplete }: { onOrderComplete: () => void }) => {
             )}
 
             {/* Mostra il balance dell'utente se disponibile */}
-            {user && user.balance !== undefined && user.balance > 0 && (
+            {!onlyGiftCards && user && user.balance !== undefined && user.balance > 0 && (
                 <div className="flex flex-col mb-4 p-3 bg-gray-100 rounded-md">
                     <div className="flex justify-between items-center mb-2">
                         <span className="font-medium">Ваш баланс:</span>
@@ -749,23 +671,11 @@ const Summary = ({ onOrderComplete }: { onOrderComplete: () => void }) => {
                 </AnimatePresence>
             </div>
 
-            <Button
-                onClick={onCheckout}
-                disabled={isCheckoutDisabled || isSubmitting}
-                className={`w-full mt-2 rounded-none flex justify-center items-center gap-2 ${isCheckoutDisabled || isSubmitting
-                    ? "bg-gray-400 cursor-auto text-gray-200"
-                    : "bg-black text-white"
-                    }`}
-            >
-                {isSubmitting ? (
-                    <>
-                        <span>Оформление</span>
-                        <LoadingDots />
-                    </>
-                ) : (
-                    "Оформить заказ"
-                )}
-            </Button>
+            <AlfaBankButton
+                isSubmitting={isSubmitting}
+                isCheckoutDisabled={isCheckoutDisabled}
+                onCheckout={onCheckout}
+            />
         </div>
     );
 };
