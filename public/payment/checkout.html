@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Оплата заказа</title>
+    <title>LikeSvet</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
         body {
@@ -62,7 +62,6 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            display: flex;
             flex-direction: column;
             gap: 10px;
         }
@@ -72,49 +71,33 @@
             padding: 20px 40px !important;
             border-radius: 10px !important;
         }
-
-        #alfa-payment {
-            width: 100% !important;
-            max-width: 100% !important;
-            height: 100% !important;
-            max-height: 100% !important;
-            top: 0 !important;
-            left: 0 !important;
-            position: fixed !important;
-            margin: 0 !important;
-            border-radius: 0 !important;
-            overflow: auto !important;
-            z-index: 999999 !important;
-        }
-
-        .alfa-payment__rbs-frame-header {
-            position: absolute !important;
-            display: block !important;
-            height: 25px !important;
-            right: 5px !important;
-            top: 5px !important;
-            width: 25px !important;
-        }
     </style>
 </head>
 
 <body>
-    <!-- Logo del negozio fuori dalla card -->
     <img src="/logo.jpg" alt="Logo Negozio" class="store-logo">
-
     <div class="container">
-        <!-- Logo AlfaBank dentro la card -->
         <img src="/alfa-bank-logo.png" alt="AlfaBank Logo" class="alfa-logo">
-
         <h1 id="order-header">Оплата заказа #0</h1>
         <p id="amount-paragraph">Сумма к оплате: 0 ₽</p>
 
-        <!-- Contenitore del widget AlfaBank -->
-        <div id="alfa-payment-button" data-token="ndpuvf1jn8iaggp3ck7sfa5p6r" data-gateway="test" data-version="1.0"
-            data-client-info-selector=".clientInfo" data-amount-selector=".amount"
+    <div style="
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+        padding: 15px 20px;
+        border-radius: 8px;
+        font-size: 16px;
+        margin-bottom: 20px;
+        text-align: center;
+    ">
+        Пожалуйста, не закрывайте эту страницу во время оплаты!
+    </div>
+
+        <div id="alfa-payment-button" data-token="ndpuvf1jn8iaggp3ck7sfa5p6r" data-gateway="test"
+            data-version="1.0" data-client-info-selector=".clientInfo" data-amount-selector=".amount"
             data-order-number-selector=".orderNumber" data-description-selector=".order" data-stages="1"
-            data-language="ru" data-return-url="http://localhost:3001/payment/success"
-            data-fail-url="http://localhost:3001/payment/fail" data-redirect="true" data-amount-format="kopeyki">
+            data-language="ru" data-return-url="" data-fail-url="" data-redirect="true" data-amount-format="kopeyki">
             <input type="hidden" class="clientInfo" value="">
             <input type="hidden" class="amount" value="">
             <input type="hidden" class="orderNumber" value="">
@@ -123,16 +106,30 @@
     </div>
 
     <script>
+        // --- 1. Recupera dati ordine da URL o sessionStorage
         const urlParams = new URLSearchParams(window.location.search);
-        const orderId = urlParams.get('orderId') || '0';
-        const amountKopeks = parseInt(urlParams.get('amount') || '0', 10);
-        const email = urlParams.get('email') || '';
-        const usedBalance = parseInt(urlParams.get('usedBalance') || '0', 10);
+        let orderId = urlParams.get('orderId');
+        let amountKopeks = parseInt(urlParams.get('amount') || '0', 10);
+        let email = urlParams.get('email');
+        let usedBalance = parseInt(urlParams.get('usedBalance') || '0', 10);
+
+        if (!orderId || !amountKopeks || !email) {
+            const orderData = JSON.parse(sessionStorage.getItem("currentOrder") || "{}");
+            if (orderData.orderId) {
+                orderId = orderData.orderId;
+                amountKopeks = orderData.amount;
+                email = orderData.email;
+                usedBalance = orderData.usedBalance;
+            } else {
+                // nessun ordine valido → redirect immediato a fail
+                window.location.href = `/payment/fail`;
+            }
+        }
 
         const amountRub = (amountKopeks / 100).toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-        const returnUrl = `http://localhost:3001/payment/success?orderId=${orderId}&amount=${amountKopeks}&email=${encodeURIComponent(email)}&usedBalance=${usedBalance}&isPaid=true`;
-        const failUrl = `http://localhost:3001/payment/fail?orderId=${orderId}&amount=${amountKopeks}&email=${encodeURIComponent(email)}&usedBalance=${usedBalance}&isPaid=false`;
+        const returnUrl = `/payment/success?orderId=${orderId}&amount=${amountKopeks}&email=${encodeURIComponent(email)}&usedBalance=${usedBalance}&isPaid=true`;
+        const failUrl = `/payment/fail?orderId=${orderId}&amount=${amountKopeks}&email=${encodeURIComponent(email)}&usedBalance=${usedBalance}&isPaid=false`;
 
         const paymentButton = document.getElementById('alfa-payment-button');
         paymentButton.dataset.returnUrl = returnUrl;
@@ -140,20 +137,25 @@
 
         document.getElementById('order-header').textContent = `Оплата заказа #${orderId}`;
         document.getElementById('amount-paragraph').textContent = `Сумма к оплате: ${amountRub} ₽`;
-
         document.querySelector('.clientInfo').value = email;
         document.querySelector('.amount').value = amountKopeks;
         document.querySelector('.orderNumber').value = orderId;
 
-        //class=alfa-payment__rbs-frame-header div che contiene X per chiudere il form
-        //class=alfa-payment__payment-close-button
-        //class=alfa-payment__modal Overlay del modal
-        //id alfa-payment form dove mettere i dati della carta
-        // id alfa-payment__message quando ordine va bene
-        // class=app__success 
-    </script>
-    <script id="alfa-payment-script" type="text/javascript"
-        src="https://testpay.alfabank.ru/assets/alfa-payment.js"></script>
-</body>
+        // --- 2. Gestione fail se l'utente abbandona la pagina
+        let hasClickedPayment = false;
+        paymentButton.addEventListener("click", () => { hasClickedPayment = true; });
 
+        function forceFailRedirect() {
+            if (!hasClickedPayment) {
+                window.location.href = failUrl;
+            }
+        }
+
+        // back button
+        history.pushState(null, "", window.location.href);
+        window.addEventListener("popstate", forceFailRedirect);
+    </script>
+
+    <script id="alfa-payment-script" type="text/javascript" src="https://testpay.alfabank.ru/assets/alfa-payment.js"></script>
+</body>
 </html>

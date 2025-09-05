@@ -49,9 +49,9 @@ const PaymentFailPage = () => {
           await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/orders/${orderId}`, {
             headers: { Authorization: `Bearer ${user.token}` },
           });
-          console.log(`Ordine ${orderId} cancellato`);
+          console.log(`Order ${orderId} deleted`);
         } catch (delErr) {
-          console.error("Errore cancellando ordine:", delErr);
+          console.error("Error deleting order:", delErr);
         }
 
         // --- 2️⃣ Restituisci il balance usato
@@ -64,14 +64,14 @@ const PaymentFailPage = () => {
             );
             updateUserBalance(balanceRes.data.balance);
           } catch (balanceErr) {
-            console.error("Errore restituendo il balance:", balanceErr);
+            console.error("Error refunding balance:", balanceErr);
             toast.error("⚠️ Ошибка при возврате баланса. Попробуйте снова.");
           }
         }
 
         toast.error("❌ Платеж не выполнен. Заказ отменён.");
       } catch (err) {
-        console.error("Errore gestendo il fail:", err);
+        console.error("Error:", err);
         toast.error("⚠️ Ошибка при обработке платежа. Попробуйте снова.");
       } finally {
         setIsProcessing(false);

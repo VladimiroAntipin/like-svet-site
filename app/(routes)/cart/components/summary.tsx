@@ -362,7 +362,6 @@ const Summary = () => {
             setIsSubmitting(true);
 
             // --- 1. Costruzione orderItems
-            // --- Costruzione orderItems senza generare giftCodeId
             const orderItems = items.map(item => {
                 if (item.product.isGiftCard) {
                     return {
@@ -370,7 +369,6 @@ const Summary = () => {
                         quantity: Number(item.quantity) || 1,
                         giftCardAmount: item.giftCardAmount,
                         giftCardType: item.giftCardType,
-                        // giftCodeId verrà generato dopo il pagamento
                     };
                 }
                 return {
@@ -398,12 +396,10 @@ const Summary = () => {
                     extraInfo,
                     isPaid: false,
                     totalPrice: finalTotal,
-                    usedBalance: usedBalance
+                    usedBalance
                 },
                 { headers: { Authorization: `Bearer ${user.token}` } }
             );
-
-            console.log("📝 Order created response:", response.data);
 
             const orderId = response.data.id;
 
@@ -415,20 +411,24 @@ const Summary = () => {
                         { amount: -maxBalanceToUse },
                         { headers: { Authorization: `Bearer ${user.token}` } }
                     );
-
                     updateUserBalance(balanceRes.data.balance);
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 } catch (balanceErr) {
-                    console.error("Errore aggiornando баланс:", balanceErr);
                     toast.error("⚠️ Заказ создан, но баланс не обновлён.");
                 }
             }
 
-            // --- 5. Apri la pagina di Alfa-Bank con orderId, amount ed email
+            // --- 5. Salva dati ordine e flag "fromCheckout"
+            const orderData = { orderId, amount: finalTotal, email: user.email, usedBalance };
+            sessionStorage.setItem("currentOrder", JSON.stringify(orderData));
+            sessionStorage.setItem("fromCheckout", "true"); // segnala che siamo arrivati da summary
+
+            // --- 6. Vai a pagina statica checkout.html
             const url = `/payment/checkout.html?orderId=${orderId}&amount=${finalTotal}&email=${encodeURIComponent(user.email)}&usedBalance=${usedBalance}`;
             window.location.href = url;
 
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
-            console.error(err);
             toast.error("❌ Ошибка при оформлении заказа. Попробуйте снова.");
         } finally {
             setIsSubmitting(false);

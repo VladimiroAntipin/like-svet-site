@@ -7,6 +7,7 @@ import { AuthProvider } from "@/context/auth-context";
 import { Toaster } from "sonner";
 import { FavoritesProvider } from "@/context/favorite-context";
 import ScrollToTop from "@/components/scroll-to-top";
+import CheckoutGuard from "@/components/checkout-guard";
 
 const font = Manrope({ subsets: ["latin", "cyrillic"], });
 
@@ -25,11 +26,7 @@ export const metadata: Metadata = {
   themeColor: "#ffffff",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode; }>) {
   return (
     <html lang="ru" data-scroll-behavior="smooth">
       <head>
@@ -42,9 +39,11 @@ export default function RootLayout({
           <FavoritesProvider>
             <Navbar />
             <ScrollToTop />
-            <main className="pt-[104px]" style={{ paddingTop: `calc(104px + env(safe-area-inset-top))` }}>
-              {children}
-            </main>
+            <CheckoutGuard>
+              <main className="pt-[104px]" style={{ paddingTop: `calc(104px + env(safe-area-inset-top))` }}>
+                {children}
+              </main>
+            </CheckoutGuard>
             <Footer />
             <Toaster position="top-left" richColors />
           </FavoritesProvider>
