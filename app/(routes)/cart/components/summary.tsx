@@ -17,6 +17,7 @@ import { getUserOrders, OrderItem } from "@/actions/get-user-orders";
 import AlfaBankButton from "@/components/alfabutton";
 import { validateCourierDate, validateDeliveryPoint, validateElectronic, validateEmail, validateInternational, validatePhone, validatePostIndex } from "@/lib/cart-validation";
 import { moscowOutsideMKAD } from "@/lib/moscow-out-mkad";
+import CheckoutGuard from "@/components/payment-guard";
 
 interface ShippingOption {
     name: string;
@@ -436,247 +437,249 @@ const Summary = () => {
     };
 
     return (
-        <div className="mt-16 max-[450px]:mt-8 rounded-lg bg-gray-50 px-4 py-4 sm:p-6 lg:col-span-5 lg:mt-0 lg:p-8">
-            {/* Dropdown spedizione */}
-            <div className="flex flex-col mb-4">
-                <span className="mb-1 mt-2 font-medium">Выберите способ доставки:</span>
-                <Popover open={isOpen} onOpenChange={setIsOpen}>
-                    <PopoverTrigger asChild>
-                        <Button
-                            className="w-full rounded-none border px-3 py-2 text-left mt-2"
-                            ref={buttonRef}
-                            disabled={onlyElectronicGiftCards}
-                        >
-                            <div className="flex justify-between w-full">
-                                <span className="text-gray-900 text-base font-medium">
-                                    {selectedShipping ? selectedShipping.name : "Служба доставки"}
-                                </span>
-                            </div>
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="p-0" align="start" style={{ width: buttonRef.current?.offsetWidth }}>
-                        <Command className="rounded-none border">
-                            <CommandList>
-                                {shippingOptions.map(option => (
-                                    <CommandItem
-                                        key={option.name}
-                                        onSelect={() => {
-                                            setSelectedShipping(option);
-                                            setIsOpen(false);
-                                            setShowShippingPrice(false);
-                                            // Reset di tutti gli errori quando si cambia corriere
-                                            setExtraInfoError("");
-                                            setRegionError("");
-                                            setAddressError("");
-                                            setInvalidCourier(false);
+        <CheckoutGuard>
+            <div className="mt-16 max-[450px]:mt-8 rounded-lg bg-gray-50 px-4 py-4 sm:p-6 lg:col-span-5 lg:mt-0 lg:p-8">
+                {/* Dropdown spedizione */}
+                <div className="flex flex-col mb-4">
+                    <span className="mb-1 mt-2 font-medium">Выберите способ доставки:</span>
+                    <Popover open={isOpen} onOpenChange={setIsOpen}>
+                        <PopoverTrigger asChild>
+                            <Button
+                                className="w-full rounded-none border px-3 py-2 text-left mt-2"
+                                ref={buttonRef}
+                                disabled={onlyElectronicGiftCards}
+                            >
+                                <div className="flex justify-between w-full">
+                                    <span className="text-gray-900 text-base font-medium">
+                                        {selectedShipping ? selectedShipping.name : "Служба доставки"}
+                                    </span>
+                                </div>
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="p-0" align="start" style={{ width: buttonRef.current?.offsetWidth }}>
+                            <Command className="rounded-none border">
+                                <CommandList>
+                                    {shippingOptions.map(option => (
+                                        <CommandItem
+                                            key={option.name}
+                                            onSelect={() => {
+                                                setSelectedShipping(option);
+                                                setIsOpen(false);
+                                                setShowShippingPrice(false);
+                                                // Reset di tutti gli errori quando si cambia corriere
+                                                setExtraInfoError("");
+                                                setRegionError("");
+                                                setAddressError("");
+                                                setInvalidCourier(false);
 
-                                            if (option.name === "Самовывоз") {
-                                                setRegion("г.Москва");
-                                                setAddress("105122, Щелковское шоссе, д.19");
-                                                setApartment(""); setFloor(""); setEntrance(""); setExtraInfo("");
-                                            } else if (option.name === "электронный") {
-                                                setRegion("");
-                                                setAddress("");
-                                                setApartment(""); setFloor(""); setEntrance(""); setExtraInfo("");
-                                            } else {
-                                                setRegion(""); setAddress(""); setApartment(""); setFloor(""); setEntrance(""); setExtraInfo("");
-                                            }
-                                        }}
-                                        className="cursor-pointer"
-                                    >
-                                        {option.name}
-                                    </CommandItem>
-                                ))}
-                            </CommandList>
-                        </Command>
-                    </PopoverContent>
-                </Popover>
-                {onlyElectronicGiftCards && (
-                    <span className="text-xs text-gray-500 mt-1">
-                        Для электронных подарочных карт доступна только электронная доставка
-                    </span>
-                )}
-                {invalidCourier && <span className="text-red-600 mt-1 text-sm">Доставка Курьер недоступна в этом регионе, выберите другой способ</span>}
-            </div>
-
-            {/* Campi indirizzo */}
-            {selectedShipping && !isSelfPickup && (
-                <div className="flex flex-col mb-6">
-                    <span className="mb-1 font-medium">
-                        {isInternational ? "Страна и город" :
-                            isElectronic ? "Контакты" :
-                                "Город / Регион"}
-                    </span>
-                    <input
-                        type="text"
-                        value={region}
-                        onChange={e => {
-                            setRegion(e.target.value);
-                            // Reset error when user starts typing
-                            if (regionError) setRegionError("");
-                        }}
-                        onBlur={handleRegionBlur}
-                        onFocus={() => setShowShippingPrice(false)}
-                        placeholder={
-                            isInternational ? "Germany, Berlin" :
-                                isPostRussia ? "Москва, 101000" :
-                                    isElectronic ? "Email (например: example@mail.ru)" :
-                                        "г.Москва"
-                        }
-                        className={`border rounded-md px-3 py-2 mb-2 ${regionError ? "border-red-500" : ""}`}
-                    />
-                    {regionError && <span className="text-red-600 text-sm mb-2">{regionError}</span>}
-
-                    <span className="mb-1 font-medium">
-                        {isDeliveryPoint ? "Адрес пункт выдачи" :
-                            isElectronic ? "Телефон" :
-                                "Адрес доставки"}
-                    </span>
-                    <input
-                        type="text"
-                        value={address}
-                        onChange={e => {
-                            setAddress(e.target.value);
-                            // Reset error when user starts typing
-                            if (addressError) setAddressError("");
-                        }}
-                        onBlur={handleAddressBlur}
-                        placeholder={
-                            isDeliveryPoint ? "Введите адрес пункта выдачи" :
-                                isElectronic ? "Телефон (например: +79123456789)" :
-                                    "Введите адрес"
-                        }
-                        className={`border rounded-md px-3 py-2 mb-2 ${addressError ? "border-red-500" : ""}`}
-                    />
-                    {addressError && <span className="text-red-600 text-sm mb-2">{addressError}</span>}
-
-                    {isElectronic && (
+                                                if (option.name === "Самовывоз") {
+                                                    setRegion("г.Москва");
+                                                    setAddress("105122, Щелковское шоссе, д.19");
+                                                    setApartment(""); setFloor(""); setEntrance(""); setExtraInfo("");
+                                                } else if (option.name === "электронный") {
+                                                    setRegion("");
+                                                    setAddress("");
+                                                    setApartment(""); setFloor(""); setEntrance(""); setExtraInfo("");
+                                                } else {
+                                                    setRegion(""); setAddress(""); setApartment(""); setFloor(""); setEntrance(""); setExtraInfo("");
+                                                }
+                                            }}
+                                            className="cursor-pointer"
+                                        >
+                                            {option.name}
+                                        </CommandItem>
+                                    ))}
+                                </CommandList>
+                            </Command>
+                        </PopoverContent>
+                    </Popover>
+                    {onlyElectronicGiftCards && (
                         <span className="text-xs text-gray-500 mt-1">
-                            Укажите email и телефон
+                            Для электронных подарочных карт доступна только электронная доставка
                         </span>
                     )}
-
-                    {/* Mostra solo per Kurier */}
-                    {!isDeliveryPoint && !isSelfPickup && !isElectronic && (
-                        <>
-                            <div className="flex justify-between gap-2 mb-2 w-full">
-                                <input type="text" value={apartment} onChange={e => setApartment(e.target.value)} placeholder="Квартира" className="border rounded-md px-3 py-2 w-[30%]" />
-                                <input type="text" value={floor} onChange={e => setFloor(e.target.value)} placeholder="Этаж" className="border rounded-md px-3 py-2 w-[30%]" />
-                                <input type="text" value={entrance} onChange={e => setEntrance(e.target.value)} placeholder="Подъезд" className="border rounded-md px-3 py-2 w-[30%]" />
-                            </div>
-                            {isCourier && (
-                                <>
-                                    <input
-                                        type="text"
-                                        value={extraInfo}
-                                        onChange={e => {
-                                            setExtraInfo(e.target.value);
-                                            // Solo se la città è valida, validare extraInfo
-                                            if (!invalidCourier) {
-                                                if (!validateCourierDate(e.target.value)) {
-                                                    setExtraInfoError("Укажите корректную дату и интервал (dd/mm/yy hh:mm-hh:mm)");
-                                                } else {
-                                                    setExtraInfoError("");
-                                                }
-                                            }
-                                        }}
-                                        placeholder="дата и интервал доставки например: 01/01/25 10:00-13:00"
-                                        className={`border rounded-md px-3 py-2 mb-2 ${extraInfoError ? "border-red-500" : ""}`}
-                                        disabled={invalidCourier} // Disabilita il campo se la città non è valida
-                                    />
-                                    {/* Mostra l'errore di extraInfo solo se la città è valida */}
-                                    {!invalidCourier && extraInfoError && <span className="text-red-600 text-sm mb-2">{extraInfoError}</span>}
-                                </>
-                            )}
-                        </>
-                    )}
+                    {invalidCourier && <span className="text-red-600 mt-1 text-sm">Доставка Курьер недоступна в этом регионе, выберите другой способ</span>}
                 </div>
-            )}
 
-            {/* Campi Самовывоз */}
-            {isSelfPickup && (
-                <div className="flex flex-col mb-6">
-                    <span className="mb-1 font-medium">Город / Регион</span>
-                    <input type="text" value={region} readOnly className="border rounded-md px-3 py-2 mb-2 bg-gray-200" />
-                    <span className="mb-1 font-medium">Адрес</span>
-                    <input type="text" value={address} readOnly className="border rounded-md px-3 py-2 mb-2 bg-gray-200" />
-                </div>
-            )}
-
-            {/* Mostra il balance dell'utente se disponibile */}
-            {!onlyGiftCards && user && user.balance !== undefined && user.balance > 0 && (
-                <div className="flex flex-col mb-4 p-3 bg-gray-100 rounded-md">
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="font-medium">Ваш баланс:</span>
-                        <Currency data={user.balance} />
-                    </div>
-                    <div className="flex items-center">
+                {/* Campi indirizzo */}
+                {selectedShipping && !isSelfPickup && (
+                    <div className="flex flex-col mb-6">
+                        <span className="mb-1 font-medium">
+                            {isInternational ? "Страна и город" :
+                                isElectronic ? "Контакты" :
+                                    "Город / Регион"}
+                        </span>
                         <input
-                            type="checkbox"
-                            id="useBalance"
-                            checked={useBalance}
-                            onChange={(e) => setUseBalance(e.target.checked)}
-                            className="mr-2"
+                            type="text"
+                            value={region}
+                            onChange={e => {
+                                setRegion(e.target.value);
+                                // Reset error when user starts typing
+                                if (regionError) setRegionError("");
+                            }}
+                            onBlur={handleRegionBlur}
+                            onFocus={() => setShowShippingPrice(false)}
+                            placeholder={
+                                isInternational ? "Germany, Berlin" :
+                                    isPostRussia ? "Москва, 101000" :
+                                        isElectronic ? "Email (например: example@mail.ru)" :
+                                            "г.Москва"
+                            }
+                            className={`border rounded-md px-3 py-2 mb-2 ${regionError ? "border-red-500" : ""}`}
                         />
-                        <label htmlFor="useBalance" className="text-sm">
-                            Использовать баланс (макс. {maxBalanceToUse / 100} ₽)
-                        </label>
+                        {regionError && <span className="text-red-600 text-sm mb-2">{regionError}</span>}
+
+                        <span className="mb-1 font-medium">
+                            {isDeliveryPoint ? "Адрес пункт выдачи" :
+                                isElectronic ? "Телефон" :
+                                    "Адрес доставки"}
+                        </span>
+                        <input
+                            type="text"
+                            value={address}
+                            onChange={e => {
+                                setAddress(e.target.value);
+                                // Reset error when user starts typing
+                                if (addressError) setAddressError("");
+                            }}
+                            onBlur={handleAddressBlur}
+                            placeholder={
+                                isDeliveryPoint ? "Введите адрес пункта выдачи" :
+                                    isElectronic ? "Телефон (например: +79123456789)" :
+                                        "Введите адрес"
+                            }
+                            className={`border rounded-md px-3 py-2 mb-2 ${addressError ? "border-red-500" : ""}`}
+                        />
+                        {addressError && <span className="text-red-600 text-sm mb-2">{addressError}</span>}
+
+                        {isElectronic && (
+                            <span className="text-xs text-gray-500 mt-1">
+                                Укажите email и телефон
+                            </span>
+                        )}
+
+                        {/* Mostra solo per Kurier */}
+                        {!isDeliveryPoint && !isSelfPickup && !isElectronic && (
+                            <>
+                                <div className="flex justify-between gap-2 mb-2 w-full">
+                                    <input type="text" value={apartment} onChange={e => setApartment(e.target.value)} placeholder="Квартира" className="border rounded-md px-3 py-2 w-[30%]" />
+                                    <input type="text" value={floor} onChange={e => setFloor(e.target.value)} placeholder="Этаж" className="border rounded-md px-3 py-2 w-[30%]" />
+                                    <input type="text" value={entrance} onChange={e => setEntrance(e.target.value)} placeholder="Подъезд" className="border rounded-md px-3 py-2 w-[30%]" />
+                                </div>
+                                {isCourier && (
+                                    <>
+                                        <input
+                                            type="text"
+                                            value={extraInfo}
+                                            onChange={e => {
+                                                setExtraInfo(e.target.value);
+                                                // Solo se la città è valida, validare extraInfo
+                                                if (!invalidCourier) {
+                                                    if (!validateCourierDate(e.target.value)) {
+                                                        setExtraInfoError("Укажите корректную дату и интервал (dd/mm/yy hh:mm-hh:mm)");
+                                                    } else {
+                                                        setExtraInfoError("");
+                                                    }
+                                                }
+                                            }}
+                                            placeholder="дата и интервал доставки например: 01/01/25 10:00-13:00"
+                                            className={`border rounded-md px-3 py-2 mb-2 ${extraInfoError ? "border-red-500" : ""}`}
+                                            disabled={invalidCourier} // Disabilita il campo se la città non è valida
+                                        />
+                                        {/* Mostra l'errore di extraInfo solo se la città è valida */}
+                                        {!invalidCourier && extraInfoError && <span className="text-red-600 text-sm mb-2">{extraInfoError}</span>}
+                                    </>
+                                )}
+                            </>
+                        )}
                     </div>
-                </div>
-            )}
-
-            {/* Costi */}
-            <div className="flex justify-between mb-2">
-                <span>Стоимость товаров</span>
-                <Currency data={itemsTotal} />
-            </div>
-
-            <AnimatePresence>
-                {selectedShipping && showShippingPrice && (
-                    <motion.div className="flex justify-between mb-2" initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.3 }}>
-                        <span>Стоимость доставки</span>
-                        <Currency data={selectedShipping.price} />
-                    </motion.div>
                 )}
-            </AnimatePresence>
 
-            {/* Mostra lo sconto solo se non ci sono solo gift card */}
-            {userDiscountPercentage > 0 && !onlyGiftCards && (
+                {/* Campi Самовывоз */}
+                {isSelfPickup && (
+                    <div className="flex flex-col mb-6">
+                        <span className="mb-1 font-medium">Город / Регион</span>
+                        <input type="text" value={region} readOnly className="border rounded-md px-3 py-2 mb-2 bg-gray-200" />
+                        <span className="mb-1 font-medium">Адрес</span>
+                        <input type="text" value={address} readOnly className="border rounded-md px-3 py-2 mb-2 bg-gray-200" />
+                    </div>
+                )}
+
+                {/* Mostra il balance dell'utente se disponibile */}
+                {!onlyGiftCards && user && user.balance !== undefined && user.balance > 0 && (
+                    <div className="flex flex-col mb-4 p-3 bg-gray-100 rounded-md">
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="font-medium">Ваш баланс:</span>
+                            <Currency data={user.balance} />
+                        </div>
+                        <div className="flex items-center">
+                            <input
+                                type="checkbox"
+                                id="useBalance"
+                                checked={useBalance}
+                                onChange={(e) => setUseBalance(e.target.checked)}
+                                className="mr-2"
+                            />
+                            <label htmlFor="useBalance" className="text-sm">
+                                Использовать баланс (макс. {maxBalanceToUse / 100} ₽)
+                            </label>
+                        </div>
+                    </div>
+                )}
+
+                {/* Costi */}
                 <div className="flex justify-between mb-2">
-                    <span>Твоя скидка ({userDiscountPercentage}%)</span>
-                    <span className="flex">-<Currency data={discountAmount} /></span>
+                    <span>Стоимость товаров</span>
+                    <Currency data={itemsTotal} />
                 </div>
-            )}
 
-            {/* Mostra l'utilizzo del balance se selezionato */}
-            {useBalance && maxBalanceToUse > 0 && (
-                <div className="flex justify-between mb-2 text-green-600">
-                    <span>Использовано с баланса</span>
-                    <span className="flex">-<Currency data={maxBalanceToUse} /></span>
-                </div>
-            )}
-
-            <div className="flex justify-between font-semibold text-lg mb-4 border-t border-gray-200 pt-4">
-                <span>К оплате:</span>
-                <AnimatePresence mode="wait">
-                    <motion.div
-                        key={finalTotal}
-                        initial={{ opacity: 0, y: -5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -5 }}
-                        transition={{ duration: 0.3 }}
-                    >
-                        <Currency data={finalTotal} />
-                    </motion.div>
+                <AnimatePresence>
+                    {selectedShipping && showShippingPrice && (
+                        <motion.div className="flex justify-between mb-2" initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.3 }}>
+                            <span>Стоимость доставки</span>
+                            <Currency data={selectedShipping.price} />
+                        </motion.div>
+                    )}
                 </AnimatePresence>
-            </div>
 
-            <AlfaBankButton
-                isSubmitting={isSubmitting}
-                isCheckoutDisabled={isCheckoutDisabled}
-                onCheckout={onCheckout}
-            />
-        </div>
+                {/* Mostra lo sconto solo se non ci sono solo gift card */}
+                {userDiscountPercentage > 0 && !onlyGiftCards && (
+                    <div className="flex justify-between mb-2">
+                        <span>Твоя скидка ({userDiscountPercentage}%)</span>
+                        <span className="flex">-<Currency data={discountAmount} /></span>
+                    </div>
+                )}
+
+                {/* Mostra l'utilizzo del balance se selezionato */}
+                {useBalance && maxBalanceToUse > 0 && (
+                    <div className="flex justify-between mb-2 text-green-600">
+                        <span>Использовано с баланса</span>
+                        <span className="flex">-<Currency data={maxBalanceToUse} /></span>
+                    </div>
+                )}
+
+                <div className="flex justify-between font-semibold text-lg mb-4 border-t border-gray-200 pt-4">
+                    <span>К оплате:</span>
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={finalTotal}
+                            initial={{ opacity: 0, y: -5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -5 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <Currency data={finalTotal} />
+                        </motion.div>
+                    </AnimatePresence>
+                </div>
+
+                <AlfaBankButton
+                    isSubmitting={isSubmitting}
+                    isCheckoutDisabled={isCheckoutDisabled}
+                    onCheckout={onCheckout}
+                />
+            </div>
+        </CheckoutGuard>
     );
 };
 

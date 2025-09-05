@@ -69,6 +69,10 @@ const PaymentFailPage = () => {
           }
         }
 
+        // --- 3️⃣ Pulizia sessionStorage
+        sessionStorage.removeItem("currentOrder");
+        sessionStorage.removeItem("fromCheckout");
+
         toast.error("❌ Платеж не выполнен. Заказ отменён.");
       } catch (err) {
         console.error("Error:", err);

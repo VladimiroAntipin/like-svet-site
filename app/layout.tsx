@@ -7,7 +7,6 @@ import { AuthProvider } from "@/context/auth-context";
 import { Toaster } from "sonner";
 import { FavoritesProvider } from "@/context/favorite-context";
 import ScrollToTop from "@/components/scroll-to-top";
-import CheckoutGuard from "@/components/checkout-guard";
 
 const font = Manrope({ subsets: ["latin", "cyrillic"], });
 
@@ -39,11 +38,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <FavoritesProvider>
             <Navbar />
             <ScrollToTop />
-            <CheckoutGuard>
               <main className="pt-[104px]" style={{ paddingTop: `calc(104px + env(safe-area-inset-top))` }}>
                 {children}
               </main>
-            </CheckoutGuard>
             <Footer />
             <Toaster position="top-left" richColors />
           </FavoritesProvider>

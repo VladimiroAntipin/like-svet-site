@@ -74,6 +74,10 @@ const PaymentSuccessPage = ({ onOrderComplete }: any) => {
                     toast.success("🎁 Подарочный сертификат создан!");
                 }
 
+                // 🔹 Pulizia sessionStorage (ordine completato)
+                sessionStorage.removeItem("currentOrder");
+                sessionStorage.removeItem("fromCheckout");
+
                 if (onOrderComplete) onOrderComplete();
             } catch {
                 toast.error("❌ Ошибка при подтверждении оплаты.");
