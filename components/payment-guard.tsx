@@ -7,37 +7,41 @@ export default function CheckoutGuard({ children }: { children: React.ReactNode 
   const router = useRouter();
   const [checking, setChecking] = useState(true);
 
-  useEffect(() => {
-    const checkFromCheckout = async () => {
-      try {
-        const fromCheckout = sessionStorage.getItem("fromCheckout");
-        if (!fromCheckout) {
-          setChecking(false);
-          return;
+  const checkFromCheckout = () => {
+    try {
+      const fromCheckout = sessionStorage.getItem("fromCheckout");
+      if (!fromCheckout) return;
+
+      const orderData = JSON.parse(sessionStorage.getItem("currentOrder") || "{}");
+      if (orderData.orderId) {
+        const failUrl = `/payment/fail?orderId=${orderData.orderId}&amount=${orderData.amount}&email=${encodeURIComponent(orderData.email)}&usedBalance=${orderData.usedBalance}&isPaid=false`;
+
+        if (orderData.usedBalance && orderData.usedBalance > 0) {
+          toast.info(`💰 Вам возвращено ${orderData.usedBalance / 100}₽ на баланс`);
         }
 
-        const orderData = JSON.parse(sessionStorage.getItem("currentOrder") || "{}");
-        if (orderData.orderId) {
-          const failUrl = `/payment/fail?orderId=${orderData.orderId}&amount=${orderData.amount}&email=${encodeURIComponent(orderData.email)}&usedBalance=${orderData.usedBalance}&isPaid=false`;
-
-          // 🔹 Se c’era balance usato → mostra log
-          if (orderData.usedBalance && orderData.usedBalance > 0) {
-            toast.info(`💰 Вам возвращено ${orderData.usedBalance / 100}₽ на баланс`);
-          }
-
-          router.replace(failUrl);
-        }
-      } catch (err) {
-        console.error("Error on checkout guard:", err);
-      } finally {
-        // 🔹 Pulizia sempre, sia in caso di successo che errore
-        sessionStorage.removeItem("fromCheckout");
-        sessionStorage.removeItem("currentOrder");
-        setChecking(false);
+        router.replace(failUrl);
       }
-    };
+    } catch (err) {
+      console.error("Error on checkout guard:", err);
+    } finally {
+      sessionStorage.removeItem("fromCheckout");
+      sessionStorage.removeItem("currentOrder");
+      setChecking(false);
+    }
+  };
 
+  useEffect(() => {
+    // Controllo normale all'inizio
     checkFromCheckout();
+
+    // Controllo anche se la pagina viene mostrata da bfcache
+    window.addEventListener("pageshow", checkFromCheckout);
+
+    return () => {
+      window.removeEventListener("pageshow", checkFromCheckout);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
   if (checking) {
