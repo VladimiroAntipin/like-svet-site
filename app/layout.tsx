@@ -23,6 +23,39 @@ export const metadata: Metadata = {
     ],
   },
   themeColor: "#ffffff",
+
+  openGraph: {
+    title: "LikeSvet Shop",
+    description: "LikeSvet — интернет-магазин украшений с доставкой по России и миру.",
+    url: "https://likesvet.com",
+    siteName: "LikeSvet",
+    images: [
+      {
+        url: "https://likesvet.com/SEO.jpg",
+        width: 1200,
+        height: 630,
+        alt: "LikeSvet Shop",
+      },
+    ],
+    locale: "ru_RU",
+    type: "website",
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "LikeSvet Shop",
+    description: "LikeSvet — интернет-магазин украшений с доставкой по России и миру.",
+    images: ["https://likesvet.com/SEO.jpg"],
+  },
+
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode; }>) {
@@ -38,9 +71,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <FavoritesProvider>
             <Navbar />
             <ScrollToTop />
-              <main className="pt-[104px]" style={{ paddingTop: `calc(104px + env(safe-area-inset-top))` }}>
-                {children}
-              </main>
+            <main className="pt-[104px]" style={{ paddingTop: `calc(104px + env(safe-area-inset-top))` }}>
+              {children}
+            </main>
             <Footer />
             <Toaster position="top-left" richColors />
           </FavoritesProvider>
