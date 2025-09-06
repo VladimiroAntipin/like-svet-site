@@ -2,107 +2,108 @@
 <html lang="ru">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LikeSvet</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #f0f2f5;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LikeSvet</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex; /* rimane valido, verrà riattivato via JS */
+      flex-direction: column;
+      align-items: center;
+      background-color: #f0f2f5;
+    }
 
-        .store-logo {
-            width: 200px;
-            height: auto;
-            margin-top: 20px;
-        }
+    .store-logo {
+      width: 200px;
+      height: auto;
+      margin-top: 20px;
+    }
 
-        .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 30px;
-            width: 80%;
-            padding: 40px 30px;
-            background-color: #fff;
-            border-radius: 16px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            margin-top: 50px;
-        }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+      width: 80%;
+      padding: 40px 30px;
+      background-color: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      margin-top: 50px;
+    }
 
-        .alfa-logo {
-            width: 150px;
-            height: auto;
-            margin-bottom: 20px;
-        }
+    .alfa-logo {
+      width: 150px;
+      height: auto;
+      margin-bottom: 20px;
+    }
 
-        h1 {
-            font-size: 24px;
-            margin-bottom: 10px;
-            color: #333;
-        }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: #333;
+    }
 
-        p {
-            font-size: 18px;
-            margin-bottom: 25px;
-            color: #555;
-        }
+    p {
+      font-size: 18px;
+      margin-bottom: 25px;
+      color: #555;
+    }
 
-        #alfa-payment-button {
-            width: 100%;
-            min-height: 70px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            gap: 10px;
-        }
+    #alfa-payment-button {
+      width: 100%;
+      min-height: 70px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      gap: 10px;
+    }
 
-        #alfa-payment-button button {
-            font-size: 2rem !important;
-            padding: 20px 40px !important;
-            border-radius: 10px !important;
-        }
+    #alfa-payment-button button {
+      font-size: 2rem !important;
+      padding: 20px 40px !important;
+      border-radius: 10px !important;
+    }
 
-        #alfa-payment {
-            width: 100% !important;
-            max-width: 100% !important;
-            height: 100% !important;
-            max-height: 100% !important;
-            top: 0 !important;
-            left: 0 !important;
-            position: fixed !important;
-            margin: 0 !important;
-            border-radius: 0 !important;
-            overflow: auto !important;
-            z-index: 999999 !important;
-        }
+    #alfa-payment {
+      width: 100% !important;
+      max-width: 100% !important;
+      height: 100% !important;
+      max-height: 100% !important;
+      top: 0 !important;
+      left: 0 !important;
+      position: fixed !important;
+      margin: 0 !important;
+      border-radius: 0 !important;
+      overflow: auto !important;
+      z-index: 999999 !important;
+    }
 
-        .alfa-payment__rbs-frame-header {
-            position: absolute !important;
-            display: block !important;
-            height: 25px !important;
-            right: 5px !important;
-            top: 5px !important;
-            width: 25px !important;
-        }
-    </style>
+    .alfa-payment__rbs-frame-header {
+      position: absolute !important;
+      display: block !important;
+      height: 25px !important;
+      right: 5px !important;
+      top: 5px !important;
+      width: 25px !important;
+    }
+  </style>
 </head>
 
-<body>
-    <img src="/logo.jpg" alt="Logo Negozio" class="store-logo">
-    <div class="container">
-        <img src="/alfa-bank-logo.png" alt="AlfaBank Logo" class="alfa-logo">
-        <h1 id="order-header">Оплата заказа #0</h1>
-        <p id="amount-paragraph">Сумма к оплате: 0 ₽</p>
+<!-- 🔹 NASCONDI TUTTO ALL'AVVIO -->
+<body style="display:none">
+  <img src="/logo.jpg" alt="Logo Negozio" class="store-logo">
+  <div class="container">
+    <img src="/alfa-bank-logo.png" alt="AlfaBank Logo" class="alfa-logo">
+    <h1 id="order-header">Оплата заказа #0</h1>
+    <p id="amount-paragraph">Сумма к оплате: 0 ₽</p>
 
     <div style="
         background-color: #fff3cd;
@@ -114,55 +115,65 @@
         margin-bottom: 20px;
         text-align: center;
     ">
-        Пожалуйста, не закрывайте эту страницу во время оплаты!
+      Пожалуйста, не закрывайте эту страницу во время оплаты!
     </div>
 
-        <div 
-            id="alfa-payment-button" 
-            data-token="ndpuvf1jn8iaggp3ck7sfa5p6r" 
-            data-gateway="test"
-            data-version="1.0" 
-            data-client-info-selector=".clientInfo" 
-            data-amount-selector=".amount"
-            data-order-number-selector=".orderNumber" 
-            data-description-selector=".order" 
-            data-stages="1"
-            data-language="ru" 
-            data-return-url="http://localhost:3001/payment/success" 
-            data-fail-url="http://localhost:3001/payment/fail" 
-            data-redirect="true" 
-            data-amount-format="kopeyki">
-            <input type="hidden" class="clientInfo" value="">
-            <input type="hidden" class="amount" value="">
-            <input type="hidden" class="orderNumber" value="">
-            <input type="hidden" class="order" value="Покупка в магазине">
-        </div>
+    <div 
+      id="alfa-payment-button" 
+      data-token="ndpuvf1jn8iaggp3ck7sfa5p6r" 
+      data-gateway="test"
+      data-version="1.0" 
+      data-client-info-selector=".clientInfo" 
+      data-amount-selector=".amount"
+      data-order-number-selector=".orderNumber" 
+      data-description-selector=".order" 
+      data-stages="1"
+      data-language="ru" 
+      data-return-url="http://localhost:3001/payment/success" 
+      data-fail-url="http://localhost:3001/payment/fail" 
+      data-redirect="true" 
+      data-amount-format="kopeyki">
+      <input type="hidden" class="clientInfo" value="">
+      <input type="hidden" class="amount" value="">
+      <input type="hidden" class="orderNumber" value="">
+      <input type="hidden" class="order" value="Покупка в магазине">
     </div>
+  </div>
 
-    <script>
-        // --- 1. Recupera dati ordine da URL o sessionStorage
-        const urlParams = new URLSearchParams(window.location.search);
-        let orderId = urlParams.get('orderId');
-        let amountKopeks = parseInt(urlParams.get('amount') || '0', 10);
-        let email = urlParams.get('email');
-        let usedBalance = parseInt(urlParams.get('usedBalance') || '0', 10);
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    let orderId = urlParams.get('orderId');
+    let amountKopeks = parseInt(urlParams.get('amount') || '0', 10);
+    let email = urlParams.get('email');
+    let usedBalance = parseInt(urlParams.get('usedBalance') || '0', 10);
 
-        const amountRub = (amountKopeks / 100).toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    // 🔹 Se manca l'orderId → redirect immediato
+    if (!orderId) {
+      window.location.replace("/not-found");
+    } else {
+      // ✅ Solo se orderId è valido mostri la pagina
+      document.body.style.display = "flex";
 
-        const returnUrl = `/payment/success?orderId=${orderId}&amount=${amountKopeks}&email=${encodeURIComponent(email)}&usedBalance=${usedBalance}&isPaid=true`;
-        const failUrl = `/payment/fail?orderId=${orderId}&amount=${amountKopeks}&email=${encodeURIComponent(email)}&usedBalance=${usedBalance}&isPaid=false`;
+      const amountRub = (amountKopeks / 100).toLocaleString('ru-RU', { 
+        minimumFractionDigits: 2, 
+        maximumFractionDigits: 2 
+      });
 
-        const paymentButton = document.getElementById('alfa-payment-button');
-        paymentButton.dataset.returnUrl = returnUrl;
-        paymentButton.dataset.failUrl = failUrl;
+      const returnUrl = `/payment/success?orderId=${orderId}&amount=${amountKopeks}&email=${encodeURIComponent(email)}&usedBalance=${usedBalance}&isPaid=true`;
+      const failUrl = `/payment/fail?orderId=${orderId}&amount=${amountKopeks}&email=${encodeURIComponent(email)}&usedBalance=${usedBalance}&isPaid=false`;
 
-        document.getElementById('order-header').textContent = `Оплата заказа #${orderId}`;
-        document.getElementById('amount-paragraph').textContent = `Сумма к оплате: ${amountRub} ₽`;
-        document.querySelector('.clientInfo').value = email;
-        document.querySelector('.amount').value = amountKopeks;
-        document.querySelector('.orderNumber').value = orderId;
-    </script>
+      const paymentButton = document.getElementById('alfa-payment-button');
+      paymentButton.dataset.returnUrl = returnUrl;
+      paymentButton.dataset.failUrl = failUrl;
 
-    <script id="alfa-payment-script" type="text/javascript" src="https://testpay.alfabank.ru/assets/alfa-payment.js"></script>
+      document.getElementById('order-header').textContent = `Оплата заказа #${orderId}`;
+      document.getElementById('amount-paragraph').textContent = `Сумма к оплате: ${amountRub} ₽`;
+      document.querySelector('.clientInfo').value = email || "";
+      document.querySelector('.amount').value = amountKopeks;
+      document.querySelector('.orderNumber').value = orderId;
+    }
+  </script>
+
+  <script id="alfa-payment-script" type="text/javascript" src="https://testpay.alfabank.ru/assets/alfa-payment.js"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, notFound } from "next/navigation";
 import axios from "axios";
 import { toast } from "sonner";
 import { useAuth } from "@/context/auth-context";
@@ -16,6 +16,11 @@ const PaymentSuccessPage = ({ onOrderComplete }: any) => {
     const removeAll = useCart((state) => state.removeAll);
     const hasProcessedRef = useRef(false);
 
+    const urlParams = new URLSearchParams(
+        typeof window !== "undefined" ? window.location.search : ""
+    );
+    const orderId = urlParams.get("orderId");
+
     useEffect(() => {
         const confirmPayment = async () => {
             if (hasProcessedRef.current) return;
@@ -27,19 +32,9 @@ const PaymentSuccessPage = ({ onOrderComplete }: any) => {
                 return;
             }
 
-            const urlParams = new URLSearchParams(window.location.search);
-            const orderId = urlParams.get("orderId");
-
-            if (!orderId) {
-                toast.error("Неверные данные заказа");
-                router.push("/");
-                return;
-            }
-
             setIsSubmitting(true);
 
             try {
-                // Aggiorna l'ordine come pagato
                 await axios.patch(
                     `${process.env.NEXT_PUBLIC_API_URL}/orders/${orderId}`,
                     { isPaid: true },
@@ -49,13 +44,11 @@ const PaymentSuccessPage = ({ onOrderComplete }: any) => {
                 toast.success("✅ Заказ успешно оплачен!");
                 removeAll();
 
-                // Recupera ordine completo con orderItems
                 const orderRes = await axios.get(
                     `${process.env.NEXT_PUBLIC_API_URL}/orders/${orderId}`,
                     { headers: { Authorization: `Bearer ${user.token}` } }
                 );
 
-                // Filtra solo prodotti gift card
                 const giftCardItems = orderRes.data.orderItems?.filter(
                     (item: any) => item.giftCardAmount && item.giftCardAmount > 0
                 ) || [];
@@ -74,7 +67,6 @@ const PaymentSuccessPage = ({ onOrderComplete }: any) => {
                     toast.success("🎁 Подарочный сертификат создан!");
                 }
 
-                // 🔹 Pulizia sessionStorage (ordine completato)
                 sessionStorage.removeItem("currentOrder");
                 sessionStorage.removeItem("fromCheckout");
 
@@ -88,9 +80,14 @@ const PaymentSuccessPage = ({ onOrderComplete }: any) => {
         };
 
         if (!loading) confirmPayment();
-    }, [user, loading, router, removeAll, onOrderComplete]);
+    }, [user, loading, router, removeAll, onOrderComplete, orderId]);
 
-    // Loader con spinner
+
+    if (!orderId) {
+        return notFound();
+    }
+
+
     if (loading || isSubmitting) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-100">
