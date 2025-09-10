@@ -1,39 +1,34 @@
 'use client';
 
-import { useEffect, useState, useRef } from "react";
-import { useRouter, notFound } from "next/navigation";
-import axios from "axios";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth } from "@/context/auth-context";
+import { authFetch } from "@/lib/auth-fetch";
 
 const PaymentFailPage = () => {
   const router = useRouter();
   const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(true);
-  const hasRun = useRef(false);
+  const [orderId, setOrderId] = useState<string | null>(null);
 
-  // 🔹 Prendi orderId subito
-  const urlParams = new URLSearchParams(
-    typeof window !== "undefined" ? window.location.search : ""
-  );
-  const orderId = urlParams.get("orderId");
-
+  // 🔹 Prendi orderId lato client
   useEffect(() => {
-    if (hasRun.current || !user) return;
-    hasRun.current = true;
+    const params = new URLSearchParams(window.location.search);
+    setOrderId(params.get("orderId"));
+  }, []);
+
+  // 🔹 Effettua undo-order
+  useEffect(() => {
+    if (!user || !orderId) return;
 
     const handleFail = async () => {
       try {
-        if (!orderId) return;
+        await authFetch(`${process.env.NEXT_PUBLIC_API_URL}/undo-order`, {
+          method: "POST",
+          body: JSON.stringify({ orderId }),
+        });
 
-        // --- Chiama la route /undo-order
-        await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/undo-order`,
-          { orderId },
-          { headers: { Authorization: `Bearer ${user.token}` } }
-        );
-
-        // --- Pulizia sessionStorage
         sessionStorage.removeItem("currentOrder");
         sessionStorage.removeItem("fromCheckout");
 
@@ -49,8 +44,16 @@ const PaymentFailPage = () => {
     handleFail();
   }, [user, orderId]);
 
-  if (!orderId) {
-    return notFound();
+  // 🔹 Loader finché non abbiamo orderId o richiesta in corso
+  if (!orderId || isProcessing) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-gray-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-black mx-auto mb-4"></div>
+          <p className="text-gray-700 text-lg">Обработка заказа...</p>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -1,8 +1,8 @@
 "use client";
 
-import { getToken } from "@/lib/token";
+import { authFetch } from "@/lib/auth-fetch";
 
-const CMS_URL = process.env.NEXT_PUBLIC_API_URL;
+const CMS_URL = process.env.NEXT_PUBLIC_API_URL!;
 
 interface UpdateCustomerPayload {
   firstName?: string;
@@ -16,21 +16,18 @@ interface UpdateCustomerPayload {
 }
 
 export async function updateCustomer(data: UpdateCustomerPayload) {
-  const token = getToken();
-  if (!token) throw new Error("User not authenticated");
-
-  const res = await fetch(`${CMS_URL}/auth/me`, {
+  const res = await authFetch(`${CMS_URL}/auth/me`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(data),
+    cache: "no-store",
   });
 
   if (!res.ok) {
     const err = await res.text();
-    throw new Error(err);
+    throw new Error(err || "Ошибка при обновлении профиля");
   }
 
   return res.json();

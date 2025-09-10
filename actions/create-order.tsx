@@ -1,5 +1,7 @@
 "use server";
 
+import { authFetch } from "@/lib/auth-fetch";
+
 interface OrderItem {
   id: string; // productId
 }
@@ -13,14 +15,13 @@ interface OrderPayload {
   isPaid?: boolean;
 }
 
-const CMS_URL = process.env.NEXT_PUBLIC_API_URL;
+const CMS_URL = process.env.NEXT_PUBLIC_API_URL!;
 
-export async function createOrder(data: OrderPayload, token: string) {
-  const res = await fetch(`${CMS_URL}/orders`, {
+export async function createOrder(data: OrderPayload) {
+  const res = await authFetch(`${CMS_URL}/orders`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,   // 👈 aggiunto
     },
     body: JSON.stringify(data),
     cache: "no-store",
@@ -28,7 +29,7 @@ export async function createOrder(data: OrderPayload, token: string) {
 
   if (!res.ok) {
     const err = await res.text();
-    throw new Error(err);
+    throw new Error(err || "Order creation failed");
   }
 
   return res.json();

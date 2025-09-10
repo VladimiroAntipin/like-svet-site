@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { getToken } from "@/lib/token";
+import { authFetch } from "@/lib/auth-fetch";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 
@@ -14,7 +14,7 @@ export interface OrderProduct {
   price: number; // in rubli
   images: { id: string; url: string }[];
   category: { id: string; name: string };
-  giftPrices?: GiftPrice[]; 
+  giftPrices?: GiftPrice[];
   giftCardAmount?: number;
   giftCode?: string | null;
 }
@@ -34,13 +34,8 @@ export interface OrderItem {
 }
 
 export async function getUserOrders(): Promise<OrderItem[]> {
-  const token = getToken();
-  if (!token) return [];
-
-  const res = await fetch(`${API_URL}/orders-by-client`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+  const res = await authFetch(`${API_URL}/orders-by-client`, {
+    method: "GET",
     cache: "no-store",
   });
 

@@ -142,7 +142,7 @@ const AccountPage = () => {
     try {
       if (!user?.token) throw new Error("Необхоидмо авторизоваться");
 
-      const res = await redeemPromoCode(promoCode, user.token);
+      const res = await redeemPromoCode(promoCode);
       const newBalance = Number(res.user.balance ?? 0);
       setBalance(newBalance);
       const increment = (res.user.balance - balance) / 100;

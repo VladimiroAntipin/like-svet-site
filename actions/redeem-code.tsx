@@ -1,23 +1,23 @@
 "use server";
 
+import { authFetch } from "@/lib/auth-fetch";
+
 const CMS_URL = process.env.NEXT_PUBLIC_API_URL!;
 
-export async function redeemPromoCode(code: string, token: string) {
+export async function redeemPromoCode(code: string) {
+  const res = await authFetch(`${CMS_URL}/gift-codes/redeem`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ code }),
+    cache: "no-store",
+  });
 
-    const res = await fetch(`${CMS_URL}/gift-codes/redeem`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // 👈 qui usiamo il token preso dal context/localStorage
-        },
-        body: JSON.stringify({ code }),
-        cache: "no-store",
-    });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Нет такого промокода");
+  }
 
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || "Нет такого промокода");
-    }
-
-    return res.json();
+  return res.json();
 }
