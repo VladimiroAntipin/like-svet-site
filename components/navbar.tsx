@@ -5,6 +5,8 @@ import Logo from "@/public/logo.jpg";
 import NavbarActions from "@/components/navbar-actions";
 import { getGiftProductId } from "@/actions/get-gift-product";
 
+export const dynamic = 'force-dynamic'
+
 export const revalidate = 0;
 
 const Navbar = async () => {

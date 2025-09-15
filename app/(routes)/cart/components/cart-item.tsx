@@ -7,6 +7,8 @@ import Currency from "@/components/ui/currency";
 import useCart from "@/hooks/use-cart";
 import { CartItem as CartItemType } from "@/hooks/use-cart";
 
+export const dynamic = 'force-dynamic'
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface CartItemProps {
   data: CartItemType;

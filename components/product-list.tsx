@@ -5,7 +5,6 @@ import NoResults from "@/components/ui/no-results";
 import ProductCard from "@/components/ui/product-card";
 import { useFavorites } from "@/context/favorite-context";
 
-
 interface ProductListProps {
   title: string;
   items: Product[];

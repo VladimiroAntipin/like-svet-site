@@ -8,6 +8,8 @@ import Container from "@/components/ui/container";
 import LoadMoreButton from "@/components/ui/load-more-button";
 import GiftCertificatesPage from "../../customers/gift-certificates/page";
 
+export const dynamic = 'force-dynamic'
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface ProductPageProps {
   params: {

@@ -15,6 +15,8 @@ import ClearFiltersButton from "@/components/ui/clear-filter-button";
 import Container from "@/components/ui/container";
 import LoadMoreButton from "@/components/ui/load-more-button";
 
+export const dynamic = 'force-dynamic'
+
 export const revalidate = 0;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

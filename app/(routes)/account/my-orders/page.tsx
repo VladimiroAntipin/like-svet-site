@@ -12,6 +12,8 @@ import Currency from "@/components/ui/currency";
 import { getUserOrders } from "@/actions/get-user-orders";
 import Container from "@/components/ui/container";
 
+export const dynamic = 'force-dynamic'
+
 interface OrderItem {
   id: string;
   createdAt: string;

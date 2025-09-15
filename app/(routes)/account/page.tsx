@@ -14,6 +14,8 @@ import { redeemPromoCode } from "@/actions/redeem-code";
 import { getUserDiscount } from "@/lib/get-user-discount";
 import { FiArrowLeft } from "react-icons/fi";
 
+export const dynamic = 'force-dynamic'
+
 // Loader a pallini inline (mini)
 const DotsLoader = () => (
   <div className="flex gap-1 justify-center items-center">

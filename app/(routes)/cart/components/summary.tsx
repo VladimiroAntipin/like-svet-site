@@ -19,6 +19,8 @@ import { validateCourierDate, validateDeliveryPoint, validateElectronic, validat
 import { moscowOutsideMKAD } from "@/lib/moscow-out-mkad";
 import CheckoutGuard from "@/components/payment-guard";
 
+export const dynamic = 'force-dynamic'
+
 interface ShippingOption {
     name: string;
     price: number;
