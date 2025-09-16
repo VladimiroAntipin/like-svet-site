@@ -8,8 +8,6 @@ import useCart from "@/hooks/use-cart";
 import { purchaseGiftCode } from "@/actions/purchase-code";
 import { authFetch } from "@/lib/auth-fetch";
 
-export const dynamic = 'force-dynamic'
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const PaymentSuccessPage = ({ onOrderComplete }: any) => {
   const router = useRouter();

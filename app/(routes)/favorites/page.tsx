@@ -8,8 +8,6 @@ import Loader from "@/components/loader";
 import { useFavorites } from "@/context/favorite-context";
 import { useAuth } from "@/context/auth-context";
 
-export const dynamic = 'force-dynamic'
-
 const FavoritePage: React.FC = () => {
   const { favorites, loading } = useFavorites();
   const { user } = useAuth();

@@ -10,6 +10,12 @@ import ScrollToTop from "@/components/scroll-to-top";
 
 const font = Manrope({ subsets: ["latin", "cyrillic"], });
 
+export function generateViewport() {
+  return {
+    themeColor: "#ffffff",
+  };
+}
+
 export const metadata: Metadata = {
   title: "LikeSvet Shop",
   description: "Интернет магазин",
@@ -22,7 +28,6 @@ export const metadata: Metadata = {
       { rel: "icon", url: "/android-chrome-512x512.png", sizes: "512x512" },
     ],
   },
-  themeColor: "#ffffff",
 
   openGraph: {
     title: "LikeSvet Shop",

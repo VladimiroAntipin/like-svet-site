@@ -1,5 +1,3 @@
-"use server";
-
 import { authFetch } from "@/lib/auth-fetch";
 
 interface OrderItem {

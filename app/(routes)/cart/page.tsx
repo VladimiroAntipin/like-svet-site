@@ -8,8 +8,6 @@ import Button from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
-export const dynamic = 'force-dynamic'
-
 const CartPage = () => {
     const cart = useCart();
     const router = useRouter();

@@ -6,8 +6,6 @@ import { toast } from "sonner";
 import { useAuth } from "@/context/auth-context";
 import { authFetch } from "@/lib/auth-fetch";
 
-export const dynamic = 'force-dynamic'
-
 const PaymentFailPage = () => {
   const router = useRouter();
   const { user } = useAuth();

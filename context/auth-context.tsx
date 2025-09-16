@@ -191,7 +191,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       removeToken();
       setUser(null);
       clearTimeout(refreshTimeout);
-      toast.info("Вы вышли из аккаунта 👋");
+      if (broadcast) toast.info("Вы вышли из аккаунта 👋");
 
       if (broadcast) new BroadcastChannel("auth_channel").postMessage({ type: "LOGOUT" });
     }

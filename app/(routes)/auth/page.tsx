@@ -7,8 +7,6 @@ import { useAuth } from "@/context/auth-context";
 import Loader from "@/components/loader";
 import { toast } from "sonner";
 
-export const dynamic = 'force-dynamic'
-
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phoneRegex = /^\+?[0-9]{7,15}$/;
 

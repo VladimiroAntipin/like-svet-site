@@ -1,5 +1,3 @@
-"use server";
-
 import { authFetch } from "@/lib/auth-fetch";
 
 const CMS_URL = process.env.NEXT_PUBLIC_API_URL!;

@@ -13,8 +13,6 @@ import useCart from "@/hooks/use-cart";
 import { useRouter } from "next/navigation";
 import { FiArrowLeft } from "react-icons/fi";
 
-export const dynamic = 'force-dynamic'
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface GiftCertificatesProps {
   product: Product;

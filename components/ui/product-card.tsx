@@ -10,8 +10,6 @@ import { useAuth } from "@/context/auth-context";
 import { toast } from "sonner";
 import { useFavorites } from "@/context/favorite-context";
 
-export const dynamic = 'force-dynamic'
-
 interface ProductCardProps {
   data: Product;
   onToggleFavorite?: () => void;
