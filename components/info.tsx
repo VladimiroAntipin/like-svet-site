@@ -47,17 +47,21 @@ const Info: React.FC<InfoProps> = ({ data }) => {
 
   const handleSizeSelect = (sizeId: string) => {
     setSelectedSize(sizeId);
-    setSizePopoverOpen(false); // Chiudi il dropdown dopo la selezione
+    setSizePopoverOpen(false);
   };
 
   const handleColorSelect = (colorId: string) => {
     setSelectedColor(colorId);
-    setColorPopoverOpen(false); // Chiudi il dropdown dopo la selezione
+    setColorPopoverOpen(false);
   };
 
   return (
     <div>
       <h1 className="text-3xl font-bold text-gray-900">{data.name}</h1>
+
+      {data.description && (
+        <p className="mt-2 text-gray-600 text-base mb-[30px]">{data.description}</p>
+      )}
 
       <div className="mt-3 flex items-end justify-between">
         <div className="text-2xl text-gray-900">

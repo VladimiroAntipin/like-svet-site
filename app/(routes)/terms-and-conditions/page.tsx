@@ -21,11 +21,11 @@ const TermsAndConditions = () => {
               <strong>Продавец</strong> — организация, осуществляющая продажу
               товаров посредством Интернет-магазина, размещенного по адресу{" "}
               <a
-                href="http://likesvetshop.ru"
+                href="https://likesvet.com"
                 target="_blank"
                 className="text-blue-600 underline"
               >
-                likesvetshop.ru
+                likesvet.com
               </a>
               .
               <br />
