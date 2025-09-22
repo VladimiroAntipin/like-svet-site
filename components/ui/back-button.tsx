@@ -7,7 +7,7 @@ const BackButton: React.FC = () => {
 
   return (
     <button
-      onClick={() => router.push('/#products', {scroll: true})}
+      onClick={() => router.back()}
       className="py-2 mb-6 bg-transparent hover:opacity-75 text-gray-900 cursor-pointer"
     >
       ← Вернуться в каталог
