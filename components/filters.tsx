@@ -114,7 +114,7 @@ const Filters: React.FC<FiltersProps> = ({ colors }) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -5 }}
               transition={{ duration: 0.2 }}
-              className="absolute w-full mt-1 bg-white border rounded shadow-md z-10"
+              className="absolute w-full mt-1 bg-white border rounded shadow-md z-10 max-h-60 overflow-y-auto"
             >
               <button
                 className="w-full text-left px-3 py-2 hover:bg-gray-100 text-gray-500 font-thin cursor-pointer text-sm"
