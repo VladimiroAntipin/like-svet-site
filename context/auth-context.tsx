@@ -49,6 +49,9 @@ let logoutFunc: (() => void) | null = null;
 // Singleton per refresh token
 let refreshingPromise: Promise<string | null> | null = null;
 
+// Flag per prevenire logout multipli
+let isLoggingOut = false;
+
 export async function refreshTokenFromProvider() {
   if (refreshingPromise) return refreshingPromise; // evita refresh paralleli
 
@@ -80,7 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const bc = new BroadcastChannel("auth_channel");
 
     bc.onmessage = (e) => {
-      if (e.data.type === "LOGOUT") handleLogout(false);
+      if (e.data.type === "LOGOUT") handleLogout(false, false);
       if (e.data.type === "LOGIN" && e.data.token) fetchUser(e.data.token);
     };
 
@@ -112,7 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (err) {
       console.error("[SCHEDULE_REFRESH_ERROR]", err);
-      handleLogout();
+      handleLogout(true, false);
     }
   };
 
@@ -132,12 +135,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         scheduleRefresh(data.token);
         return data.token;
       } else {
-        handleLogout();
+        handleLogout(true, false);
         return null;
       }
     } catch (err) {
       console.error("[REFRESH_TOKEN_ERROR]", err);
-      handleLogout();
+      handleLogout(true, false);
       return null;
     }
   };
@@ -152,21 +155,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       scheduleRefresh(token);
     } catch (err) {
       console.error("[FETCH_USER_ERROR]", err);
-      handleLogout();
+      handleLogout(false, false);
     } finally {
       setLoading(false);
     }
   };
 
   const login: AuthContextType["login"] = async (credentials) => {
-    const res = await loginUser(credentials);
-    if (res?.token && res.user) {
-      saveToken(res.token);
-      setUser({ token: res.token, ...res.user });
-      toast.success("Вы успешно вошли ✅");
-      scheduleRefresh(res.token);
+    try {
+      const res = await loginUser(credentials);
+      if (res?.token && res.user) {
+        saveToken(res.token);
+        setUser({ token: res.token, ...res.user });
+        toast.success("Вы успешно вошли ✅");
+        scheduleRefresh(res.token);
 
-      new BroadcastChannel("auth_channel").postMessage({ type: "LOGIN", token: res.token });
+        new BroadcastChannel("auth_channel").postMessage({ type: "LOGIN", token: res.token });
+      } else {
+        toast.error("Неверный логин или пароль ❌");
+      }
+    } catch (err) {
+      console.error("[LOGIN_ERROR]", err);
+      toast.error("Неверный логин или пароль ❌");
     }
   };
 
@@ -182,7 +192,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const handleLogout = async (broadcast = true) => {
+  /**
+   * Logout globale
+   * @param broadcast sync con altre tab
+   * @param showToast mostra o no il messaggio
+   */
+  const handleLogout = async (broadcast = true, showToast = true) => {
+    if (isLoggingOut) return;
+    isLoggingOut = true;
+
     try {
       await logoutUser();
     } catch (err) {
@@ -191,9 +209,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       removeToken();
       setUser(null);
       clearTimeout(refreshTimeout);
-      if (broadcast) toast.info("Вы вышли из аккаунта 👋");
 
       if (broadcast) new BroadcastChannel("auth_channel").postMessage({ type: "LOGOUT" });
+      if (showToast) toast.info("Вы вышли из аккаунта 👋");
+
+      isLoggingOut = false;
     }
   };
 

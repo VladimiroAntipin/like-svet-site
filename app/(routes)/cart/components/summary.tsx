@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -566,32 +565,45 @@ const Summary = () => {
                                     <input type="text" value={floor} onChange={e => setFloor(e.target.value)} placeholder="Этаж" className="border rounded-md px-3 py-2 w-[30%]" />
                                     <input type="text" value={entrance} onChange={e => setEntrance(e.target.value)} placeholder="Подъезд" className="border rounded-md px-3 py-2 w-[30%]" />
                                 </div>
-                                {isCourier && (
-                                    <>
-                                        <input
-                                            type="text"
-                                            value={extraInfo}
-                                            onChange={e => {
-                                                setExtraInfo(e.target.value);
-                                                // Solo se la città è valida, validare extraInfo
-                                                if (!invalidCourier) {
-                                                    if (!validateCourierDate(e.target.value)) {
-                                                        setExtraInfoError("Укажите корректную дату и интервал (dd/mm/yy hh:mm-hh:mm)");
-                                                    } else {
-                                                        setExtraInfoError("");
-                                                    }
-                                                }
-                                            }}
-                                            placeholder="дата и интервал доставки например: 01/01/25 10:00-13:00"
-                                            className={`border rounded-md px-3 py-2 mb-2 ${extraInfoError ? "border-red-500" : ""}`}
-                                            disabled={invalidCourier} // Disabilita il campo se la città non è valida
-                                        />
-                                        {/* Mostra l'errore di extraInfo solo se la città è valida */}
-                                        {!invalidCourier && extraInfoError && <span className="text-red-600 text-sm mb-2">{extraInfoError}</span>}
-                                    </>
-                                )}
+
+
                             </>
                         )}
+
+                           {/* Campo extraInfo */}
+                {selectedShipping && (
+                    <div className="mb-2">
+                        <span className="mb-2 font-medium">Комментарии</span>
+                        <input
+                            type="text"
+                            value={extraInfo}
+                            onChange={e => {
+                                setExtraInfo(e.target.value);
+
+                                // Validazione solo per Курьер
+                                if (isCourier && !invalidCourier) {
+                                    if (!validateCourierDate(e.target.value)) {
+                                        setExtraInfoError("Укажите корректную дату и интервал (dd/mm/yy hh:mm-hh:mm)");
+                                    } else {
+                                        setExtraInfoError("");
+                                    }
+                                }
+                            }}
+                            placeholder={
+                                isCourier
+                                    ? "дата и интервал доставки например: 01/01/25 10:00-13:00"
+                                    : "Комментарии (необязательно)"
+                            }
+                            className={`border rounded-md px-3 py-2 mb-2 w-full ${extraInfoError ? "border-red-500" : ""}`}
+                            disabled={isCourier && invalidCourier} // solo Курьер può essere disabilitato se città invalida
+                        />
+                        {/* Mostra l'errore solo se è Курьер e città valida */}
+                        {isCourier && !invalidCourier && extraInfoError && (
+                            <span className="text-red-600 text-sm mb-2">{extraInfoError}</span>
+                        )}
+                    </div>
+                )}
+
                     </div>
                 )}
 

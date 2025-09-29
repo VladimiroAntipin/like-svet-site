@@ -20,7 +20,7 @@ const AuthPage = () => {
     return mode !== "register";
   });
 
-   useEffect(() => {
+  useEffect(() => {
     if (user) {
       router.replace("/");
     }
@@ -116,7 +116,11 @@ const AuthPage = () => {
           identifier: form.identifier,
           password: form.password,
         });
-        router.push("/");
+
+        // Se il login ha avuto successo, user sarà settato
+        if (user) {
+          router.push("/");
+        }
       } else {
         await register({
           firstName: form.firstName,
